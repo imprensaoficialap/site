@@ -1,0 +1,366 @@
+<!-- START OF FILE referencias.html -->
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guia de Referências - NIO</title>
+    
+    <link rel="shortcut icon" href="img/favicon1.png" type="image/x-icon">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- jQuery e Mask para datas -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+    
+    <style>
+        body { background-color: #f0f2f5; font-family: 'Segoe UI', sans-serif; }
+        .navbar-top { background-color: #002b5c; color: white; padding: 12px 20px; }
+        
+        .nav-link-custom { color: rgba(255,255,255,0.7); text-decoration: none; font-weight: 500; padding: 5px 10px; transition: 0.3s; }
+        .nav-link-custom:hover { color: white; }
+        .nav-link-custom.active { color: white; font-weight: 700; border-bottom: 2px solid #ffc107; }
+
+        .card-controls { background: white; border-radius: 10px; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .table-container { background: white; border-radius: 10px; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.05); overflow: hidden; }
+        
+        .header-azul { background-color: #0078d4; color: white; padding: 15px; font-weight: bold; border-radius: 10px 10px 0 0; }
+        
+        @media (min-width: 993px) {
+            .navbar-menu-center { position: absolute; left: 50%; transform: translateX(-50%); display: flex; gap: 20px; }
+        }
+        @media (max-width: 992px) {
+            .navbar-menu-center { display: flex; gap: 15px; font-size: 0.9rem; margin-top: 5px; width: 100%; justify-content: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; }
+            .navbar-container { flex-wrap: wrap; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-top shadow-sm sticky-top">
+        <div class="container-fluid navbar-container d-flex justify-content-between align-items-center position-relative">
+            <span class="navbar-brand text-white fw-bold fs-6"><i class="bi bi-shield-lock-fill"></i> NIO INTERNO</span>
+            
+            <div class="navbar-menu-center">
+                <a class="nav-link-custom" href="painel.html">Pedidos</a>
+                <a class="nav-link-custom active" href="referencias.html">Referências</a>
+                <a class="nav-link-custom" href="relatorios.html">Relatórios</a>
+            </div>
+
+            <div class="d-flex align-items-center">
+                <span class="me-2 text-white small d-none d-sm-inline">Olá, <strong id="nomeUsuario">...</strong></span>
+                <button onclick="sair()" class="btn btn-sm btn-outline-light"><i class="bi bi-box-arrow-right"></i> Sair</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4 mb-5">
+        <div class="row g-4">
+            
+            <!-- COLUNA DA ESQUERDA: CONTROLES -->
+            <div class="col-lg-4">
+                
+                <!-- SELETOR DE ORGANIZAÇÃO -->
+                <div class="card card-controls mb-3">
+                    <div class="card-body">
+                        <label class="fw-bold text-primary mb-2">SELECIONE A ORGANIZAÇÃO</label>
+                        <div class="input-group mb-3">
+                            <select id="selectOrganizacao" class="form-select form-select-lg fw-bold text-uppercase" onchange="filtrarPorOrganizacao()">
+                                <option value="" disabled selected>Carregando...</option>
+                            </select>
+                            <button class="btn btn-success" onclick="abrirModalNovaOrg()" title="Nova Organização">
+                                <i class="bi bi-plus-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FORMULÁRIO DE ADIÇÃO -->
+                <div class="card card-controls">
+                    <div class="header-azul">
+                        <i class="bi bi-plus-circle"></i> ADICIONAR REFERÊNCIA
+                    </div>
+                    <div class="card-body">
+                        <form id="formNovaRef" onsubmit="adicionarReferencia(event)">
+                            <div class="mb-3">
+                                <label class="fw-bold small text-muted">DATA</label>
+                                <input type="text" id="novaData" class="form-control" placeholder="DD/MM/AAAA" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="fw-bold small text-muted">REFERÊNCIA / DESCRIÇÃO</label>
+                                <textarea id="novaDescricao" class="form-control" rows="3" placeholder="Ex: Nomeação - Pág 05" required></textarea>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" id="btnSalvar" class="btn btn-primary fw-bold">
+                                    ADICIONAR À LISTA
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COLUNA DA DIREITA: TABELA -->
+            <div class="col-lg-8">
+                <div class="table-container h-100">
+                    <div class="header-azul d-flex justify-content-between align-items-center">
+                        <span id="tituloTabela">REFERÊNCIAS</span>
+                        <span class="badge bg-light text-primary rounded-pill" id="contadorReg">0 registros</span>
+                    </div>
+                    
+                    <div class="p-3 bg-light border-bottom">
+                        <input type="text" id="buscaInterna" class="form-control" placeholder="🔍 Filtrar nesta lista..." onkeyup="filtrarInterno()">
+                    </div>
+
+                    <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+                        <table class="table table-hover mb-0 align-middle">
+                            <thead class="table-light sticky-top">
+                                <tr>
+                                    <th style="width: 130px;">Data</th>
+                                    <th>Referência</th>
+                                    <th style="width: 60px;" class="text-center">Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelaRefs">
+                                <tr><td colspan="3" class="text-center p-5 text-muted">Selecione uma organização para ver os dados.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- MODAL NOVA ORGANIZAÇÃO -->
+    <div class="modal fade" id="modalNovaOrg" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">+ Nova Organização</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <label class="fw-bold">Nome da Organização (Sigla):</label>
+                    <input type="text" id="inputNomeOrg" class="form-control text-uppercase" placeholder="EX: DETRAN">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-success" onclick="salvarNovaOrg()">Criar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const URL_API = 'https://script.google.com/macros/s/AKfycbw1YF42SazcEuLyI-I8g-btHyYlUJWC2jllDG7T59BgOL_lvmzuwQiqyW6-oJwM5-JV/exec';
+        
+        let dadosCompletos = []; // Todos os dados vindos da planilha
+        let listaOrganizacoes = []; // Lista única de nomes
+        
+        // Autenticação básica
+        const usuarioLogado = localStorage.getItem('nio_usuario');
+        if (!usuarioLogado) window.location.href = 'login.html';
+        document.getElementById('nomeUsuario').innerText = usuarioLogado.split(' ')[0];
+        function sair() { localStorage.clear(); window.location.href = 'login.html'; }
+
+        $(document).ready(function(){ $('#novaData').mask('00/00/0000'); });
+
+        async function carregarTudo() {
+            const select = document.getElementById('selectOrganizacao');
+            const tbody = document.getElementById('tabelaRefs');
+            
+            // Estado inicial de carregamento
+            select.innerHTML = '<option>Carregando...</option>';
+            tbody.innerHTML = '<tr><td colspan="3" class="text-center p-5"><div class="spinner-border text-primary"></div><br>Baixando base de dados...</td></tr>';
+
+            try {
+                // Chama a API pedindo a lista de referências
+                const response = await fetch(URL_API + '?acao=listar_referencias_completa'); 
+                const data = await response.json();
+
+                if (data.result === 'success') {
+                    dadosCompletos = data.referencias; 
+                    processarOrganizacoes();
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="3" class="text-center text-danger">Erro ao carregar dados.</td></tr>';
+                }
+            } catch (error) {
+                console.error(error);
+                tbody.innerHTML = '<tr><td colspan="3" class="text-center text-danger">Erro de conexão.</td></tr>';
+                document.getElementById('selectOrganizacao').innerHTML = '<option>Erro</option>';
+            }
+        }
+
+        function processarOrganizacoes() {
+            // CORREÇÃO: Lê coluna 0 (Organização) em vez da 1
+            const orgs = [...new Set(dadosCompletos.map(item => item[0]))].sort();
+            listaOrganizacoes = orgs;
+
+            const select = document.getElementById('selectOrganizacao');
+            select.innerHTML = '<option value="" disabled selected>SELECIONE...</option>';
+            
+            listaOrganizacoes.forEach(org => {
+                if(org) select.innerHTML += `<option value="${org}">${org}</option>`;
+            });
+
+            // Se o usuário acabou de criar uma org, seleciona ela
+            const lastOrg = localStorage.getItem('nio_last_org');
+            if(lastOrg && listaOrganizacoes.includes(lastOrg)) {
+                select.value = lastOrg;
+                filtrarPorOrganizacao();
+            } else {
+                document.getElementById('tabelaRefs').innerHTML = '<tr><td colspan="3" class="text-center p-5 text-muted"><i class="bi bi-arrow-up-left fs-1"></i><br>Selecione uma organização acima.</td></tr>';
+            }
+        }
+
+        function filtrarPorOrganizacao() {
+            const orgSelecionada = document.getElementById('selectOrganizacao').value;
+            const tbody = document.getElementById('tabelaRefs');
+            
+            document.getElementById('tituloTabela').innerText = `REFERÊNCIAS DE ${orgSelecionada}`;
+            localStorage.setItem('nio_last_org', orgSelecionada);
+
+            // CORREÇÃO: Filtra olhando coluna 0 (Organização)
+            const filtrados = dadosCompletos.filter(item => item[0] === orgSelecionada);
+            
+            renderizarLinhas(filtrados);
+        }
+
+        function renderizarLinhas(lista) {
+            const tbody = document.getElementById('tabelaRefs');
+            tbody.innerHTML = '';
+            document.getElementById('contadorReg').innerText = `${lista.length} registros`;
+
+            if(lista.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" class="text-center p-4 text-muted">Nenhuma referência cadastrada para esta organização.</td></tr>';
+                return;
+            }
+
+            lista.forEach(item => {
+                // CORREÇÃO DOS ÍNDICES
+                // item[0] = Organização
+                // item[1] = Data
+                // item[2] = Texto/Referência
+                // item[3] = ID (Se existir, para apagar)
+                
+                let data = item[1] ? item[1] : '-';
+                if(data.includes && data.includes('T')) data = data.split('T')[0]; // Ajuste caso venha formato ISO
+
+                let texto = item[2];
+                let id = item[3] || item[0]; // Tenta pegar ID da col 3, senão usa org (não ideal para apagar, mas visualiza ok)
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="fw-bold text-secondary">${data}</td>
+                        <td>${texto}</td>
+                        <td class="text-center">
+                            <button class="btn btn-outline-danger btn-sm border-0" onclick="excluirReferencia('${id}')" title="Excluir">
+                                <i class="bi bi-trash-fill"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function filtrarInterno() {
+            const termo = document.getElementById('buscaInterna').value.toLowerCase();
+            const orgSelecionada = document.getElementById('selectOrganizacao').value;
+            if(!orgSelecionada) return;
+
+            // CORREÇÃO: Filtra e busca nas colunas certas (0=Org, 1=Data, 2=Texto)
+            const base = dadosCompletos.filter(item => item[0] === orgSelecionada);
+            const filtrados = base.filter(item => 
+                String(item[1]).toLowerCase().includes(termo) || 
+                String(item[2]).toLowerCase().includes(termo)
+            );
+            renderizarLinhas(filtrados);
+        }
+
+        // --- AÇÕES DE CADASTRO ---
+
+        const modalOrg = new bootstrap.Modal(document.getElementById('modalNovaOrg'));
+        function abrirModalNovaOrg() {
+            document.getElementById('inputNomeOrg').value = '';
+            modalOrg.show();
+        }
+
+        function salvarNovaOrg() {
+            const nome = document.getElementById('inputNomeOrg').value.toUpperCase().trim();
+            if(!nome) return alert("Digite o nome.");
+            
+            const select = document.getElementById('selectOrganizacao');
+            const option = document.createElement("option");
+            option.text = nome;
+            option.value = nome;
+            select.add(option);
+            select.value = nome;
+            
+            filtrarPorOrganizacao(); 
+            modalOrg.hide();
+        }
+
+        async function adicionarReferencia(e) {
+            e.preventDefault();
+            const org = document.getElementById('selectOrganizacao').value;
+            if(!org) return alert("Selecione uma organização primeiro.");
+
+            const dataRef = document.getElementById('novaData').value;
+            const textoRef = document.getElementById('novaDescricao').value;
+            const btn = document.getElementById('btnSalvar');
+
+            const dados = {
+                acao: 'nova_referencia',
+                organizacao: org,
+                data: dataRef,
+                referencia: textoRef,
+                responsavel: usuarioLogado
+            };
+
+            btn.disabled = true;
+            btn.innerHTML = 'Salvando...';
+
+            try {
+                await fetch(URL_API, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(dados)
+                });
+                
+                alert("Referência Salva!");
+                document.getElementById('formNovaRef').reset();
+                carregarTudo(); 
+                
+            } catch (error) {
+                alert("Erro ao salvar.");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'ADICIONAR À LISTA';
+            }
+        }
+
+        async function excluirReferencia(id) {
+            if(!confirm("Tem certeza que deseja excluir esta referência?")) return;
+            
+            try {
+                await fetch(URL_API, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ acao: 'excluir_referencia', id: id })
+                });
+                // Aguarda um pouco para dar tempo do Google processar
+                setTimeout(() => carregarTudo(), 1500);
+            } catch (e) {
+                alert("Erro ao excluir.");
+            }
+        }
+
+        window.onload = carregarTudo;
+    </script>
+</body>
+</html>

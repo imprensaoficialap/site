@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notícias - Imprensa Oficial AP</title>
+    
+    <link rel="shortcut icon" href="img/favicon1.png" type="image/x-icon">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/estilo.css">
+    
+    <script src="js/noticias.js"></script>
+    <script src="js/dados.js"></script> 
+    <script src="js/busca.js"></script>
+    
+    <style>
+        .foto-principal { 
+            width: 100%; height: 350px; object-fit: cover; border-radius: 8px; margin-bottom: 10px;
+            background-color: #eee; 
+        }
+        .foto-secundaria { 
+            width: 100%; height: 170px; object-fit: cover; border-radius: 8px; 
+            background-color: #eee;
+        }
+        
+        @media (max-width: 768px) {
+            .foto-principal { height: 250px; }
+            .foto-secundaria { height: 120px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="caixa-central">
+        <div class="topo-container"><div class="topo-banner"></div></div>
+        
+        <nav class="navbar-gov">
+            <button class="btn-menu-mobile" onclick="toggleMenu()">
+                <i class="bi bi-list"></i> MENU DE NAVEGAÇÃO
+            </button>
+            <ul class="menu-lista" id="menuPrincipal">
+                <li><a class="nav-link" href="index.html">Início</a></li>
+                <li><a class="nav-link" href="acervo.html">Acervo Histórico</a></li>
+                <li><a class="nav-link" href="solicitacao.html">Solicitar Pesquisa</a></li>
+                <li><a class="nav-link" href="publique.html">Como Publicar</a></li>
+                <li><a class="nav-link active" href="noticias.html">Notícias</a></li>
+                <li><a class="nav-link" href="institucional.html">Institucional</a></li>
+                <li><a class="nav-link" href="javascript:void(0);" onclick="abrirBusca()"><i class="bi bi-search"></i> BUSCAR</a></li>
+            </ul>
+        </nav>
+
+        <div class="banner-id"></div>
+
+        <main class="conteudo-noticias">
+            <h2 class="titulo-secao">NOTÍCIAS INSTITUCIONAIS</h2>
+            
+            <div id="containerNoticias">
+                <div class="text-center py-5"><div class="spinner-border text-primary"></div></div>
+            </div>
+        </main>
+
+        <footer class="rodape-oficial py-4">
+            <div class="container text-center">
+                <img src="img/banner-governo-rodape.png" alt="Governo do Amapá" class="img-rodape mb-3">
+                
+                <div class="mt-3 border-top pt-3">
+                    <a href="login.html" class="text-secondary text-decoration-none small fw-bold opacity-75" style="font-size: 0.8rem;">
+                        <i class="bi bi-shield-lock-fill"></i> Acesso Restrito ao Servidor
+                    </a>
+                </div>
+                
+                <div class="text-muted mt-2" style="font-size: 0.7rem;">
+                    &copy; 2026 Núcleo de Imprensa Oficial - Secretaria de Administração
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- MODAL DE BUSCA -->
+    <div id="modalBusca" class="modal-overlay">
+        <div class="modal-box">
+            <span class="modal-close" onclick="fecharBusca()">&times;</span>
+            <h3>Pesquisar no Acervo Histórico</h3>
+            <input type="text" id="campoBusca" placeholder="Digite o ano (ex: 1950) ou edição..." onkeyup="realizarBusca()">
+            <div id="resultadosBusca">
+                <p class="text-muted mt-3">Digite para pesquisar...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleMenu() { document.getElementById('menuPrincipal').classList.toggle('ativo'); }
+
+        const container = document.getElementById('containerNoticias');
+        
+        if(typeof baseNoticias !== 'undefined' && baseNoticias.length > 0) {
+            container.innerHTML = baseNoticias.map(n => `
+                <div class="row g-4 mb-5 align-items-start border-bottom pb-4">
+                    <div class="col-md-6">
+                        <img src="${n.imagens[0] || 'img/banner-topo.png'}" class="foto-principal shadow-sm" alt="${n.titulo}" onerror="this.style.display='none'">
+                        ${n.imagens.length > 1 ? `
+                        <div class="row g-2">
+                            <div class="col-6"><img src="${n.imagens[1]}" class="foto-secundaria shadow-sm" onerror="this.style.display='none'"></div>
+                            ${n.imagens[2] ? `<div class="col-6"><img src="${n.imagens[2]}" class="foto-secundaria shadow-sm" onerror="this.style.display='none'"></div>` : ''}
+                        </div>` : ''}
+                    </div>
+                    <div class="col-md-6">
+                        <div class="ps-md-3">
+                            <small class="text-muted fw-bold"><i class="bi bi-calendar3"></i> ${n.data}</small>
+                            <h2 class="fw-bold mt-2 mb-3" style="color:var(--azul)">${n.titulo}</h2>
+                            <p class="text-secondary" style="font-size: 1.1rem; line-height: 1.6; text-align: justify;">${n.texto}</p>
+                            <div class="mt-3 p-3 bg-light border-start border-4 border-warning">
+                                <strong><i class="bi bi-info-circle"></i> Resumo:</strong> ${n.resumo}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            container.innerHTML = '<div class="alert alert-info">Não há notícias cadastradas no momento. Verifique o arquivo noticias.js.</div>';
+        }
+
+        let iconIndex = 0;
+        const icons = ['img/favicon1.png', 'img/favicon2.png'];
+        function changeFavicon() {
+            let link = document.querySelector("link[rel~='icon']");
+            if (!link) { link = document.createElement('link'); link.rel = 'icon'; document.head.appendChild(link); }
+            link.href = icons[iconIndex];
+            iconIndex = (iconIndex + 1) % icons.length;
+        }
+        setInterval(changeFavicon, 3000);
+        changeFavicon();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

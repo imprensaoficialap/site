@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Como Publicar - Imprensa Oficial AP</title>
+    
+    <link rel="shortcut icon" href="img/favicon1.png" type="image/x-icon">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/estilo.css">
+    
+    <script src="js/dados.js"></script>
+    <script src="js/busca.js"></script>
+</head>
+<body>
+    <div class="caixa-central">
+        <div class="topo-container"><div class="topo-banner"></div></div>
+        
+        <nav class="navbar-gov">
+            <button class="btn-menu-mobile" onclick="toggleMenu()">
+                <i class="bi bi-list"></i> MENU DE NAVEGAÇÃO
+            </button>
+            <ul class="menu-lista" id="menuPrincipal">
+                <li><a class="nav-link" href="index.html">Início</a></li>
+                <li><a class="nav-link" href="acervo.html">Acervo Histórico</a></li>
+                <li><a class="nav-link" href="solicitacao.html">Solicitar Pesquisa</a></li>
+                <li><a class="nav-link active" href="publique.html">Como Publicar</a></li>
+                <li><a class="nav-link" href="noticias.html">Notícias</a></li>
+                <li><a class="nav-link" href="institucional.html">Institucional</a></li>
+                <li><a class="nav-link" href="javascript:void(0);" onclick="abrirBusca()"><i class="bi bi-search"></i> BUSCAR</a></li>
+            </ul>
+        </nav>
+
+        <div class="banner-id"></div>
+
+        <main class="conteudo-principal">
+            <h2 class="titulo-pg">COMO PUBLICAR NO DIÁRIO OFICIAL</h2>
+            
+            <p class="lead text-muted mb-5">
+                Siga o guia abaixo para enviar matérias, portarias, avisos de licitação e outros atos para publicação no Diário Oficial do Estado do Amapá (DOE).
+            </p>
+
+            <div class="card shadow-sm border-0 mb-5">
+                <div class="card-header bg-primary text-white fw-bold py-3">
+                    <i class="bi bi-person-badge-fill"></i> 1. CADASTRO E ACESSO
+                </div>
+                <div class="card-body p-4 text-start">
+                    <div class="row g-4">
+                        <div class="col-md-6 border-end">
+                            <h5 class="text-success fw-bold"><i class="bi bi-person"></i> Particulares</h5>
+                            <p class="small text-muted">Empresas privadas, advogados, cidadãos.</p>
+                            <p>O cadastro é feito online, diretamente no portal.</p>
+                            <a href="https://diofe.portal.ap.gov.br/cadastro" target="_blank" class="btn btn-outline-success btn-sm fw-bold">
+                                FAZER CADASTRO ONLINE <i class="bi bi-box-arrow-up-right"></i>
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="text-primary fw-bold"><i class="bi bi-building"></i> Servidor Público</h5>
+                            <p class="small text-muted">Secretarias, Autarquias, Órgãos.</p>
+                            <p>O cadastro deve ser solicitado via <strong>Ofício à SEAD</strong> ou realizado pelo <strong>Usuário Master</strong> do seu órgão.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0 mb-5">
+                <div class="card-header bg-success text-white fw-bold py-3">
+                    <i class="bi bi-send-check-fill"></i> 2. ENVIO DA MATÉRIA
+                </div>
+                <div class="card-body p-4 text-start">
+                    
+                    <div class="d-flex mb-4">
+                        <div class="me-3">
+                            <span class="badge rounded-pill bg-primary fs-5">A</span>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold">Acesse a Área do Publicador</h5>
+                            <p>Utilize seu usuário e senha cadastrados para entrar no sistema.</p>
+                            <img src="img/login-print.png" class="img-fluid border rounded shadow-sm mb-2" style="max-width: 100%; height: auto;" alt="Tela de Login">
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="d-flex mb-4">
+                        <div class="me-3">
+                            <span class="badge rounded-pill bg-primary fs-5">B</span>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold">Inicie o Envio</h5>
+                            <p>No painel, localize e clique no botão <strong>"Enviar"</strong> ou vá no menu superior em <strong>Publicações > Enviar Matéria</strong>.</p>
+                            <img src="img/menu-print.png" class="img-fluid border rounded shadow-sm mb-2" style="max-width: 100%; height: auto;" alt="Menu de Envio">
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="d-flex mb-4">
+                        <div class="me-3">
+                            <span class="badge rounded-pill bg-primary fs-5">C</span>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold">Preencha e Anexe</h5>
+                            <div class="alert alert-warning border-start border-4 border-warning">
+                                <i class="bi bi-exclamation-triangle-fill"></i> <strong>Atenção aos Formatos:</strong><br>
+                                Utilize preferencialmente <strong>.DOC, .DOCX ou .RTF</strong> (Texto editável).<br>
+                                Arquivos <strong>PDF</strong> devem ser usados apenas em casos excepcionais.
+                            </div>
+                            <p>Informe a Data, Título e Categoria. Clique em <strong>"Formatar"</strong> e após conferir a pré-visualização, clique em <strong>"Confirmar"</strong>.</p>
+                            <img src="img/formulario-print.png" class="img-fluid border rounded shadow-sm" style="max-width: 100%; height: auto;" alt="Formulário de Envio">
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="text-center py-4">
+                <a href="https://diofe.portal.ap.gov.br/" target="_blank" class="btn btn-primary btn-lg fw-bold px-5">
+                    <i class="bi bi-box-arrow-in-right"></i> ACESSAR ÁREA DO PUBLICADOR
+                </a>
+            </div>
+
+        </main>
+
+        <footer class="rodape-oficial py-4">
+            <div class="container text-center">
+                <img src="img/banner-governo-rodape.png" alt="Governo do Amapá" class="img-rodape mb-3">
+                
+                <div class="mt-3 border-top pt-3">
+                    <a href="login.html" class="text-secondary text-decoration-none small fw-bold opacity-75" style="font-size: 0.8rem;">
+                        <i class="bi bi-shield-lock-fill"></i> Acesso Restrito ao Servidor
+                    </a>
+                </div>
+                
+                <div class="text-muted mt-2" style="font-size: 0.7rem;">
+                    &copy; 2026 Núcleo de Imprensa Oficial - Secretaria de Administração
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- MODAL DE BUSCA -->
+    <div id="modalBusca" class="modal-overlay">
+        <div class="modal-box">
+            <span class="modal-close" onclick="fecharBusca()">&times;</span>
+            <h3>Pesquisar no Acervo Histórico</h3>
+            <input type="text" id="campoBusca" placeholder="Digite o ano ou edição..." onkeyup="realizarBusca()">
+            <div id="resultadosBusca">
+                <p class="text-muted mt-3">Digite para pesquisar...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleMenu() { document.getElementById('menuPrincipal').classList.toggle('ativo'); }
+        
+        let iconIndex = 0;
+        const icons = ['img/favicon1.png', 'img/favicon2.png'];
+        function changeFavicon() {
+            let link = document.querySelector("link[rel~='icon']");
+            if (!link) { link = document.createElement('link'); link.rel = 'icon'; document.head.appendChild(link); }
+            link.href = icons[iconIndex];
+            iconIndex = (iconIndex + 1) % icons.length;
+        }
+        setInterval(changeFavicon, 3000);
+        changeFavicon();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

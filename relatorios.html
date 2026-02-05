@@ -1,0 +1,358 @@
+<!-- START OF FILE relatorios.html -->
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatórios - NIO Interno</title>
+    
+    <link rel="shortcut icon" href="img/favicon1.png" type="image/x-icon">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    
+    <!-- Bibliotecas para Gráficos e Exportação PDF -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <style>
+        :root {
+            --azul-python: #2077b4;
+            --verde-python: #4cae4c;
+            --laranja-python: #f0ad4e;
+            --roxo-python: #9c27b0;
+            --azul-escuro: #002b5c;
+        }
+
+        body { background-color: #f0f2f5; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        
+        /* Navbar Padronizada */
+        .navbar-top { background-color: var(--azul-escuro); color: white; padding: 12px 20px; }
+        .nav-link-custom { color: rgba(255,255,255,0.7); text-decoration: none; font-weight: 500; padding: 5px 10px; transition: 0.3s; }
+        .nav-link-custom:hover { color: white; }
+        .nav-link-custom.active { color: white; font-weight: 700; border-bottom: 2px solid #ffc107; }
+
+        @media (min-width: 993px) {
+            .navbar-menu-center { position: absolute; left: 50%; transform: translateX(-50%); display: flex; gap: 20px; }
+        }
+        @media (max-width: 992px) {
+            .navbar-menu-center { display: flex; gap: 15px; font-size: 0.9rem; margin-top: 5px; width: 100%; justify-content: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; }
+            .navbar-container { flex-wrap: wrap; }
+        }
+
+        /* Dashboard Styles */
+        .dashboard-container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .titulo-dash { color: #0078d4; font-weight: 800; text-align: center; margin-bottom: 25px; text-transform: uppercase; }
+        
+        .kpi-card { color: white; padding: 30px 20px; border-radius: 4px; text-align: center; height: 100%; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .kpi-blue { background-color: var(--azul-python); }
+        .kpi-green { background-color: var(--verde-python); }
+        
+        .kpi-titulo { font-size: 1rem; font-weight: 700; text-transform: uppercase; margin-bottom: 10px; opacity: 0.9; }
+        .kpi-valor { font-size: 3.5rem; font-weight: 800; line-height: 1; }
+
+        .chart-card { background: white; padding: 20px; border-radius: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); height: 100%; }
+        .chart-title { text-align: center; font-size: 1.2rem; margin-bottom: 20px; color: #333; font-weight: 700; }
+
+        .filtro-box { background: #e9ecef; padding: 15px; border-radius: 5px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center; border: 1px solid #ddd; }
+        
+        .btn-filtro { background-color: var(--laranja-python); color: white; font-weight: bold; border: none; }
+        .btn-filtro:hover { background-color: #ec971f; color: white; }
+        
+        .btn-exportar { background-color: var(--roxo-python); color: white; font-weight: bold; border: none; padding: 10px 30px; }
+        .btn-exportar:hover { background-color: #7b1fa2; color: white; }
+
+        /* Ajuste para telas pequenas */
+        @media (max-width: 768px) {
+            .kpi-valor { font-size: 2.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-top shadow-sm sticky-top" id="navPrincipal">
+        <div class="container-fluid navbar-container d-flex justify-content-between align-items-center position-relative">
+            <span class="navbar-brand text-white fw-bold fs-6"><i class="bi bi-shield-lock-fill"></i> NIO INTERNO</span>
+            
+            <div class="navbar-menu-center">
+                <a class="nav-link-custom" href="painel.html">Pedidos</a>
+                <a class="nav-link-custom" href="referencias.html">Referências</a>
+                <a class="nav-link-custom active" href="relatorios.html">Relatórios</a>
+            </div>
+
+            <div class="d-flex align-items-center">
+                <span class="me-2 text-white small d-none d-sm-inline">Olá, <strong id="nomeUsuario">...</strong></span>
+                <button onclick="sair()" class="btn btn-sm btn-outline-light"><i class="bi bi-box-arrow-right"></i> Sair</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-container" id="conteudoRelatorio">
+        
+        <h2 class="titulo-dash">Dashboard de Relatórios</h2>
+
+        <!-- FILTROS -->
+        <div class="filtro-box mb-4" id="sessaoFiltros">
+            <div class="d-flex align-items-center gap-2">
+                <label class="fw-bold mb-0">Mês:</label>
+                <select id="filtroMes" class="form-select w-auto">
+                    <option value="0">Janeiro</option><option value="1">Fevereiro</option>
+                    <option value="2">Março</option><option value="3">Abril</option>
+                    <option value="4">Maio</option><option value="5">Junho</option>
+                    <option value="6">Julho</option><option value="7">Agosto</option>
+                    <option value="8">Setembro</option><option value="9">Outubro</option>
+                    <option value="10">Novembro</option><option value="11">Dezembro</option>
+                </select>
+            </div>
+
+            <div class="d-flex align-items-center gap-2">
+                <label class="fw-bold mb-0">Ano:</label>
+                <select id="filtroAno" class="form-select w-auto"></select>
+            </div>
+
+            <button onclick="aplicarFiltros()" class="btn btn-filtro px-4">Aplicar Filtro</button>
+        </div>
+
+        <!-- CARDS KPI -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-6">
+                <div class="kpi-card kpi-blue">
+                    <div class="kpi-titulo">TOTAL DE SOLICITAÇÕES</div>
+                    <div class="kpi-valor" id="kpiTotal">0</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="kpi-card kpi-green">
+                    <div class="kpi-titulo">TEMPO MÉDIO DE ATENDIMENTO</div>
+                    <div class="kpi-valor" id="kpiTempo">00:00</div>
+                    <small class="opacity-75">Formato: Dias : Horas</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- GRÁFICOS -->
+        <div class="row g-4">
+            <div class="col-md-5">
+                <div class="chart-card">
+                    <div class="chart-title">Pedidos por Status</div>
+                    <div style="height: 320px;">
+                        <canvas id="graficoPizza"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-7">
+                <div class="chart-card">
+                    <div class="chart-title">Pedidos nos Últimos 30 Dias</div>
+                    <div style="height: 320px;">
+                        <canvas id="graficoBarras"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center text-muted mt-5 small">
+            Relatório gerado pelo sistema NIO Interno em: <span id="dataGeracao">-</span>
+        </div>
+    </div>
+
+    <!-- BOTÕES FIXOS FORA DO PDF -->
+    <div class="container text-center mb-5 mt-4" id="areaBotoes">
+        <hr>
+        <button onclick="carregarDados()" class="btn btn-filtro btn-lg me-3 shadow-sm">
+            <i class="bi bi-arrow-clockwise"></i> ATUALIZAR DADOS
+        </button>
+        <button onclick="gerarPDF()" class="btn btn-exportar btn-lg shadow-sm">
+            <i class="bi bi-file-earmark-pdf-fill"></i> EXPORTAR RELATÓRIO
+        </button>
+    </div>
+
+    <script>
+        const URL_API = 'https://script.google.com/macros/s/AKfycbw1YF42SazcEuLyI-I8g-btHyYlUJWC2jllDG7T59BgOL_lvmzuwQiqyW6-oJwM5-JV/exec';
+        
+        let dadosGlobais = [];
+        let chartPizza = null;
+        let chartBarras = null;
+
+        const usuarioLogado = localStorage.getItem('nio_usuario');
+        if (!usuarioLogado) window.location.href = 'login.html';
+        document.getElementById('nomeUsuario').innerText = usuarioLogado.split(' ')[0];
+        function sair() { localStorage.clear(); window.location.href = 'login.html'; }
+
+        // Inicializar Página
+        window.onload = function() {
+            const selectAno = document.getElementById('filtroAno');
+            const anoAtual = new Date().getFullYear();
+            for(let i = anoAtual; i >= 2024; i--) {
+                const opt = document.createElement('option');
+                opt.value = i; opt.innerText = i;
+                selectAno.appendChild(opt);
+            }
+
+            const hoje = new Date();
+            document.getElementById('filtroMes').value = hoje.getMonth();
+            document.getElementById('filtroAno').value = hoje.getFullYear();
+            document.getElementById('dataGeracao').innerText = hoje.toLocaleString();
+            
+            carregarDados();
+        };
+
+        async function carregarDados() {
+            const btn = document.querySelector('#areaBotoes .btn-filtro');
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Carregando...';
+            
+            try {
+                const response = await fetch(URL_API + '?acao=listar_pedidos');
+                const data = await response.json();
+                if (data.result === 'success') {
+                    dadosGlobais = data.pedidos;
+                    aplicarFiltros();
+                }
+            } catch (e) { alert("Erro de conexão com o banco de dados."); }
+            finally { btn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> ATUALIZAR DADOS'; }
+        }
+
+        function aplicarFiltros() {
+            const mesSel = parseInt(document.getElementById('filtroMes').value);
+            const anoSel = parseInt(document.getElementById('filtroAno').value);
+
+            const dadosFiltrados = dadosGlobais.filter(p => {
+                const dataPedido = converterDataJS(p[1]);
+                return dataPedido && dataPedido.getMonth() === mesSel && dataPedido.getFullYear() === anoSel;
+            });
+
+            atualizarDashboard(dadosFiltrados);
+        }
+
+        function atualizarDashboard(dados) {
+            // 1. Total
+            document.getElementById('kpiTotal').innerText = dados.length;
+
+            // 2. Tempo Médio Real
+            let somaMs = 0;
+            let totalParaMedia = 0;
+            const agora = new Date();
+
+            dados.forEach(p => {
+                const dataAbertura = converterDataJS(p[1]);
+                if (!dataAbertura) return;
+
+                let dataConclusao = null;
+                const obs = p[8] || "";
+                const regexData = /(\d{2}\/\d{2}\/\d{4})/;
+                const matchData = obs.match(regexData);
+
+                if (p[6] === "ATENDIDO" && matchData) {
+                    dataConclusao = converterDataJS(matchData[0]);
+                } else if (p[6] === "EM ANÁLISE") {
+                    dataConclusao = agora;
+                }
+
+                if (dataConclusao) {
+                    const diff = dataConclusao - dataAbertura;
+                    if (diff > 0) { somaMs += diff; totalParaMedia++; }
+                }
+            });
+
+            const mediaFinal = totalParaMedia > 0 ? somaMs / totalParaMedia : 0;
+            document.getElementById('kpiTempo').innerText = formatarMilissegundos(mediaFinal);
+
+            // 3. Gráfico Pizza
+            const statusMap = {};
+            dados.forEach(p => {
+                const s = p[6] || "OUTROS";
+                statusMap[s] = (statusMap[s] || 0) + 1;
+            });
+            renderizarPizza(statusMap);
+
+            // 4. Gráfico Barras
+            const diasMap = {};
+            dados.forEach(p => {
+                const diaMes = p[1].substring(0, 5); 
+                diasMap[diaMes] = (diasMap[diaMes] || 0) + 1;
+            });
+            const diasSort = Object.keys(diasMap).sort();
+            const valoresSort = diasSort.map(d => diasMap[d]);
+            renderizarBarras(diasSort, valoresSort);
+        }
+
+        // Gráficos
+        function renderizarPizza(mapa) {
+            const ctx = document.getElementById('graficoPizza').getContext('2d');
+            if(chartPizza) chartPizza.destroy();
+            chartPizza = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(mapa),
+                    datasets: [{
+                        data: Object.values(mapa),
+                        backgroundColor: ['#1f77b4', '#ff7f0e', '#d62728', '#2ca02c']
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+            });
+        }
+
+        function renderizarBarras(labels, data) {
+            const ctx = document.getElementById('graficoBarras').getContext('2d');
+            if(chartBarras) chartBarras.destroy();
+            chartBarras = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{ label: 'Solicitações', data: data, backgroundColor: '#1f77b4' }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+            });
+        }
+
+        // Auxiliares
+        function converterDataJS(str) {
+            if (!str) return null;
+            const partes = str.split(' ');
+            const d = partes[0].split('/');
+            if (d.length !== 3) return null;
+            if (partes[1]) {
+                const h = partes[1].split(':');
+                return new Date(d[2], d[1] - 1, d[0], h[0], h[1]);
+            }
+            return new Date(d[2], d[1] - 1, d[0]);
+        }
+
+        function formatarMilissegundos(ms) {
+            if (ms === 0) return "00:00";
+            const totalHoras = Math.floor(ms / (1000 * 60 * 60));
+            const dias = Math.floor(totalHoras / 24);
+            const horas = totalHoras % 24;
+            return `${String(dias).padStart(2, '0')}:${String(horas).padStart(2, '0')}`;
+        }
+
+        // PDF
+        function gerarPDF() {
+            const area = document.getElementById('conteudoRelatorio');
+            const nav = document.getElementById('navPrincipal');
+            const botoes = document.getElementById('areaBotoes');
+
+            nav.style.display = 'none';
+            botoes.style.display = 'none';
+
+            window.scrollTo(0, 0);
+
+            html2canvas(area, { scale: 2 }).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const pWidth = pdf.internal.pageSize.getWidth();
+                const pHeight = (canvas.height * pWidth) / canvas.width;
+
+                pdf.addImage(imgData, 'PNG', 0, 0, pWidth, pHeight);
+                pdf.save("Relatorio_Produtividade_NIO.pdf");
+
+                nav.style.display = 'flex';
+                botoes.style.display = 'block';
+            });
+        }
+    </script>
+</body>
+</html>
