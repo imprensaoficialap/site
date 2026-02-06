@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Área Restrita - NIO</title>
-    
+
     <link rel="shortcut icon" href="img/favicon1.png" type="image/x-icon">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    
+
     <style>
         body {
             background-color: #f2f4f5;
@@ -48,99 +48,112 @@
 </head>
 <body>
 
-    <div class="login-card">
-        <!-- Logo (Adapte o caminho se necessário) -->
-        <img src="img/favicon1.png" alt="Logo NIO" class="logo-login">
-        
-        <h4 class="fw-bold mb-1" style="color: #002b5c;">Área do Servidor</h4>
-        <p class="text-muted mb-4 small">Núcleo de Imprensa Oficial</p>
+<div class="login-card">
+    <img src="img/favicon1.png" alt="Logo NIO" class="logo-login">
 
-        <form id="formLogin" onsubmit="fazerLogin(event)">
-            <div class="mb-3 text-start">
-                <label class="form-label fw-bold small">USUÁRIO</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
-                    <input type="text" class="form-control" id="usuario" required placeholder="Digite seu usuário">
-                </div>
+    <h4 class="fw-bold mb-1" style="color: #002b5c;">Área do Servidor</h4>
+    <p class="text-muted mb-4 small">Núcleo de Imprensa Oficial</p>
+
+    <form id="formLogin" onsubmit="fazerLogin(event)">
+        <div class="mb-3 text-start">
+            <label class="form-label fw-bold small">USUÁRIO</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
+                <input type="text" class="form-control" id="usuario" required placeholder="Digite seu usuário">
             </div>
-
-            <div class="mb-4 text-start">
-                <label class="form-label fw-bold small">SENHA</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
-                    <input type="password" class="form-control" id="senha" required placeholder="••••••••">
-                </div>
-            </div>
-
-            <button type="submit" id="btnEntrar" class="btn btn-entrar">
-                ENTRAR NO SISTEMA
-            </button>
-            
-            <div id="msgErro" class="mt-3 text-danger small fw-bold" style="display:none;"></div>
-        </form>
-        
-        <div class="mt-4 border-top pt-3">
-            <a href="index.html" class="text-decoration-none text-muted small">
-                <i class="bi bi-arrow-left"></i> Voltar para o Site
-            </a>
         </div>
+
+        <div class="mb-4 text-start">
+            <label class="form-label fw-bold small">SENHA</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                <input type="password" class="form-control" id="senha" required placeholder="••••••••">
+            </div>
+        </div>
+
+        <button type="submit" id="btnEntrar" class="btn btn-entrar">
+            ENTRAR NO SISTEMA
+        </button>
+
+        <div id="msgErro" class="mt-3 text-danger small fw-bold" style="display:none;"></div>
+    </form>
+
+    <div class="mt-4 border-top pt-3">
+        <a href="index.html" class="text-decoration-none text-muted small">
+            <i class="bi bi-arrow-left"></i> Voltar para o Site
+        </a>
     </div>
+</div>
 
-    <script>
-        // URL DO SEU APPS SCRIPT (O MESMO DO SITE)
-        const URL_API = 'https://script.google.com/macros/s/AKfycbw1YF42SazcEuLyI-I8g-btHyYlUJWC2jllDG7T59BgOL_lvmzuwQiqyW6-oJwM5-JV/exec';
+<script>
+    const URL_API = 'https://script.google.com/macros/s/AKfycbw1YF42SazcEuLyI-I8g-btHyYlUJWC2jllDG7T59BgOL_lvmzuwQiqyW6-oJwM5-JV/exec';
 
-        async function fazerLogin(e) {
-            e.preventDefault();
-            
-            const btn = document.getElementById('btnEntrar');
-            const msg = document.getElementById('msgErro');
-            const usuario = document.getElementById('usuario').value;
-            const senha = document.getElementById('senha').value;
+    // ✅ Sessão: 8 horas
+    const SESSION_MAX_MS = 8 * 60 * 60 * 1000;
 
-            // Bloqueia botão
-            btn.disabled = true;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Verificando...';
-            msg.style.display = 'none';
+    function sessaoValida() {
+        const token = localStorage.getItem('nio_token');
+        const ts = parseInt(localStorage.getItem('nio_login_ts') || '0', 10);
+        if (token !== 'logado') return false;
+        if (!ts) return false;
+        return (Date.now() - ts) <= SESSION_MAX_MS;
+    }
 
-            try {
-                // Envia dados para o Apps Script verificar na planilha
-                const response = await fetch(URL_API, {
-                    method: 'POST',
-                    mode: 'cors', // Tenta cors, se der erro o Apps Script precisa estar configurado
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({
-                        acao: 'login', // Ação específica para login
-                        usuario: usuario,
-                        senha: senha
-                    })
-                });
-                
-                const data = await response.json();
+    // ✅ Se já estiver logado e dentro das 8h, vai direto para o painel
+    if (sessaoValida()) {
+        window.location.href = 'painel.html';
+    }
 
-                if (data.result === 'success') {
-                    // SUCESSO: Salva "crachá" no navegador
-                    localStorage.setItem('nio_usuario', data.nome);
-                    localStorage.setItem('nio_token', 'logado');
-                    
-                    // Redireciona para o Painel (que vamos criar depois)
-                    window.location.href = 'painel.html';
-                } else {
-                    // ERRO DE SENHA
-                    throw new Error("Usuário ou senha incorretos.");
-                }
+    async function fazerLogin(e) {
+        e.preventDefault();
 
-            } catch (error) {
-                // Como estamos usando 'no-cors' ou fetch complexo, às vezes o erro é genérico.
-                // Mas vamos simular a verificação pelo Script.
-                msg.innerText = "Falha no login. Verifique suas credenciais.";
+        const btn = document.getElementById('btnEntrar');
+        const msg = document.getElementById('msgErro');
+
+        const usuario = document.getElementById('usuario').value.trim();
+        const senha = document.getElementById('senha').value.trim();
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Verificando...';
+        msg.style.display = 'none';
+
+        try {
+            const response = await fetch(URL_API, {
+                method: 'POST',
+                mode: 'cors',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({
+                    acao: 'login',
+                    usuario: usuario,
+                    senha: senha
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.result === 'success') {
+                // ✅ salva nome vindo do script + token + timestamp da sessão
+                localStorage.setItem('nio_usuario', String(data.nome || usuario).trim());
+                localStorage.setItem('nio_token', 'logado');
+                localStorage.setItem('nio_login_ts', String(Date.now()));
+
+                window.location.href = 'painel.html';
+            } else {
+                msg.innerText = data.message || "Usuário ou senha incorretos.";
                 msg.style.display = 'block';
                 btn.disabled = false;
                 btn.innerHTML = 'ENTRAR NO SISTEMA';
-                console.error(error);
             }
+
+        } catch (error) {
+            msg.innerText = "Falha no login. Verifique sua conexão e tente novamente.";
+            msg.style.display = 'block';
+            btn.disabled = false;
+            btn.innerHTML = 'ENTRAR NO SISTEMA';
+            console.error(error);
         }
-    </script>
+    }
+</script>
 
 </body>
 </html>

@@ -1,73 +1,150 @@
-/* js/estilo.css - VERSÃO MASTER PREMIUM (Público + Painel Interno) */
+/* css/estilo.css - VERSÃO MASTER PREMIUM (Público + Painel Interno) */
 
 @import url('https://fonts.googleapis.com/css2?family=Raleway:wght@400;700;800&family=Roboto:wght@400;500&display=swap');
 
-:root { 
-    --azul: #002b5c; 
-    --verde-gov: #009e58; 
-    --ouro: #c5a059; 
-    --verde: #29a771; 
-    --fundo: #f2f4f5; 
+:root {
+    --azul: #002b5c;
+    --verde-gov: #009e58;
+    --ouro: #c5a059;
+    --verde: #29a771;
+    --fundo: #f2f4f5;
     --fonte-titulo: 'Raleway', sans-serif;
     --fonte-corpo: 'Roboto', sans-serif;
 }
 
 * { box-sizing: border-box; }
 html, body { overflow-x: hidden; width: 100%; margin: 0; padding: 0; background-color: var(--fundo); }
-
 body { font-family: var(--fonte-corpo); color: #333; -webkit-font-smoothing: antialiased; }
 
 h1, h2, h3, h4, h5 { font-family: var(--fonte-titulo); margin-top: 0; }
 a { text-decoration: none; transition: 0.3s; }
 
 /* --- ESTRUTURA --- */
-.caixa-central { 
-    width: 100%; max-width: 1200px; margin: 0 auto; 
-    background-color: white; box-shadow: 0 0 20px rgba(0,0,0,0.1);
-    min-height: 100vh; display: flex; flex-direction: column;
+.caixa-central {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: white;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 /* Banners Topo (PC) */
-.topo-banner { 
-    width: 100%; 
-    height: 180px; 
-    background: #fff url('../img/banner-topo.png') no-repeat center; 
-    background-size: cover; 
+.topo-banner {
+    width: 100%;
+    height: 180px;
+    background: #fff url('../img/banner-topo.png') no-repeat center;
+    background-size: cover;
 }
-.banner-id { 
-    width: 100%; 
-    height: 100px; 
-    background: url('../img/banner-id.png') no-repeat center; 
-    background-size: cover; 
+.banner-id {
+    width: 100%;
+    height: 100px;
+    background: url('../img/banner-id.png') no-repeat center;
+    background-size: cover;
 }
 
 /* --- MENU PÚBLICO --- */
-.navbar-gov { background-color: #ffffff; border-bottom: 4px solid var(--ouro); position: relative; z-index: 1000; }
-.menu-lista { display: flex; list-style: none; margin: 0; padding: 0; width: 100%; }
-.nav-link { color: var(--azul) !important; font-weight: 700; padding: 14px 18px !important; text-transform: uppercase; font-size: 0.85rem; border-right: 1px solid rgba(0,0,0,0.05); display: block; cursor: pointer; }
+.navbar-gov {
+    background-color: #ffffff;
+    border-bottom: 4px solid var(--ouro);
+    position: relative;
+    z-index: 1000;
+}
+.menu-lista {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+.nav-link {
+    color: var(--azul) !important;
+    font-weight: 700;
+    padding: 14px 18px !important;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    border-right: 1px solid rgba(0,0,0,0.05);
+    display: block;
+    cursor: pointer;
+}
 .nav-link:hover { background: #f8f9fa; color: var(--verde-gov) !important; }
 .nav-link.active { color: var(--verde-gov) !important; border-bottom: 3px solid var(--verde-gov); }
-.btn-menu-mobile { display: none; width: 100%; background: #fff; padding: 15px; border: none; font-weight: 800; color: var(--azul); cursor: pointer; border-bottom: 1px solid #eee; }
+.btn-menu-mobile {
+    display: none;
+    width: 100%;
+    background: #fff;
+    padding: 15px;
+    border: none;
+    font-weight: 800;
+    color: var(--azul);
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+}
 
 /* --- INDEX (GRID PC TRAVADO) --- */
 .home-container, .conteudo-principal, .conteudo-noticias { padding: 40px; flex-grow: 1; }
-.layout-grid { 
-    display: grid; 
-    grid-template-columns: 65% 32%; 
-    gap: 3%; 
+.layout-grid {
+    display: grid;
+    grid-template-columns: 65% 32%;
+    gap: 3%;
     margin-bottom: 40px;
     align-items: start;
 }
 
-.hero-card { background: linear-gradient(135deg, var(--azul) 0%, #001a4d 100%); color: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.15); }
+.hero-card {
+    background: linear-gradient(135deg, var(--azul) 0%, #001a4d 100%);
+    color: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
 .hero-img { width: 100%; height: auto; display: block; border-bottom: 5px solid var(--ouro); }
 .hero-content { padding: 30px; text-align: left; }
-.hero-content h1 { color: white !important; font-size: 1.8rem; font-weight: 800; margin-bottom: 15px; }
-.hero-content p { color: rgba(255,255,255,0.9) !important; font-size: 1.05rem; line-height: 1.6; text-align: justify; margin-bottom: 20px; }
-.tag-destaque { background: var(--ouro); color: var(--azul); font-weight: 800; font-size: 0.7rem; padding: 3px 8px; border-radius: 3px; display: inline-block; margin-bottom: 10px; text-transform: uppercase; }
-.btn-acessar { background-color: var(--verde); color: white !important; font-weight: 800; padding: 12px 25px; border-radius: 4px; display: inline-block; text-transform: uppercase; }
+.hero-content h1 {
+    color: white !important;
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin-bottom: 15px;
+}
+.hero-content p {
+    color: rgba(255,255,255,0.9) !important;
+    font-size: 1.05rem;
+    line-height: 1.6;
+    text-align: justify;
+    margin-bottom: 20px;
+}
+.tag-destaque {
+    background: var(--ouro);
+    color: var(--azul);
+    font-weight: 800;
+    font-size: 0.7rem;
+    padding: 3px 8px;
+    border-radius: 3px;
+    display: inline-block;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+.btn-acessar {
+    background-color: var(--verde);
+    color: white !important;
+    font-weight: 800;
+    padding: 12px 25px;
+    border-radius: 4px;
+    display: inline-block;
+    text-transform: uppercase;
+}
 
-.sidebar-widget { background: white; border-radius: 8px; overflow: hidden; text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,0.08); border: 1px solid #eee; margin-bottom: 25px; }
+.sidebar-widget {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    text-align: center;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    border: 1px solid #eee;
+    margin-bottom: 25px;
+}
 .doe-header { background: var(--azul); padding: 15px; border-bottom: 5px solid var(--ouro); color: white; }
 .doe-header h3 { margin: 0; font-size: 1.3rem; font-weight: 800; color: white; }
 .doe-body { padding: 20px; }
@@ -76,14 +153,14 @@ a { text-decoration: none; transition: 0.3s; }
 .img-zap-lateral { max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
 
 /* --- TÍTULOS --- */
-.titulo-pg, .titulo-secao, .titulo-secao-home { 
-    color: var(--azul); 
-    border-left: 8px solid var(--verde-gov); 
-    padding-left: 20px; 
-    font-weight: 800; 
-    font-size: 1.8rem; 
+.titulo-pg, .titulo-secao, .titulo-secao-home {
+    color: var(--azul);
+    border-left: 8px solid var(--verde-gov);
+    padding-left: 20px;
+    font-weight: 800;
+    font-size: 1.8rem;
     margin-top: 20px;
-    margin-bottom: 30px; 
+    margin-bottom: 30px;
     text-align: left;
     text-transform: uppercase;
 }
@@ -102,7 +179,7 @@ a { text-decoration: none; transition: 0.3s; }
 .nav-link-custom.active { color: white !important; background: rgba(255,255,255,0.2); box-shadow: inset 0 -2px 0 var(--ouro); }
 
 /* Cards KPIs Dashboard */
-.card-resumo { 
+.card-resumo {
     position: relative;
     padding: 20px;
     border-radius: 12px;
@@ -129,47 +206,344 @@ a { text-decoration: none; transition: 0.3s; }
 .bg-total { background: linear-gradient(45deg, #556ee6, #3b5de7); color: #fff !important; }
 
 /* --- ACERVO --- */
-.grid-anos { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; background: #f8f9fa; padding: 25px; border-radius: 10px; border: 1px solid #eee; margin-bottom: 30px; }
-.btn-ano { min-width: 75px; font-weight: 700; border: 1px solid #ccc; background: white; padding: 10px; border-radius: 6px; cursor: pointer; color: #444; }
-.btn-ano.ativo { background: var(--azul); color: white; border-color: var(--azul); box-shadow: 0 4px 8px rgba(0,43,92,0.3); }
+.grid-anos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    background: #f8f9fa;
+    padding: 25px;
+    border-radius: 10px;
+    border: 1px solid #eee;
+    margin-bottom: 30px;
+}
+.btn-ano {
+    min-width: 75px;
+    font-weight: 700;
+    border: 1px solid #ccc;
+    background: white;
+    padding: 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #444;
+}
+.btn-ano.ativo {
+    background: var(--azul);
+    color: white;
+    border-color: var(--azul);
+    box-shadow: 0 4px 8px rgba(0,43,92,0.3);
+}
 
-.container-tabela { border-radius: 12px; overflow: hidden; border: 1px solid #ddd; margin-top: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-.header-tabela { background: var(--verde-gov); color: white; padding: 15px 25px; display: flex; align-items: center; gap: 10px; }
-.mes-nav { display: flex; justify-content: space-around; background: #fff; padding: 15px; border-bottom: 1px solid #eee; flex-wrap: wrap; gap: 5px; }
-.mes-link { padding: 6px 15px; font-weight: 700; color: #555; border-radius: 20px; font-size: 0.85rem; background: #f0f2f5; }
-.mes-link.active { background: var(--azul); color: white !important; }
+.container-tabela {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #ddd;
+    margin-top: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+.header-tabela {
+    background: var(--verde-gov);
+    color: white;
+    padding: 15px 25px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.mes-nav {
+    display: flex;
+    justify-content: space-around;
+    background: #fff;
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+.mes-link {
+    padding: 6px 15px;
+    font-weight: 700;
+    color: #555;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    background: #f0f2f5;
+    border: 1px solid transparent;
+}
+.mes-link:hover { filter: brightness(0.98); }
+.mes-link.active {
+    background: var(--azul);
+    color: white !important;
+    border-color: rgba(0,0,0,0.05);
+}
+
+/* ✅ BOTÃO "ABRIR" (PC MAIS BONITO) */
+.btn-visualizar {
+    display: inline-block;
+    padding: 10px 18px;
+    border-radius: 999px;
+    font-weight: 900;
+    letter-spacing: 0.2px;
+    background: var(--azul);
+    color: #fff !important;
+    border: 1px solid rgba(255,255,255,0.0);
+    box-shadow: 0 10px 18px rgba(0,43,92,0.14);
+    transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
+}
+.btn-visualizar:hover {
+    filter: brightness(1.06);
+    transform: translateY(-1px);
+    box-shadow: 0 14px 22px rgba(0,43,92,0.18);
+}
+.btn-visualizar:active { transform: translateY(0px); }
 
 /* --- RODAPÉ --- */
-.rodape-oficial { width: 100%; background: white; text-align: center; border-top: 5px solid var(--azul); margin-top: auto; }
+.rodape-oficial {
+    width: 100%;
+    background: white;
+    text-align: center;
+    border-top: 5px solid var(--azul);
+    margin-top: auto;
+}
 .img-rodape { width: 100%; height: auto; display: block; margin: 0 auto; max-width: 1200px; }
 
 /* --- RESPONSIVIDADE (CELULAR) --- */
 @media (max-width: 992px) {
-    .topo-banner { height: 110px; background-size: contain; background-position: center; background-color: #fff; }
-    .banner-id { height: 60px; background-size: cover; }
-    .layout-grid { display: block; }
-    .hero-card { margin-bottom: 30px; }
-    .btn-menu-mobile { display: block; }
+
+    /* 1) Ajuste do container principal (simetria no celular) */
+    .caixa-central {
+        max-width: 100%;
+        box-shadow: none;
+        border-radius: 0;
+    }
+
+    /* 2) Topos e banners mais proporcionais */
+    .topo-banner {
+        height: 110px;
+        background-size: contain;
+        background-position: center;
+        background-color: #fff;
+    }
+    .banner-id {
+        height: 60px;
+        background-size: cover;
+        background-position: center;
+    }
+
+    /* 3) Menu mobile mais alinhado e bonito */
+    .btn-menu-mobile {
+        display: block;
+        width: 100%;
+        padding: 14px 16px;
+        font-size: 0.95rem;
+        letter-spacing: 0.4px;
+    }
+
     .menu-lista { display: none; flex-direction: column; width: 100%; }
     .menu-lista.ativo { display: flex !important; }
-    .nav-link { border-right: none; border-bottom: 1px solid #eee; padding: 15px !important; text-align: center; }
-    
-    /* Painel Mobile */
-    .kpi-value { font-size: 2rem; }
-    .nav-link-custom { font-size: 0.9rem; padding: 5px 10px; margin-bottom: 5px; }
 
-    /* Tabela em Cards no Mobile */
-    .table thead { display: none; }
-    .table tr { display: block; margin-bottom: 15px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #eee; }
-    .table td { 
-        display: flex; justify-content: space-between; align-items: center; 
-        text-align: right; border-bottom: 1px solid #f0f0f0; padding: 10px 15px; 
+    .nav-link {
+        border-right: none;
+        border-bottom: 1px solid #eee;
+        padding: 14px 14px !important;
+        text-align: center;
+        font-size: 0.9rem;
     }
-    .table td::before { content: attr(data-label); font-weight: bold; color: #666; text-transform: uppercase; font-size: 0.7rem; text-align: left; }
-    .table td:last-child { border-bottom: none; background-color: #fcfcfc; justify-content: flex-end; }
 
-    .grid-anos { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 10px; }
-    .btn-ano { min-width: 0; font-size: 0.8rem; padding: 8px 2px; }
-    .home-container, .conteudo-principal { padding: 20px 15px; }
-    .titulo-pg, .titulo-secao { font-size: 1.4rem; padding-left: 15px; border-left-width: 6px; }
+    /* 4) Layout grid vira coluna com espaçamento uniforme */
+    .layout-grid { display: block; margin-bottom: 24px; }
+
+    .home-container, .conteudo-principal, .conteudo-noticias {
+        padding: 18px 14px;
+    }
+
+    /* 5) Hero card ajustado para celular (sem mexer no PC) */
+    .hero-card { margin-bottom: 18px; border-radius: 12px; }
+    .hero-content { padding: 18px; }
+    .hero-content h1 { font-size: 1.35rem; text-align: center; }
+    .hero-content p { font-size: 0.98rem; text-align: justify; }
+
+    .btn-acessar {
+        width: 100%;
+        text-align: center;
+        padding: 12px 14px;
+        border-radius: 10px;
+    }
+
+    /* 6) Coluna lateral e cards com simetria */
+    .sidebar-widget { border-radius: 12px; margin-bottom: 16px; }
+    .doe-capa { width: 130px; }
+    .doe-body { padding: 16px; }
+    .img-zap-lateral { border-radius: 12px; }
+
+    /* 7) Títulos padronizados no celular */
+    .titulo-pg, .titulo-secao, .titulo-secao-home {
+        font-size: 1.25rem;
+        padding-left: 12px;
+        border-left-width: 6px;
+        margin-top: 14px;
+        margin-bottom: 18px;
+        text-align: left;
+    }
+
+    /* 8) Painel interno: ajustes suaves sem afetar PC */
+    .kpi-value { font-size: 2rem; }
+    .nav-link-custom { font-size: 0.92rem; padding: 6px 10px; margin-bottom: 6px; }
+
+    /* 9) Grid de anos (acervo) mais alinhado */
+    .grid-anos {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        padding: 12px;
+    }
+    .btn-ano {
+        min-width: 0;
+        font-size: 0.82rem;
+        padding: 10px 2px;
+        border-radius: 10px;
+    }
+
+    /* 10) Rodapé com padding simétrico */
+    .rodape-oficial { padding: 0; }
+    .rodape-oficial .pb-3 { padding: 14px 10px 18px !important; }
+    .img-rodape { width: 100%; max-width: 100%; }
+
+    /* ===========================================================
+       ✅ ACERVO: MESES EM GRID (MOBILE)
+       =========================================================== */
+    .container-tabela { border-radius: 14px; overflow: hidden; }
+
+    .mes-nav {
+        display: grid !important;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        justify-content: center;
+        padding: 12px !important;
+    }
+
+    .mes-link {
+        display: block;
+        width: 100%;
+        text-align: center;
+        padding: 10px 0 !important;
+        font-size: 0.82rem;
+        border-radius: 14px !important;
+        background: #f1f3f5;
+        border: 1px solid #e9ecef;
+    }
+
+    .mes-link.active {
+        background: var(--azul) !important;
+        color: #fff !important;
+        border-color: var(--azul) !important;
+        box-shadow: 0 6px 12px rgba(0, 43, 92, 0.18);
+    }
+
+    /* ===========================================================
+       ✅ ACERVO: LISTA DE EDIÇÕES EM "CARDS" COMPACTOS (MOBILE)
+       (Nº + DATA alinhados / botão Abrir na direita)
+       =========================================================== */
+    .container-tabela table thead {
+        display: none !important;
+    }
+
+    .container-tabela table tbody tr {
+        display: grid !important;
+        grid-template-columns: 1fr auto;
+        gap: 6px 12px;
+        padding: 12px 12px !important;
+        margin: 10px 10px !important;
+        border-radius: 14px !important;
+        background: #ffffff !important;
+        border: 1px solid #e9ecef !important;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    }
+
+    .container-tabela table tbody td {
+        border: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        text-align: left !important;
+        vertical-align: middle !important;
+        line-height: 1.25 !important;
+    }
+
+    .container-tabela table tbody td:nth-child(1) {
+        font-weight: 900;
+        font-size: 1.05rem;
+        color: #111;
+    }
+
+    .container-tabela table tbody td:nth-child(2) {
+        font-size: 0.92rem;
+        color: #6c757d;
+    }
+
+    .container-tabela table tbody td:nth-child(3) {
+        grid-column: 2;
+        grid-row: 1 / span 2;
+        align-self: center;
+        justify-self: end;
+        text-align: right !important;
+    }
+
+    .container-tabela table tbody td:nth-child(3) a.btn-visualizar {
+        display: inline-block !important;
+        padding: 10px 14px !important;
+        border-radius: 12px !important;
+        font-weight: 900 !important;
+        background: var(--azul) !important;
+        color: #fff !important;
+        box-shadow: 0 6px 14px rgba(0,43,92,0.18);
+    }
+}
+
+/* Ajuste extra telas muito pequenas */
+@media (max-width: 360px) {
+    .mes-nav { grid-template-columns: repeat(3, 1fr) !important; }
+    .mes-link { font-size: 0.78rem; padding: 9px 0 !important; }
+
+    .container-tabela table tbody tr {
+        margin: 8px 8px !important;
+        padding: 10px 10px !important;
+    }
+    .container-tabela table tbody td:nth-child(1) { font-size: 1rem; }
+    .container-tabela table tbody td:nth-child(3) a.btn-visualizar { padding: 9px 12px !important; }
+}
+
+/* ===========================================================
+   ✅ REMOVER "BUSCAR" (qualquer menu / qualquer página)
+   (Seu site tem páginas com menus diferentes)
+   =========================================================== */
+a[onclick*="abrirBusca"],
+a[onclick*="fecharBusca"],
+a[onclick*="AbrirBusca"],
+a[onclick*="FecharBusca"],
+a[data-bs-target*="busca"],
+a[data-bs-target*="Busca"],
+a[href*="busca"],
+a[href*="Busca"],
+a[href*="BUSCA"],
+a[href="#busca"],
+a[href="#Busca"],
+a[href="#BUSCA"] {
+    display: none !important;
+}
+
+/* Chrome moderno: remove item com ícone de lupa */
+li:has(i.bi-search),
+a:has(i.bi-search) {
+    display: none !important;
+}
+
+/* Esconde modais/overlays de busca caso existam */
+#modalBusca,
+#ModalBusca,
+#buscaModal,
+#BuscaModal,
+#overlayBusca,
+#OverlayBusca,
+.modal-busca,
+.busca-modal,
+#popupBusca,
+#PopupBusca {
+    display: none !important;
 }

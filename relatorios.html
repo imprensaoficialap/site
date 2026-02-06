@@ -1,358 +1,805 @@
-<!-- START OF FILE relatorios.html -->
-
+<!-- relatorios.html (COMPLETO) -->
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Relatórios - NIO Interno</title>
-    
-    <link rel="shortcut icon" href="img/favicon1.png" type="image/x-icon">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    
-    <!-- Bibliotecas para Gráficos e Exportação PDF -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    
-    <style>
-        :root {
-            --azul-python: #2077b4;
-            --verde-python: #4cae4c;
-            --laranja-python: #f0ad4e;
-            --roxo-python: #9c27b0;
-            --azul-escuro: #002b5c;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Relatórios - NIO Interno</title>
 
-        body { background-color: #f0f2f5; font-family: 'Segoe UI', Tahoma, sans-serif; }
-        
-        /* Navbar Padronizada */
-        .navbar-top { background-color: var(--azul-escuro); color: white; padding: 12px 20px; }
-        .nav-link-custom { color: rgba(255,255,255,0.7); text-decoration: none; font-weight: 500; padding: 5px 10px; transition: 0.3s; }
-        .nav-link-custom:hover { color: white; }
-        .nav-link-custom.active { color: white; font-weight: 700; border-bottom: 2px solid #ffc107; }
+  <link rel="shortcut icon" href="img/favicon1.png" type="image/x-icon" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" />
 
-        @media (min-width: 993px) {
-            .navbar-menu-center { position: absolute; left: 50%; transform: translateX(-50%); display: flex; gap: 20px; }
-        }
-        @media (max-width: 992px) {
-            .navbar-menu-center { display: flex; gap: 15px; font-size: 0.9rem; margin-top: 5px; width: 100%; justify-content: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; }
-            .navbar-container { flex-wrap: wrap; }
-        }
+  <!-- Bibliotecas -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-        /* Dashboard Styles */
-        .dashboard-container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-        .titulo-dash { color: #0078d4; font-weight: 800; text-align: center; margin-bottom: 25px; text-transform: uppercase; }
-        
-        .kpi-card { color: white; padding: 30px 20px; border-radius: 4px; text-align: center; height: 100%; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .kpi-blue { background-color: var(--azul-python); }
-        .kpi-green { background-color: var(--verde-python); }
-        
-        .kpi-titulo { font-size: 1rem; font-weight: 700; text-transform: uppercase; margin-bottom: 10px; opacity: 0.9; }
-        .kpi-valor { font-size: 3.5rem; font-weight: 800; line-height: 1; }
+  <style>
+    :root {
+      --azul-python: #2077b4;
+      --verde-python: #4cae4c;
+      --laranja-python: #f0ad4e;
+      --roxo-python: #9c27b0;
+      --azul-escuro: #002b5c;
+      --cinza-bg: #f0f2f5;
+    }
 
-        .chart-card { background: white; padding: 20px; border-radius: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); height: 100%; }
-        .chart-title { text-align: center; font-size: 1.2rem; margin-bottom: 20px; color: #333; font-weight: 700; }
+    body { background-color: var(--cinza-bg); font-family: 'Segoe UI', Tahoma, sans-serif; }
 
-        .filtro-box { background: #e9ecef; padding: 15px; border-radius: 5px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center; border: 1px solid #ddd; }
-        
-        .btn-filtro { background-color: var(--laranja-python); color: white; font-weight: bold; border: none; }
-        .btn-filtro:hover { background-color: #ec971f; color: white; }
-        
-        .btn-exportar { background-color: var(--roxo-python); color: white; font-weight: bold; border: none; padding: 10px 30px; }
-        .btn-exportar:hover { background-color: #7b1fa2; color: white; }
+    /* Navbar Padronizada */
+    .navbar-top { background-color: var(--azul-escuro); color: white; padding: 12px 20px; }
+    .nav-link-custom { color: rgba(255,255,255,0.7); text-decoration: none; font-weight: 600; padding: 8px 12px; border-radius: 10px; transition: 0.2s; display: flex; align-items: center; gap: 8px; }
+    .nav-link-custom:hover { color: white; background: rgba(255,255,255,0.08); }
+    .nav-link-custom.active { color: white; font-weight: 800; background: rgba(255,255,255,0.12); box-shadow: inset 0 -2px 0 #ffc107; }
 
-        /* Ajuste para telas pequenas */
-        @media (max-width: 768px) {
-            .kpi-valor { font-size: 2.5rem; }
-        }
-    </style>
+    @media (min-width: 993px) {
+      .navbar-menu-center { position: absolute; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; }
+    }
+    @media (max-width: 992px) {
+      .navbar-menu-center { display: flex; gap: 10px; font-size: 0.95rem; margin-top: 10px; width: 100%; justify-content: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; flex-wrap: wrap; }
+      .navbar-container { flex-wrap: wrap; }
+    }
+
+    /* Dashboard */
+    .dashboard-container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+    .titulo-dash { color: #0078d4; font-weight: 800; text-align: center; margin-bottom: 25px; text-transform: uppercase; }
+
+    .kpi-card { color: white; padding: 26px 18px; border-radius: 10px; text-align: center; height: 100%; box-shadow: 0 6px 12px rgba(0,0,0,0.10); }
+    .kpi-blue { background-color: var(--azul-python); }
+    .kpi-green { background-color: var(--verde-python); }
+    .kpi-orange { background-color: #ff7f0e; }
+    .kpi-red { background-color: #d62728; }
+    .kpi-purple { background-color: #6f42c1; }
+
+    .kpi-titulo { font-size: 0.95rem; font-weight: 800; text-transform: uppercase; margin-bottom: 8px; opacity: 0.95; letter-spacing: 0.5px; }
+    .kpi-valor { font-size: 2.8rem; font-weight: 900; line-height: 1; }
+
+    .chart-card { background: white; padding: 18px; border-radius: 12px; box-shadow: 0 6px 12px rgba(0,0,0,0.06); height: 100%; }
+    .chart-title { text-align: center; font-size: 1.15rem; margin-bottom: 12px; color: #333; font-weight: 800; }
+
+    .filtro-box { background: #e9ecef; padding: 14px; border-radius: 12px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center; border: 1px solid #ddd; }
+    .btn-filtro { background-color: var(--laranja-python); color: white; font-weight: bold; border: none; }
+    .btn-filtro:hover { background-color: #ec971f; color: white; }
+
+    .btn-exportar { background-color: var(--roxo-python); color: white; font-weight: bold; border: none; padding: 10px 26px; }
+    .btn-exportar:hover { background-color: #7b1fa2; color: white; }
+
+    /* PDF */
+    .pdf-wrap { background: #fff; padding: 18px; border-radius: 14px; box-shadow: 0 6px 14px rgba(0,0,0,0.08); }
+    .pdf-header { display: flex; gap: 12px; align-items: center; border-bottom: 2px solid #e9ecef; padding-bottom: 12px; margin-bottom: 12px; }
+    .pdf-logo {
+      width: 56px; height: 56px; border-radius: 12px; background: #f3f6fb;
+      display: flex; align-items: center; justify-content: center; font-size: 26px; color: var(--azul-escuro);
+      flex: 0 0 auto;
+    }
+    .pdf-title { margin: 0; font-weight: 900; color: var(--azul-escuro); }
+    .pdf-sub { margin: 0; color: #6c757d; font-size: 0.95rem; }
+    .pdf-meta { font-size: 0.92rem; color: #495057; }
+    .pdf-section-title { font-weight: 900; margin-top: 16px; margin-bottom: 8px; color: #1f2d3d; }
+    .badge-soft {
+      background: #f1f3f5; border: 1px solid #e9ecef; padding: 6px 10px;
+      border-radius: 999px; font-size: 0.85rem; color: #343a40;
+    }
+    .table-sm td, .table-sm th { padding: 0.45rem; }
+
+    #relatorioPDF { display: none; } /* escondido na tela */
+  </style>
 </head>
+
 <body>
 
-    <!-- NAVBAR -->
-    <nav class="navbar navbar-top shadow-sm sticky-top" id="navPrincipal">
-        <div class="container-fluid navbar-container d-flex justify-content-between align-items-center position-relative">
-            <span class="navbar-brand text-white fw-bold fs-6"><i class="bi bi-shield-lock-fill"></i> NIO INTERNO</span>
-            
-            <div class="navbar-menu-center">
-                <a class="nav-link-custom" href="painel.html">Pedidos</a>
-                <a class="nav-link-custom" href="referencias.html">Referências</a>
-                <a class="nav-link-custom active" href="relatorios.html">Relatórios</a>
-            </div>
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-top shadow-sm sticky-top" id="navPrincipal">
+    <div class="container-fluid navbar-container d-flex justify-content-between align-items-center position-relative">
 
-            <div class="d-flex align-items-center">
-                <span class="me-2 text-white small d-none d-sm-inline">Olá, <strong id="nomeUsuario">...</strong></span>
-                <button onclick="sair()" class="btn btn-sm btn-outline-light"><i class="bi bi-box-arrow-right"></i> Sair</button>
-            </div>
-        </div>
-    </nav>
+      <span class="navbar-brand text-white fw-bold fs-5 m-0">
+        <i class="bi bi-shield-lock-fill me-2 text-warning"></i>NIO <span class="fw-light opacity-75">INTERNO</span>
+      </span>
 
-    <div class="dashboard-container" id="conteudoRelatorio">
-        
-        <h2 class="titulo-dash">Dashboard de Relatórios</h2>
+      <div class="navbar-menu-center">
+        <a class="nav-link-custom" href="painel.html"><i class="bi bi-list-task"></i> Pedidos</a>
+        <a class="nav-link-custom" href="referencias.html"><i class="bi bi-book"></i> Referências</a>
+        <a class="nav-link-custom active" href="relatorios.html"><i class="bi bi-graph-up-arrow"></i> Relatórios</a>
+      </div>
 
-        <!-- FILTROS -->
-        <div class="filtro-box mb-4" id="sessaoFiltros">
-            <div class="d-flex align-items-center gap-2">
-                <label class="fw-bold mb-0">Mês:</label>
-                <select id="filtroMes" class="form-select w-auto">
-                    <option value="0">Janeiro</option><option value="1">Fevereiro</option>
-                    <option value="2">Março</option><option value="3">Abril</option>
-                    <option value="4">Maio</option><option value="5">Junho</option>
-                    <option value="6">Julho</option><option value="7">Agosto</option>
-                    <option value="8">Setembro</option><option value="9">Outubro</option>
-                    <option value="10">Novembro</option><option value="11">Dezembro</option>
-                </select>
-            </div>
+      <div class="d-flex align-items-center">
+        <span class="me-3 text-white small d-none d-sm-inline">Olá, <strong id="nomeUsuario">...</strong></span>
+        <button onclick="sair()" class="btn btn-sm btn-outline-light rounded-pill px-3 fw-bold">
+          SAIR <i class="bi bi-box-arrow-right ms-1"></i>
+        </button>
+      </div>
 
-            <div class="d-flex align-items-center gap-2">
-                <label class="fw-bold mb-0">Ano:</label>
-                <select id="filtroAno" class="form-select w-auto"></select>
-            </div>
+    </div>
+  </nav>
 
-            <button onclick="aplicarFiltros()" class="btn btn-filtro px-4">Aplicar Filtro</button>
-        </div>
+  <!-- DASHBOARD (TELA) -->
+  <div class="dashboard-container" id="conteudoRelatorio">
+    <h2 class="titulo-dash">Dashboard de Relatórios</h2>
 
-        <!-- CARDS KPI -->
-        <div class="row g-4 mb-4">
-            <div class="col-md-6">
-                <div class="kpi-card kpi-blue">
-                    <div class="kpi-titulo">TOTAL DE SOLICITAÇÕES</div>
-                    <div class="kpi-valor" id="kpiTotal">0</div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="kpi-card kpi-green">
-                    <div class="kpi-titulo">TEMPO MÉDIO DE ATENDIMENTO</div>
-                    <div class="kpi-valor" id="kpiTempo">00:00</div>
-                    <small class="opacity-75">Formato: Dias : Horas</small>
-                </div>
-            </div>
-        </div>
+    <!-- FILTROS -->
+    <div class="filtro-box mb-4" id="sessaoFiltros">
+      <div class="d-flex align-items-center gap-2">
+        <label class="fw-bold mb-0">Mês:</label>
+        <select id="filtroMes" class="form-select w-auto">
+          <option value="0">Janeiro</option><option value="1">Fevereiro</option>
+          <option value="2">Março</option><option value="3">Abril</option>
+          <option value="4">Maio</option><option value="5">Junho</option>
+          <option value="6">Julho</option><option value="7">Agosto</option>
+          <option value="8">Setembro</option><option value="9">Outubro</option>
+          <option value="10">Novembro</option><option value="11">Dezembro</option>
+        </select>
+      </div>
 
-        <!-- GRÁFICOS -->
-        <div class="row g-4">
-            <div class="col-md-5">
-                <div class="chart-card">
-                    <div class="chart-title">Pedidos por Status</div>
-                    <div style="height: 320px;">
-                        <canvas id="graficoPizza"></canvas>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-7">
-                <div class="chart-card">
-                    <div class="chart-title">Pedidos nos Últimos 30 Dias</div>
-                    <div style="height: 320px;">
-                        <canvas id="graficoBarras"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
+      <div class="d-flex align-items-center gap-2">
+        <label class="fw-bold mb-0">Ano:</label>
+        <select id="filtroAno" class="form-select w-auto"></select>
+      </div>
 
-        <div class="text-center text-muted mt-5 small">
-            Relatório gerado pelo sistema NIO Interno em: <span id="dataGeracao">-</span>
-        </div>
+      <button onclick="aplicarFiltros()" class="btn btn-filtro px-4">Aplicar Filtro</button>
     </div>
 
-    <!-- BOTÕES FIXOS FORA DO PDF -->
-    <div class="container text-center mb-5 mt-4" id="areaBotoes">
-        <hr>
-        <button onclick="carregarDados()" class="btn btn-filtro btn-lg me-3 shadow-sm">
-            <i class="bi bi-arrow-clockwise"></i> ATUALIZAR DADOS
-        </button>
-        <button onclick="gerarPDF()" class="btn btn-exportar btn-lg shadow-sm">
-            <i class="bi bi-file-earmark-pdf-fill"></i> EXPORTAR RELATÓRIO
-        </button>
+    <!-- KPIS -->
+    <div class="row g-4 mb-4">
+      <div class="col-md-3">
+        <div class="kpi-card kpi-blue">
+          <div class="kpi-titulo">Total</div>
+          <div class="kpi-valor" id="kpiTotal">0</div>
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <div class="kpi-card kpi-green">
+          <div class="kpi-titulo">TMA Concluídos</div>
+          <div class="kpi-valor" id="kpiTMAConcluidos">00:00:00</div>
+          <small class="opacity-75">Dias : Horas : Min</small>
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <div class="kpi-card kpi-purple">
+          <div class="kpi-titulo">TMA Geral</div>
+          <div class="kpi-valor" id="kpiTMAGeral">00:00:00</div>
+          <small class="opacity-75">Dias : Horas : Min</small>
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <div class="kpi-card kpi-orange">
+          <div class="kpi-titulo">Atendidos</div>
+          <div class="kpi-valor" id="kpiAtendidos">0</div>
+        </div>
+      </div>
     </div>
 
-    <script>
-        const URL_API = 'https://script.google.com/macros/s/AKfycbw1YF42SazcEuLyI-I8g-btHyYlUJWC2jllDG7T59BgOL_lvmzuwQiqyW6-oJwM5-JV/exec';
-        
-        let dadosGlobais = [];
-        let chartPizza = null;
-        let chartBarras = null;
+    <div class="row g-4 mb-4">
+      <div class="col-md-3">
+        <div class="kpi-card kpi-red">
+          <div class="kpi-titulo">Não Encontr.</div>
+          <div class="kpi-valor" id="kpiNaoEnc">0</div>
+        </div>
+      </div>
+      <div class="col-md-9">
+        <div class="chart-card">
+          <div class="chart-title">Pedidos nos Últimos 30 Dias</div>
+          <div style="height: 320px;">
+            <canvas id="graficoBarras"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
 
-        const usuarioLogado = localStorage.getItem('nio_usuario');
-        if (!usuarioLogado) window.location.href = 'login.html';
-        document.getElementById('nomeUsuario').innerText = usuarioLogado.split(' ')[0];
-        function sair() { localStorage.clear(); window.location.href = 'login.html'; }
+    <div class="row g-4">
+      <div class="col-md-5">
+        <div class="chart-card">
+          <div class="chart-title">Pedidos por Status</div>
+          <div style="height: 320px;">
+            <canvas id="graficoPizza"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-7">
+        <div class="chart-card">
+          <div class="chart-title">Ranking por Responsável (Concluídos)</div>
+          <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Responsável</th>
+                  <th style="width:120px;">Concluídos</th>
+                  <th style="width:160px;">TMA Médio</th>
+                </tr>
+              </thead>
+              <tbody id="tabelaRankingTela">
+                <tr><td colspan="3" class="text-center text-muted p-3">Carregando...</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="text-muted small mt-2">
+            * Concluídos = ATENDIDO + NÃO ENCONTRADO
+          </div>
+        </div>
+      </div>
+    </div>
 
-        // Inicializar Página
-        window.onload = function() {
-            const selectAno = document.getElementById('filtroAno');
-            const anoAtual = new Date().getFullYear();
-            for(let i = anoAtual; i >= 2024; i--) {
-                const opt = document.createElement('option');
-                opt.value = i; opt.innerText = i;
-                selectAno.appendChild(opt);
+    <div class="text-center text-muted mt-5 small">
+      Relatório gerado pelo sistema NIO Interno em: <span id="dataGeracao">-</span>
+    </div>
+  </div>
+
+  <!-- RELATÓRIO PDF (mais elaborado) -->
+  <div class="dashboard-container" id="relatorioPDF">
+    <div class="pdf-wrap" id="pdfArea">
+      <div class="pdf-header">
+        <div class="pdf-logo"><i class="bi bi-shield-lock-fill"></i></div>
+        <div class="flex-grow-1">
+          <h3 class="pdf-title">Relatório de Produtividade — NIO Interno</h3>
+          <p class="pdf-sub">Núcleo de Imprensa Oficial • Controle de Pedidos</p>
+          <div class="d-flex flex-wrap gap-2 mt-2">
+            <span class="badge-soft" id="pdfPeriodo">Período: -</span>
+            <span class="badge-soft" id="pdfEmitidoEm">Emitido em: -</span>
+            <span class="badge-soft" id="pdfEmitidoPor">Emitido por: -</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="pdf-meta">
+        Este documento consolida os pedidos do período selecionado, apresentando volume, distribuição por status,
+        tempos médios de atendimento e ranking por responsável.
+      </div>
+
+      <div class="pdf-section-title">Resumo Executivo</div>
+      <div class="row g-3">
+        <div class="col-6 col-md-3">
+          <div class="border rounded p-3">
+            <div class="text-muted small">Total</div>
+            <div class="fs-3 fw-bold" id="pdfTotal">0</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="border rounded p-3">
+            <div class="text-muted small">Atendidos</div>
+            <div class="fs-3 fw-bold" id="pdfAtendidos">0</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="border rounded p-3">
+            <div class="text-muted small">Não Encontrados</div>
+            <div class="fs-3 fw-bold" id="pdfNaoEnc">0</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="border rounded p-3">
+            <div class="text-muted small">Em Análise</div>
+            <div class="fs-3 fw-bold" id="pdfEmAnalise">0</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-3 mt-1">
+        <div class="col-12 col-md-6">
+          <div class="border rounded p-3">
+            <div class="text-muted small">TMA Concluídos</div>
+            <div class="fs-3 fw-bold" id="pdfTMAConcluidos">00:00:00</div>
+            <div class="text-muted small">Dias : Horas : Min</div>
+          </div>
+        </div>
+        <div class="col-12 col-md-6">
+          <div class="border rounded p-3">
+            <div class="text-muted small">TMA Geral (inclui Em Análise)</div>
+            <div class="fs-3 fw-bold" id="pdfTMAGeral">00:00:00</div>
+            <div class="text-muted small">Dias : Horas : Min</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pdf-section-title">Distribuição por Status</div>
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered align-middle mb-2">
+          <thead class="table-light">
+            <tr>
+              <th>Status</th>
+              <th style="width: 140px;">Quantidade</th>
+              <th style="width: 140px;">% do Total</th>
+            </tr>
+          </thead>
+          <tbody id="pdfTabelaStatus"></tbody>
+        </table>
+      </div>
+
+      <div class="pdf-section-title">Ranking por Responsável</div>
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Responsável</th>
+              <th style="width: 120px;">Concluídos</th>
+              <th style="width: 120px;">Em Análise</th>
+              <th style="width: 160px;">TMA Médio</th>
+            </tr>
+          </thead>
+          <tbody id="pdfTabelaResp"></tbody>
+        </table>
+      </div>
+
+      <div class="pdf-section-title">Observações</div>
+      <div class="text-muted small">
+        • <b>TMA Concluídos</b>: considera apenas pedidos com data/hora de conclusão preenchida.<br/>
+        • <b>TMA Geral</b>: considera concluidos (com data conclusão) e <b>Em Análise</b> contando até o momento da emissão.<br/>
+        • Pedidos sem data de abertura ou com datas inválidas são desconsiderados do cálculo.
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTÕES -->
+  <div class="container text-center mb-5 mt-4" id="areaBotoes">
+    <hr />
+    <button onclick="carregarDados()" class="btn btn-filtro btn-lg me-3 shadow-sm">
+      <i class="bi bi-arrow-clockwise"></i> ATUALIZAR DADOS
+    </button>
+    <button onclick="gerarPDF()" class="btn btn-exportar btn-lg shadow-sm">
+      <i class="bi bi-file-earmark-pdf-fill"></i> EXPORTAR RELATÓRIO
+    </button>
+  </div>
+
+  <script>
+    const URL_API = 'https://script.google.com/macros/s/AKfycbw1YF42SazcEuLyI-I8g-btHyYlUJWC2jllDG7T59BgOL_lvmzuwQiqyW6-oJwM5-JV/exec';
+
+    let dadosGlobais = [];
+    let chartPizza = null;
+    let chartBarras = null;
+
+    // ====== LOGIN / NOME ======
+    const usuarioLogado = localStorage.getItem('nio_usuario');
+    const token = localStorage.getItem('nio_token');
+    if (!usuarioLogado || token !== 'logado') {
+      window.location.href = 'login.html';
+    }
+
+    function formatarPrimeiroNome(nomeCompleto) {
+      if (!nomeCompleto) return 'Servidor';
+      const primeiro = String(nomeCompleto).trim().split(' ')[0] || 'Servidor';
+      return primeiro.charAt(0).toUpperCase() + primeiro.slice(1).toLowerCase();
+    }
+    document.getElementById('nomeUsuario').innerText = formatarPrimeiroNome(usuarioLogado);
+
+    function sair() {
+      localStorage.removeItem('nio_token');
+      localStorage.removeItem('nio_usuario');
+      localStorage.removeItem('nio_login_ts');
+      window.location.href = 'login.html';
+    }
+
+    // ====== INIT ======
+    window.onload = function() {
+      const selectAno = document.getElementById('filtroAno');
+      const anoAtual = new Date().getFullYear();
+      for (let i = anoAtual; i >= 2024; i--) {
+        const opt = document.createElement('option');
+        opt.value = i; opt.innerText = i;
+        selectAno.appendChild(opt);
+      }
+
+      const hoje = new Date();
+      document.getElementById('filtroMes').value = hoje.getMonth();
+      document.getElementById('filtroAno').value = hoje.getFullYear();
+      document.getElementById('dataGeracao').innerText = hoje.toLocaleString();
+
+      carregarDados();
+    };
+
+    async function carregarDados() {
+      const btn = document.querySelector('#areaBotoes .btn-filtro');
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Carregando...';
+
+      try {
+        const response = await fetch(URL_API + '?acao=listar_pedidos');
+        const data = await response.json();
+        if (data.result === 'success') {
+          dadosGlobais = data.pedidos || [];
+          aplicarFiltros();
+        } else {
+          alert("Não foi possível carregar os dados.");
+        }
+      } catch (e) {
+        alert("Erro de conexão com o banco de dados.");
+      } finally {
+        btn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> ATUALIZAR DADOS';
+      }
+    }
+
+    function aplicarFiltros() {
+      const mesSel = parseInt(document.getElementById('filtroMes').value);
+      const anoSel = parseInt(document.getElementById('filtroAno').value);
+
+      const dadosFiltrados = dadosGlobais.filter(p => {
+        const dataPedido = converterDataJS(p[1]); // abertura
+        return dataPedido && dataPedido.getMonth() === mesSel && dataPedido.getFullYear() === anoSel;
+      });
+
+      atualizarDashboard(dadosFiltrados);
+      atualizarRelatorioPDF(dadosFiltrados, mesSel, anoSel);
+    }
+
+    // ====== MAPEAMENTO / REGRAS ======
+    // p[1] = data/hora abertura
+    // p[6] = status
+    // p[7] = responsável
+    // p[9] = data/hora conclusão (quando concluído)
+    // Se sua conclusão estiver em outro índice, altere aqui.
+    function obterDataConclusao(p) {
+      if (p && p.length > 9) {
+        const d = converterDataJS(p[9]);
+        if (d) return d;
+      }
+      return null;
+    }
+
+    function statusNormalizado(s) {
+      return String(s || '').trim().toUpperCase();
+    }
+
+    function ehConcluido(st) {
+      const s = statusNormalizado(st);
+      return (s === "ATENDIDO" || s === "NÃO ENCONTRADO" || s === "NAO ENCONTRADO" || s === "NÃO ENC." || s === "NAO ENC.");
+    }
+
+    // ====== DASHBOARD ======
+    function atualizarDashboard(dados) {
+      const agora = new Date();
+
+      document.getElementById('kpiTotal').innerText = dados.length;
+
+      let atendidos = 0, naoEnc = 0, emAnalise = 0;
+      const statusMap = {};
+
+      // TMA concluídos
+      let somaConcluidos = 0, nConcluidos = 0;
+
+      // TMA geral (concluídos + em análise até agora)
+      let somaGeral = 0, nGeral = 0;
+
+      // Ranking resp (concluídos)
+      const respMap = {};
+
+      // Barras últimos 30 dias (dentro do filtro, mas agrupado por dia)
+      const diasMap = {};
+
+      dados.forEach(p => {
+        const st = statusNormalizado(p[6]);
+        statusMap[st || "OUTROS"] = (statusMap[st || "OUTROS"] || 0) + 1;
+
+        if (st === "ATENDIDO") atendidos++;
+        if (st === "EM ANÁLISE") emAnalise++;
+        if (st === "NÃO ENCONTRADO" || st === "NAO ENCONTRADO" || st === "NÃO ENC." || st === "NAO ENC.") naoEnc++;
+
+        const dataAbertura = converterDataJS(p[1]);
+        if (!dataAbertura) return;
+
+        // barras (dia/mês)
+        const d = String(p[1] || '');
+        const diaMes = d.length >= 5 ? d.substring(0, 5) : '-';
+        diasMap[diaMes] = (diasMap[diaMes] || 0) + 1;
+
+        // TMA Concluídos
+        if (ehConcluido(st)) {
+          const dataConclusao = obterDataConclusao(p);
+          if (dataConclusao) {
+            const diff = dataConclusao - dataAbertura;
+            if (diff > 0) {
+              somaConcluidos += diff;
+              nConcluidos++;
+              somaGeral += diff;
+              nGeral++;
             }
-
-            const hoje = new Date();
-            document.getElementById('filtroMes').value = hoje.getMonth();
-            document.getElementById('filtroAno').value = hoje.getFullYear();
-            document.getElementById('dataGeracao').innerText = hoje.toLocaleString();
-            
-            carregarDados();
-        };
-
-        async function carregarDados() {
-            const btn = document.querySelector('#areaBotoes .btn-filtro');
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Carregando...';
-            
-            try {
-                const response = await fetch(URL_API + '?acao=listar_pedidos');
-                const data = await response.json();
-                if (data.result === 'success') {
-                    dadosGlobais = data.pedidos;
-                    aplicarFiltros();
-                }
-            } catch (e) { alert("Erro de conexão com o banco de dados."); }
-            finally { btn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> ATUALIZAR DADOS'; }
+          }
         }
 
-        function aplicarFiltros() {
-            const mesSel = parseInt(document.getElementById('filtroMes').value);
-            const anoSel = parseInt(document.getElementById('filtroAno').value);
-
-            const dadosFiltrados = dadosGlobais.filter(p => {
-                const dataPedido = converterDataJS(p[1]);
-                return dataPedido && dataPedido.getMonth() === mesSel && dataPedido.getFullYear() === anoSel;
-            });
-
-            atualizarDashboard(dadosFiltrados);
+        // TMA Geral inclui EM ANÁLISE até agora
+        if (st === "EM ANÁLISE") {
+          const diff = agora - dataAbertura;
+          if (diff > 0) {
+            somaGeral += diff;
+            nGeral++;
+          }
         }
 
-        function atualizarDashboard(dados) {
-            // 1. Total
-            document.getElementById('kpiTotal').innerText = dados.length;
+        // Ranking por responsável (concluídos)
+        const resp = String(p[7] || "N/D").trim() || "N/D";
+        if (!respMap[resp]) respMap[resp] = { concluidos: 0, somaMs: 0, nMedia: 0 };
 
-            // 2. Tempo Médio Real
-            let somaMs = 0;
-            let totalParaMedia = 0;
-            const agora = new Date();
-
-            dados.forEach(p => {
-                const dataAbertura = converterDataJS(p[1]);
-                if (!dataAbertura) return;
-
-                let dataConclusao = null;
-                const obs = p[8] || "";
-                const regexData = /(\d{2}\/\d{2}\/\d{4})/;
-                const matchData = obs.match(regexData);
-
-                if (p[6] === "ATENDIDO" && matchData) {
-                    dataConclusao = converterDataJS(matchData[0]);
-                } else if (p[6] === "EM ANÁLISE") {
-                    dataConclusao = agora;
-                }
-
-                if (dataConclusao) {
-                    const diff = dataConclusao - dataAbertura;
-                    if (diff > 0) { somaMs += diff; totalParaMedia++; }
-                }
-            });
-
-            const mediaFinal = totalParaMedia > 0 ? somaMs / totalParaMedia : 0;
-            document.getElementById('kpiTempo').innerText = formatarMilissegundos(mediaFinal);
-
-            // 3. Gráfico Pizza
-            const statusMap = {};
-            dados.forEach(p => {
-                const s = p[6] || "OUTROS";
-                statusMap[s] = (statusMap[s] || 0) + 1;
-            });
-            renderizarPizza(statusMap);
-
-            // 4. Gráfico Barras
-            const diasMap = {};
-            dados.forEach(p => {
-                const diaMes = p[1].substring(0, 5); 
-                diasMap[diaMes] = (diasMap[diaMes] || 0) + 1;
-            });
-            const diasSort = Object.keys(diasMap).sort();
-            const valoresSort = diasSort.map(d => diasMap[d]);
-            renderizarBarras(diasSort, valoresSort);
-        }
-
-        // Gráficos
-        function renderizarPizza(mapa) {
-            const ctx = document.getElementById('graficoPizza').getContext('2d');
-            if(chartPizza) chartPizza.destroy();
-            chartPizza = new Chart(ctx, {
-                type: 'pie',
-                data: {
-                    labels: Object.keys(mapa),
-                    datasets: [{
-                        data: Object.values(mapa),
-                        backgroundColor: ['#1f77b4', '#ff7f0e', '#d62728', '#2ca02c']
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
-            });
-        }
-
-        function renderizarBarras(labels, data) {
-            const ctx = document.getElementById('graficoBarras').getContext('2d');
-            if(chartBarras) chartBarras.destroy();
-            chartBarras = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{ label: 'Solicitações', data: data, backgroundColor: '#1f77b4' }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
-            });
-        }
-
-        // Auxiliares
-        function converterDataJS(str) {
-            if (!str) return null;
-            const partes = str.split(' ');
-            const d = partes[0].split('/');
-            if (d.length !== 3) return null;
-            if (partes[1]) {
-                const h = partes[1].split(':');
-                return new Date(d[2], d[1] - 1, d[0], h[0], h[1]);
+        if (ehConcluido(st)) {
+          respMap[resp].concluidos++;
+          const dataConclusao = obterDataConclusao(p);
+          if (dataConclusao) {
+            const diff = dataConclusao - dataAbertura;
+            if (diff > 0) {
+              respMap[resp].somaMs += diff;
+              respMap[resp].nMedia++;
             }
-            return new Date(d[2], d[1] - 1, d[0]);
+          }
+        }
+      });
+
+      document.getElementById('kpiAtendidos').innerText = atendidos;
+      document.getElementById('kpiNaoEnc').innerText = naoEnc;
+
+      const tmaConcluidos = (nConcluidos > 0) ? (somaConcluidos / nConcluidos) : 0;
+      const tmaGeral = (nGeral > 0) ? (somaGeral / nGeral) : 0;
+
+      document.getElementById('kpiTMAConcluidos').innerText = formatarMilissegundos(tmaConcluidos);
+      document.getElementById('kpiTMAGeral').innerText = formatarMilissegundos(tmaGeral);
+
+      renderizarPizza(statusMap);
+
+      const diasSort = Object.keys(diasMap).sort();
+      const valoresSort = diasSort.map(d => diasMap[d]);
+      renderizarBarras(diasSort, valoresSort);
+
+      renderRankingTela(respMap);
+    }
+
+    function renderRankingTela(respMap) {
+      const tbody = document.getElementById('tabelaRankingTela');
+      tbody.innerHTML = '';
+
+      const lista = Object.keys(respMap).map(nome => {
+        const r = respMap[nome];
+        const tma = r.nMedia > 0 ? (r.somaMs / r.nMedia) : 0;
+        return { nome, concluidos: r.concluidos, tma };
+      }).sort((a,b) => b.concluidos - a.concluidos);
+
+      if (lista.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted p-3">Sem dados para ranking.</td></tr>';
+        return;
+      }
+
+      lista.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="fw-bold">${item.nome}</td>
+          <td>${item.concluidos}</td>
+          <td>${formatarMilissegundos(item.tma)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // ====== PDF ======
+    function atualizarRelatorioPDF(dados, mesSel, anoSel) {
+      const meses = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+      const periodo = `${meses[mesSel]} / ${anoSel}`;
+
+      const emitidoEm = new Date().toLocaleString();
+      const emitidoPor = formatarPrimeiroNome(usuarioLogado);
+
+      document.getElementById('pdfPeriodo').innerText = `Período: ${periodo}`;
+      document.getElementById('pdfEmitidoEm').innerText = `Emitido em: ${emitidoEm}`;
+      document.getElementById('pdfEmitidoPor').innerText = `Emitido por: ${emitidoPor}`;
+
+      const total = dados.length;
+
+      let atendidos = 0, naoEnc = 0, emAnalise = 0;
+      const statusMap = {};
+
+      // TMA concluídos
+      let somaConcluidos = 0, nConcluidos = 0;
+
+      // TMA geral
+      let somaGeral = 0, nGeral = 0;
+
+      // Ranking
+      const respMap = {};
+      const agora = new Date();
+
+      dados.forEach(p => {
+        const st = statusNormalizado(p[6]);
+        statusMap[st || "OUTROS"] = (statusMap[st || "OUTROS"] || 0) + 1;
+
+        if (st === "ATENDIDO") atendidos++;
+        if (st === "EM ANÁLISE") emAnalise++;
+        if (st === "NÃO ENCONTRADO" || st === "NAO ENCONTRADO" || st === "NÃO ENC." || st === "NAO ENC.") naoEnc++;
+
+        const dataAbertura = converterDataJS(p[1]);
+        if (!dataAbertura) return;
+
+        // Ranking
+        const resp = String(p[7] || "N/D").trim() || "N/D";
+        if (!respMap[resp]) respMap[resp] = { concluidos: 0, emAnalise: 0, somaMs: 0, nMedia: 0 };
+
+        // Concluídos
+        if (ehConcluido(st)) {
+          respMap[resp].concluidos++;
+          const dataConclusao = obterDataConclusao(p);
+          if (dataConclusao) {
+            const diff = dataConclusao - dataAbertura;
+            if (diff > 0) {
+              somaConcluidos += diff; nConcluidos++;
+              somaGeral += diff; nGeral++;
+
+              respMap[resp].somaMs += diff;
+              respMap[resp].nMedia++;
+            }
+          }
         }
 
-        function formatarMilissegundos(ms) {
-            if (ms === 0) return "00:00";
-            const totalHoras = Math.floor(ms / (1000 * 60 * 60));
-            const dias = Math.floor(totalHoras / 24);
-            const horas = totalHoras % 24;
-            return `${String(dias).padStart(2, '0')}:${String(horas).padStart(2, '0')}`;
+        // Em análise (entra no geral até agora)
+        if (st === "EM ANÁLISE") {
+          respMap[resp].emAnalise++;
+          const diff = agora - dataAbertura;
+          if (diff > 0) {
+            somaGeral += diff; nGeral++;
+          }
+        }
+      });
+
+      const tmaConcluidos = (nConcluidos > 0) ? (somaConcluidos / nConcluidos) : 0;
+      const tmaGeral = (nGeral > 0) ? (somaGeral / nGeral) : 0;
+
+      document.getElementById('pdfTotal').innerText = total;
+      document.getElementById('pdfAtendidos').innerText = atendidos;
+      document.getElementById('pdfNaoEnc').innerText = naoEnc;
+      document.getElementById('pdfEmAnalise').innerText = emAnalise;
+
+      document.getElementById('pdfTMAConcluidos').innerText = formatarMilissegundos(tmaConcluidos);
+      document.getElementById('pdfTMAGeral').innerText = formatarMilissegundos(tmaGeral);
+
+      // Tabela status
+      const tbodyStatus = document.getElementById('pdfTabelaStatus');
+      tbodyStatus.innerHTML = '';
+      Object.keys(statusMap).sort().forEach(k => {
+        const qtd = statusMap[k];
+        const pct = total > 0 ? ((qtd / total) * 100).toFixed(1) + '%' : '0%';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${k}</td><td>${qtd}</td><td>${pct}</td>`;
+        tbodyStatus.appendChild(tr);
+      });
+
+      // Tabela ranking responsável
+      const tbodyResp = document.getElementById('pdfTabelaResp');
+      tbodyResp.innerHTML = '';
+      const listaResp = Object.keys(respMap).map(nome => {
+        const r = respMap[nome];
+        const tmaMedio = r.nMedia > 0 ? (r.somaMs / r.nMedia) : 0;
+        return { nome, concluidos: r.concluidos, emAnalise: r.emAnalise, tma: tmaMedio };
+      }).sort((a,b) => b.concluidos - a.concluidos);
+
+      listaResp.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${item.nome}</td>
+          <td>${item.concluidos}</td>
+          <td>${item.emAnalise}</td>
+          <td>${formatarMilissegundos(item.tma)}</td>
+        `;
+        tbodyResp.appendChild(tr);
+      });
+    }
+
+    async function gerarPDF() {
+      const nav = document.getElementById('navPrincipal');
+      const botoes = document.getElementById('areaBotoes');
+      const dashboard = document.getElementById('conteudoRelatorio');
+      const pdfContainer = document.getElementById('relatorioPDF');
+      const areaPdf = document.getElementById('pdfArea');
+
+      nav.style.display = 'none';
+      botoes.style.display = 'none';
+      dashboard.style.display = 'none';
+      pdfContainer.style.display = 'block';
+
+      window.scrollTo(0, 0);
+
+      try {
+        const canvas = await html2canvas(areaPdf, { scale: 2, useCORS: true });
+        const imgData = canvas.toDataURL('image/png');
+
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('p', 'mm', 'a4');
+
+        const pWidth = pdf.internal.pageSize.getWidth();
+        const pHeight = pdf.internal.pageSize.getHeight();
+
+        const imgWidth = pWidth;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+        if (imgHeight <= pHeight) {
+          pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+        } else {
+          let heightLeft = imgHeight;
+          let position = 0;
+
+          while (heightLeft > 0) {
+            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+            heightLeft -= pHeight;
+            position -= pHeight;
+            if (heightLeft > 0) pdf.addPage();
+          }
         }
 
-        // PDF
-        function gerarPDF() {
-            const area = document.getElementById('conteudoRelatorio');
-            const nav = document.getElementById('navPrincipal');
-            const botoes = document.getElementById('areaBotoes');
+        const mesTxt = document.getElementById('filtroMes').options[document.getElementById('filtroMes').selectedIndex].text;
+        const anoTxt = document.getElementById('filtroAno').value;
+        pdf.save(`Relatorio_NIO_${mesTxt}_${anoTxt}.pdf`);
+      } finally {
+        pdfContainer.style.display = 'none';
+        dashboard.style.display = 'block';
+        nav.style.display = 'flex';
+        botoes.style.display = 'block';
+      }
+    }
 
-            nav.style.display = 'none';
-            botoes.style.display = 'none';
+    // ====== GRÁFICOS ======
+    function renderizarPizza(mapa) {
+      const ctx = document.getElementById('graficoPizza').getContext('2d');
+      if (chartPizza) chartPizza.destroy();
 
-            window.scrollTo(0, 0);
-
-            html2canvas(area, { scale: 2 }).then(canvas => {
-                const imgData = canvas.toDataURL('image/png');
-                const { jsPDF } = window.jspdf;
-                const pdf = new jsPDF('p', 'mm', 'a4');
-                const pWidth = pdf.internal.pageSize.getWidth();
-                const pHeight = (canvas.height * pWidth) / canvas.width;
-
-                pdf.addImage(imgData, 'PNG', 0, 0, pWidth, pHeight);
-                pdf.save("Relatorio_Produtividade_NIO.pdf");
-
-                nav.style.display = 'flex';
-                botoes.style.display = 'block';
-            });
+      chartPizza = new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: Object.keys(mapa),
+          datasets: [{
+            data: Object.values(mapa),
+            backgroundColor: ['#1f77b4', '#ff7f0e', '#d62728', '#2ca02c', '#9467bd', '#8c564b']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom' } }
         }
-    </script>
+      });
+    }
+
+    function renderizarBarras(labels, data) {
+      const ctx = document.getElementById('graficoBarras').getContext('2d');
+      if (chartBarras) chartBarras.destroy();
+
+      chartBarras = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{ label: 'Solicitações', data: data, backgroundColor: '#1f77b4' }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+        }
+      });
+    }
+
+    // ====== AUX ======
+    function converterDataJS(str) {
+      if (!str) return null;
+      const s = String(str).trim();
+      if (!s) return null;
+
+      const partes = s.split(' ');
+      const d = partes[0].split('/');
+      if (d.length !== 3) return null;
+
+      if (partes[1]) {
+        const h = partes[1].split(':');
+        const hh = parseInt(h[0] || '0', 10);
+        const mm = parseInt(h[1] || '0', 10);
+        return new Date(parseInt(d[2], 10), parseInt(d[1], 10) - 1, parseInt(d[0], 10), hh, mm);
+      }
+      return new Date(parseInt(d[2], 10), parseInt(d[1], 10) - 1, parseInt(d[0], 10));
+    }
+
+    // ✅ Agora com MINUTOS: DD:HH:MM
+    function formatarMilissegundos(ms) {
+      if (!ms || ms <= 0) return "00:00:00";
+
+      const totalMin = Math.floor(ms / (1000 * 60));
+      const dias = Math.floor(totalMin / (60 * 24));
+      const restoMin = totalMin % (60 * 24);
+
+      const horas = Math.floor(restoMin / 60);
+      const minutos = restoMin % 60;
+
+      return `${String(dias).padStart(2,'0')}:${String(horas).padStart(2,'0')}:${String(minutos).padStart(2,'0')}`;
+    }
+  </script>
 </body>
 </html>
