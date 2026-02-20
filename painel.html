@@ -68,18 +68,24 @@
 </head>
 <body class="bg-light">
 
-    <!-- NAVBAR -->
+    <!-- NAVBAR PADRONIZADA -->
     <nav class="navbar navbar-expand-lg navbar-dark shadow-sm sticky-top" style="background-color: var(--azul); padding: 10px 20px;">
         <div class="container-fluid px-lg-5 position-relative">
-            <span class="navbar-brand fw-bold fs-4"><i class="bi bi-shield-lock-fill me-2 text-warning"></i>NIO <span class="fw-light opacity-75">INTERNO</span></span>
+            <span class="navbar-brand fw-bold fs-4">
+                <i class="bi bi-shield-lock-fill me-2 text-warning"></i>NIO <span class="fw-light opacity-75">INTERNO</span>
+            </span>
+            
             <div class="navbar-menu-center">
                 <a class="nav-link-custom active" href="painel.html"><i class="bi bi-list-task"></i> Pedidos</a>
                 <a class="nav-link-custom" href="referencias.html"><i class="bi bi-book"></i> Referências</a>
                 <a class="nav-link-custom" href="relatorios.html"><i class="bi bi-graph-up-arrow"></i> Relatórios</a>
             </div>
+
             <div class="d-flex align-items-center text-white ms-auto">
                 <span class="me-3 d-none d-sm-inline opacity-75 small">Olá, <strong id="nomeUsuario">...</strong></span>
-                <button onclick="sair()" class="btn btn-sm btn-outline-light rounded-pill px-3 fw-bold">SAIR <i class="bi bi-box-arrow-right ms-1"></i></button>
+                <button onclick="sair()" class="btn btn-sm btn-outline-light rounded-pill px-3 fw-bold">
+                    SAIR <i class="bi bi-box-arrow-right ms-1"></i>
+                </button>
             </div>
         </div>
     </nav>
@@ -124,28 +130,32 @@
                 <div class="modal-body p-4">
                     <input type="hidden" id="editId">
                     
-                    <div id="infoCidadao" class="mb-3 p-3 bg-light rounded border small" style="display:none;">
+                    <div id="infoCidadao" class="mb-3 p-3 bg-light rounded border small">
                         <strong>Solicitante:</strong> <span id="viewNome"></span><br>
+                        <strong>WhatsApp:</strong> <span id="viewZap"></span><br>
                         <strong>O que pesquisar:</strong> <span id="viewOque"></span><br>
-                        <strong>Observação Original:</strong> <span id="viewObsOrig"></span>
+                        <div class="mt-1 border-top pt-1">
+                            <strong>Observação Original:</strong> <br>
+                            <span id="viewObsOrig" class="text-muted"></span>
+                        </div>
                     </div>
 
                     <div class="mb-3">
-                        <label class="fw-bold small text-muted mb-2">STATUS:</label>
+                        <label class="fw-bold small text-muted mb-2">STATUS ATUAL:</label>
                         <select id="editStatus" class="form-select form-select-lg fw-bold">
+                            <option value="EM ANÁLISE">⚠️ EM ANÁLISE</option>
                             <option value="ATENDIDO">✅ PEDIDO ATENDIDO</option>
                             <option value="NÃO ENCONTRADO">❌ NÃO ENCONTRADO</option>
-                            <option value="EM ANÁLISE">⚠️ DEVOLVER PARA ANÁLISE</option>
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="fw-bold small text-muted mb-2">RETORNO / OBSERVAÇÃO DO TÉCNICO:</label>
-                        <textarea id="editRetorno" class="form-control" rows="4" placeholder="Descreva o resultado da busca..."></textarea>
+                        <label class="fw-bold small text-muted mb-2">RETORNO / RESPOSTA AO CIDADÃO:</label>
+                        <textarea id="editRetorno" class="form-control" rows="5" placeholder="Digite aqui as informações que foram enviadas ao solicitante..."></textarea>
                     </div>
                 </div>
                 <div class="modal-footer border-0">
                     <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Fechar</button>
-                    <button type="button" class="btn btn-primary px-5 fw-bold" id="btnSalvarModal" onclick="salvarAlteracao()">Salvar Alteração</button>
+                    <button type="button" class="btn btn-primary px-5 fw-bold" id="btnSalvarModal" onclick="salvarAlteracao()">Atualizar Dados</button>
                 </div>
             </div>
         </div>
@@ -225,8 +235,6 @@
             paginaDados.forEach(p => {
                 let badge = p[6] === 'ATENDIDO' ? 'bg-success' : (p[6] === 'NÃO ENCONTRADO' ? 'bg-danger' : 'bg-warning text-dark');
                 let zap = p[5] ? `https://wa.me/55${p[5].replace(/\D/g,'')}` : '#';
-                
-                // MUDANÇA DO BOTÃO DINÂMICO
                 let btnLabel = p[6] === 'EM ANÁLISE' ? 'Atender' : 'Ver Detalhes';
                 let btnClass = p[6] === 'EM ANÁLISE' ? 'btn-primary' : 'btn-outline-secondary';
 
@@ -247,7 +255,7 @@
         }
 
         async function excluirPedido(id) {
-            if(!confirm("Excluir registro permanentemente?")) return;
+            if(!confirm("Deseja realmente excluir este registro permanentemente?")) return;
             await fetch(URL_API, { method: 'POST', mode: 'no-cors', body: JSON.stringify({acao: 'excluir_pedido', id: id}) });
             carregarPedidos();
         }
@@ -271,7 +279,6 @@
             $('#editId').val(id);
             $('#editStatus').val(p[6]);
             
-            // Separa o que é observação original do que é retorno técnico
             let obsBruta = p[8] || "";
             let partes = obsBruta.split(" | [RETORNO]: ");
             let obsOriginal = partes[0];
@@ -279,36 +286,46 @@
 
             $('#editRetorno').val(retornoTecnico);
             
-            // Ajusta Modal para VISUALIZAÇÃO ou ATENDIMENTO
+            // Dados extras para o cabeçalho do modal
+            $('#viewNome').text(p[2]);
+            $('#viewZap').text(p[5] || 'Não informado');
+            $('#viewOque').text(p[3]);
+            $('#viewObsOrig').text(obsOriginal || 'Nenhuma observação informada pelo cidadão.');
+
             if(p[6] === 'EM ANÁLISE') {
                 $('#modalTitulo').text("Atender Pedido");
-                $('#btnSalvarModal').show();
-                $('#editStatus, #editRetorno').prop('disabled', false);
-                $('#infoCidadao').hide();
+                $('#btnSalvarModal').text("Salvar Atendimento");
             } else {
                 $('#modalTitulo').text("Detalhes do Atendimento");
-                $('#btnSalvarModal').hide(); // Esconde botão salvar
-                $('#editStatus, #editRetorno').prop('disabled', true); // Bloqueia edição
-                
-                // Mostra dados do cidadão para conferência
-                $('#infoCidadao').show();
-                $('#viewNome').text(p[2]);
-                $('#viewOque').text(p[3]);
-                $('#viewObsOrig').text(obsOriginal || 'Nenhuma');
+                $('#btnSalvarModal').text("Atualizar Dados");
             }
+            
             modalAtend.show();
         }
 
         async function salvarAlteracao() {
-            const dados = {acao:'atualizar_pedido', id:$('#editId').val(), status:$('#editStatus').val(), retorno:$('#editRetorno').val(), responsavel:usuarioFull};
+            const id = $('#editId').val();
+            const st = $('#editStatus').val();
+            const ret = $('#editRetorno').val();
+            const btn = document.getElementById('btnSalvarModal');
+            
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Gravando...';
+
+            const dados = {acao:'atualizar_pedido', id:id, status:st, retorno:ret, responsavel:usuarioFull};
             await fetch(URL_API, {method:'POST', mode:'no-cors', body:JSON.stringify(dados)});
-            modalAtend.hide(); carregarPedidos();
+            
+            modalAtend.hide(); 
+            btn.disabled = false;
+            btn.innerText = "Atualizar Dados";
+            carregarPedidos();
         }
 
         async function salvarNovoPedido() {
             const dados = {acao:'novo_pedido', solicitante:$('#novoSolicitante').val(), nome_pesquisado:$('#novoPesquisa').val(), periodo:$('#novoPeriodo').val(), whatsapp:$('#novoZap').val(), observacoes:$('#novoObs').val(), responsavel:usuarioFull};
             await fetch(URL_API, {method:'POST', mode:'no-cors', body:JSON.stringify(dados)});
-            $('#modalNovoPedido').modal('hide'); carregarPedidos();
+            $('#modalNovoPedido').modal('hide'); 
+            carregarPedidos();
         }
 
         function abrirModalNovo() { $('#formNovoPedido')[0].reset(); new bootstrap.Modal(document.getElementById('modalNovoPedido')).show(); }
