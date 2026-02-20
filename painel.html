@@ -4,9 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Administrativo - NIO INTERNO</title>
+    <title>Painel Administrativo - NIO PESQUISA</title>
     
+    <!-- FAVICON -->
     <link rel="shortcut icon" href="img/favicon1.png" type="image/x-icon">
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="css/estilo.css">
@@ -15,11 +17,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
     
     <style>
-        /* --- RESTAURAÇÃO DO TOPO ORIGINAL --- */
-        .navbar-top-modern {
-            background-color: var(--azul);
-            padding: 12px 20px;
-        }
+        /* --- ESTILOS EXCLUSIVOS DO PAINEL --- */
+        .navbar-top-modern { background-color: var(--azul); padding: 12px 20px; }
         .nav-link-custom {
             color: rgba(255,255,255,0.7) !important;
             font-weight: 600;
@@ -31,17 +30,9 @@
             gap: 8px;
             text-decoration: none;
         }
-        .nav-link-custom:hover {
-            color: white !important;
-            background: rgba(255,255,255,0.1);
-        }
-        .nav-link-custom.active {
-            color: white !important;
-            background: rgba(255,255,255,0.2);
-            box-shadow: inset 0 -2px 0 #ffc107;
-        }
+        .nav-link-custom:hover { color: white !important; background: rgba(255,255,255,0.1); }
+        .nav-link-custom.active { color: white !important; background: rgba(255,255,255,0.2); box-shadow: inset 0 -2px 0 #ffc107; }
 
-        /* --- CARDS KPI --- */
         .card-resumo {
             position: relative;
             padding: 25px 20px;
@@ -68,9 +59,7 @@
 
         .form-control:disabled { background-color: #f8f9fa; color: #6c757d; cursor: not-allowed; border-style: dashed; }
 
-        @media (min-width: 993px) { 
-            .navbar-menu-center { position: absolute; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; } 
-        }
+        @media (min-width: 993px) { .navbar-menu-center { position: absolute; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; } }
         @media (max-width: 992px) {
             .navbar-menu-center { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 15px 0; width: 100%; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; }
             .table thead { display: none; }
@@ -82,7 +71,7 @@
 </head>
 <body class="bg-light">
 
-    <!-- NAVBAR ORIGINAL RESTAURADA -->
+    <!-- NAVBAR -->
     <nav class="navbar navbar-expand-lg navbar-dark shadow-sm sticky-top navbar-top-modern">
         <div class="container-fluid px-lg-5">
             <span class="navbar-brand fw-bold fs-4">
@@ -108,6 +97,7 @@
             <button class="btn btn-success fw-bold shadow-sm px-4 py-2 rounded-3" onclick="abrirModalNovo()">+ NOVO PEDIDO</button>
         </div>
 
+        <!-- CARDS KPI -->
         <div class="row g-3 mb-4">
             <div class="col-6 col-md-3"><div class="card-resumo bg-pendente shadow-sm" onclick="filtrarPorCard('EM ANÁLISE')"><div><span class="kpi-label">Pendentes</span><h2 class="kpi-value" id="totalAnalise">0</h2></div><i class="bi bi-hourglass-split kpi-icon"></i></div></div>
             <div class="col-6 col-md-3"><div class="card-resumo bg-atendido shadow-sm" onclick="filtrarPorCard('ATENDIDO')"><div><span class="kpi-label">Atendidos</span><h2 class="kpi-value" id="totalAtendidos">0</h2></div><i class="bi bi-check-circle kpi-icon"></i></div></div>
@@ -126,7 +116,7 @@
         <div class="d-flex justify-content-between align-items-center mt-3"><span class="text-muted small">Página <span id="paginaAtual" class="fw-bold text-primary">1</span></span><div class="btn-group shadow-sm"><button class="btn btn-white btn-sm border" onclick="mudarPagina(-1)">Anterior</button><button class="btn btn-white btn-sm border" onclick="mudarPagina(1)">Próxima</button></div></div>
     </div>
 
-    <!-- MODAL DETALHES -->
+    <!-- MODAL ATENDIMENTO -->
     <div class="modal fade" id="modalAtendimento" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg">
@@ -166,20 +156,29 @@
         </div>
     </div>
 
-    <!-- MODAL NOVO PEDIDO -->
+    <!-- MODAL NOVO PEDIDO (ESTE É O QUE ESTAVA FALTANDO) -->
     <div class="modal fade" id="modalNovoPedido" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow">
-                <div class="modal-header bg-success text-white border-0"><h5 class="modal-title fw-bold">Novo Registro</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+                <div class="modal-header bg-success text-white border-0">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-plus-circle me-2"></i>Novo Registro</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
                 <div class="modal-body p-4">
                     <form id="formNovoPedido">
                         <div class="mb-3"><label class="fw-bold small text-muted">SOLICITANTE</label><input type="text" id="novoSolicitante" class="form-control" required></div>
                         <div class="mb-3"><label class="fw-bold small text-muted">O QUE PESQUISAR?</label><input type="text" id="novoPesquisa" class="form-control" required></div>
-                        <div class="row"><div class="col-6 mb-3"><label class="fw-bold small text-muted">PERÍODO</label><input type="text" id="novoPeriodo" class="form-control" required></div><div class="col-6 mb-3"><label class="fw-bold small text-muted">WHATSAPP</label><input type="text" id="novoZap" class="form-control" required></div></div>
-                        <div class="mb-0"><label class="fw-bold small text-muted">OBSERVAÇÕES</label><textarea id="novoObs" class="form-control" rows="2"></textarea></div>
+                        <div class="row">
+                            <div class="col-6 mb-3"><label class="fw-bold small text-muted">PERÍODO</label><input type="text" id="novoPeriodo" class="form-control" required></div>
+                            <div class="col-6 mb-3"><label class="fw-bold small text-muted">WHATSAPP</label><input type="text" id="novoZap" class="form-control" required></div>
+                        </div>
+                        <div class="mb-0"><label class="fw-bold small text-muted">OBSERVAÇÕES INTERNAS</label><textarea id="novoObs" class="form-control" rows="2"></textarea></div>
                     </form>
                 </div>
-                <div class="modal-footer border-0"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button><button type="button" class="btn btn-success px-5 fw-bold" onclick="salvarNovoPedido()">Cadastrar</button></div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-success px-5 fw-bold" onclick="salvarNovoPedido()">Cadastrar Pedido</button>
+                </div>
             </div>
         </div>
     </div>
@@ -190,6 +189,18 @@
         let dadosGlobais = [], dadosFiltrados = [], paginaAtual = 1;
         const itensPorPagina = 10;
 
+        // --- LÓGICA DE FAVICON ANIMADO ---
+        let iconIndex = 0;
+        const icons = ['img/favicon1.png', 'img/favicon2.png'];
+        function changeFavicon() {
+            let link = document.querySelector("link[rel~='icon']");
+            if (!link) { link = document.createElement('link'); link.rel = 'icon'; document.head.appendChild(link); }
+            link.href = icons[iconIndex];
+            iconIndex = (iconIndex + 1) % icons.length;
+        }
+        setInterval(changeFavicon, 3000);
+
+        // --- LÓGICA DE NOME ---
         const usuarioFull = localStorage.getItem('nio_usuario') || "Servidor";
         if (localStorage.getItem('nio_token') !== 'logado') window.location.href = 'login.html';
         const nFormatado = usuarioFull.split(' ')[0].toLowerCase().replace(/^\w/, c => c.toUpperCase());
@@ -223,37 +234,28 @@
             const inicio = (paginaAtual - 1) * itensPorPagina;
             const paginaDados = dadosFiltrados.slice(inicio, inicio + itensPorPagina);
             $('#paginaAtual').text(paginaAtual);
-
             paginaDados.forEach(p => {
                 let badge = p[6] === 'ATENDIDO' ? 'bg-success' : (p[6] === 'NÃO ENCONTRADO' ? 'bg-danger' : 'bg-warning text-dark');
                 let zap = p[5] ? `https://wa.me/55${p[5].replace(/\D/g,'')}` : '#';
-                tbody.innerHTML += `<tr>
-                    <td data-label="Data" class="ps-4 small">${p[1]}</td>
-                    <td data-label="Solicitante" class="fw-bold text-primary">${p[2]}</td>
-                    <td data-label="Pesquisa"><div class="bg-light p-2 rounded small">${p[3]}</div></td>
-                    <td data-label="Período">${p[4]}</td>
-                    <td data-label="Contato"><a href="${zap}" target="_blank" class="btn btn-sm btn-outline-success border-0 rounded-circle"><i class="bi bi-whatsapp"></i></a></td>
-                    <td data-label="Status"><span class="badge ${badge} rounded-pill">${p[6]}</span></td>
-                    <td data-label="Resp."><small>${p[7]||'-'}</small></td>
-                    <td data-label="Ação" class="text-end pe-4">
-                        <button class="btn btn-sm btn-outline-danger border-0 me-1" onclick="excluirPedido('${p[0]}')"><i class="bi bi-trash"></i></button>
-                        <button class="btn ${p[6] === 'EM ANÁLISE' ? 'btn-primary' : 'btn-outline-secondary'} btn-sm rounded-pill px-3 shadow-sm" onclick="abrirModal('${p[0]}')">${p[6] === 'EM ANÁLISE' ? 'Atender' : 'Ver Detalhes'}</button>
-                    </td>
-                </tr>`;
+                tbody.innerHTML += `<tr><td class="ps-4 small">${p[1]}</td><td class="fw-bold text-primary">${p[2]}</td><td><div class="bg-light p-2 rounded small">${p[3]}</div></td><td>${p[4]}</td><td><a href="${zap}" target="_blank" class="btn btn-sm btn-outline-success border-0 rounded-circle"><i class="bi bi-whatsapp"></i></a></td><td><span class="badge ${badge} rounded-pill">${p[6]}</span></td><td><small>${p[7]||'-'}</small></td><td class="text-end pe-4"><button class="btn btn-sm btn-outline-danger border-0 me-1" onclick="excluirPedido('${p[0]}')"><i class="bi bi-trash"></i></button><button class="btn ${p[6] === 'EM ANÁLISE' ? 'btn-primary' : 'btn-outline-secondary'} btn-sm rounded-pill px-3 shadow-sm" onclick="abrirModal('${p[0]}')">${p[6] === 'EM ANÁLISE' ? 'Atender' : 'Ver Detalhes'}</button></td></tr>`;
             });
         }
 
+        const modalAtend = new bootstrap.Modal(document.getElementById('modalAtendimento'));
         function abrirModal(id) {
             const p = dadosGlobais.find(item => item[0] === id);
             $('#editId').val(id);
             $('#editStatus').val(p[6]);
             $('#editRetorno').val(p[10] || "").prop('disabled', p[6] !== 'EM ANÁLISE');
-            $('#viewNome').text(p[2]);
-            $('#viewZap').text(p[5] || 'Não informado');
-            $('#viewOque').text(p[3]);
-            $('#viewObsOrig').text(p[8] || 'Nenhuma');
-            $('#modalTitulo').text(p[6] === 'EM ANÁLISE' ? "Atender Pedido" : "Detalhes do Atendimento");
+            $('#viewNome').text(p[2]); $('#viewZap').text(p[5] || 'Não informado'); $('#viewOque').text(p[3]); $('#viewObsOrig').text(p[8] || 'Nenhuma');
             modalAtend.show();
+        }
+
+        // FUNÇÃO PARA ABRIR O MODAL NOVO
+        function abrirModalNovo() {
+            $('#formNovoPedido')[0].reset();
+            const modalNovo = new bootstrap.Modal(document.getElementById('modalNovoPedido'));
+            modalNovo.show();
         }
 
         async function salvarAlteracao() {
@@ -265,28 +267,13 @@
         async function salvarNovoPedido() {
             const dados = {acao:'novo_pedido', solicitante:$('#novoSolicitante').val(), nome_pesquisado:$('#novoPesquisa').val(), periodo:$('#novoPeriodo').val(), whatsapp:$('#novoZap').val(), observacoes:$('#novoObs').val(), responsavel:usuarioFull};
             await fetch(URL_API, {method:'POST', mode:'no-cors', body:JSON.stringify(dados)});
-            $('#modalNovoPedido').modal('hide'); carregarPedidos();
-        }
-
-        async function excluirPedido(id) {
-            if(!confirm("Excluir registro?")) return;
-            await fetch(URL_API, { method: 'POST', mode: 'no-cors', body: JSON.stringify({acao: 'excluir_pedido', id: id}) });
+            bootstrap.Modal.getInstance(document.getElementById('modalNovoPedido')).hide();
             carregarPedidos();
         }
 
-        function mudarPagina(d) {
-            const total = Math.ceil(dadosFiltrados.length / itensPorPagina);
-            if (paginaAtual + d >= 1 && paginaAtual + d <= total) { paginaAtual += d; renderizarTabela(); }
-        }
-
-        function atualizarContadores(lista) {
-            $('#totalPedidos').text(lista.length);
-            $('#totalAnalise').text(lista.filter(p=>p[6]==='EM ANÁLISE').length);
-            $('#totalAtendidos').text(lista.filter(p=>p[6]==='ATENDIDO').length);
-            $('#totalNaoEnc').text(lista.filter(p=>p[6]==='NÃO ENCONTRADO').length);
-        }
-
-        const modalAtend = new bootstrap.Modal(document.getElementById('modalAtendimento'));
+        async function excluirPedido(id) { if(!confirm("Excluir?")) return; await fetch(URL_API, { method: 'POST', mode: 'no-cors', body: JSON.stringify({acao: 'excluir_pedido', id: id}) }); carregarPedidos(); }
+        function mudarPagina(d) { const total = Math.ceil(dadosFiltrados.length / itensPorPagina); if (paginaAtual + d >= 1 && paginaAtual + d <= total) { paginaAtual += d; renderizarTabela(); } }
+        function atualizarContadores(lista) { $('#totalPedidos').text(lista.length); $('#totalAnalise').text(lista.filter(p=>p[6]==='EM ANÁLISE').length); $('#totalAtendidos').text(lista.filter(p=>p[6]==='ATENDIDO').length); $('#totalNaoEnc').text(lista.filter(p=>p[6]==='NÃO ENCONTRADO').length); }
         function filtrarPorCard(s) { $('#filtroStatus').val(s); aplicarFiltros(); }
         window.onload = carregarPedidos;
     </script>
