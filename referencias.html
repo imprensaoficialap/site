@@ -1,382 +1,100 @@
+<!-- START OF FILE referencias.html -->
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guia de Referências - NIO</title>
-
+    <title>Referências - NIO INTERNO</title>
     <link rel="shortcut icon" href="img/favicon1.png" type="image/x-icon">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="css/estilo.css">
-
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
-
     <style>
-        body { background-color: #f0f2f5; font-family: 'Segoe UI', sans-serif; }
-
-        .navbar-top-modern { background-color: var(--azul); padding: 10px 20px; }
-        .nav-link-custom {
-            color: rgba(255,255,255,0.7) !important;
-            font-weight: 600;
-            padding: 8px 18px !important;
-            border-radius: 8px;
-            transition: 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-        }
+        .nav-link-custom { color: rgba(255,255,255,0.7) !important; font-weight: 600; padding: 8px 18px !important; border-radius: 8px; transition: 0.3s; display: flex; align-items: center; gap: 8px; text-decoration: none; }
         .nav-link-custom:hover { color: white !important; background: rgba(255,255,255,0.1); }
         .nav-link-custom.active { color: white !important; background: rgba(255,255,255,0.2); box-shadow: inset 0 -2px 0 #ffc107; }
-
-        .card-controls { background: white; border-radius: 10px; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .table-container { background: white; border-radius: 10px; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.05); overflow: hidden; }
-        .header-azul { background-color: #0078d4; color: white; padding: 15px; font-weight: bold; border-radius: 10px 10px 0 0; }
-
-        @media (min-width: 993px) {
-            .navbar-menu-center { position: absolute; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; }
-        }
-        @media (max-width: 992px) {
-            .navbar-menu-center {
-                display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 15px 0;
-                width: 100%; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;
-            }
-            .navbar-container { flex-wrap: wrap; }
-        }
+        .header-azul { background-color: var(--azul); color: white; padding: 15px; font-weight: bold; border-radius: 12px 12px 0 0; text-transform: uppercase; }
+        @media (min-width: 993px) { .navbar-menu-center { position: absolute; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; } }
     </style>
 </head>
-<body>
+<body class="bg-light">
 
-<nav class="navbar navbar-expand-lg navbar-dark shadow-sm sticky-top navbar-top-modern">
-    <div class="container-fluid navbar-container position-relative">
-        <span class="navbar-brand fw-bold fs-4">
-            <i class="bi bi-shield-lock-fill me-2 text-warning"></i>NIO <span class="fw-light opacity-75">INTERNO</span>
-        </span>
-
-        <div class="navbar-menu-center">
-            <a class="nav-link-custom" href="painel.html"><i class="bi bi-list-task"></i> Pedidos</a>
-            <a class="nav-link-custom active" href="referencias.html"><i class="bi bi-book"></i> Referências</a>
-            <a class="nav-link-custom" href="relatorios.html"><i class="bi bi-graph-up-arrow"></i> Relatórios</a>
-        </div>
-
-        <div class="d-flex align-items-center text-white mt-lg-0 mt-2">
-            <span class="me-3 d-none d-sm-inline opacity-75 small">Olá, <strong id="nomeUsuario">...</strong></span>
-            <button onclick="sair()" class="btn btn-sm btn-outline-light rounded-pill px-3 fw-bold">
-                SAIR <i class="bi bi-box-arrow-right ms-1"></i>
-            </button>
-        </div>
-    </div>
-</nav>
-
-<div class="container-fluid mt-4 mb-5">
-    <div class="row g-4">
-
-        <div class="col-lg-4">
-            <div class="card card-controls mb-3">
-                <div class="card-body">
-                    <label class="fw-bold text-primary mb-2">SELECIONE A ORGANIZAÇÃO</label>
-                    <div class="input-group mb-3">
-                        <select id="selectOrganizacao" class="form-select form-select-lg fw-bold text-uppercase" onchange="filtrarPorOrganizacao()">
-                            <option value="" disabled selected>Carregando...</option>
-                        </select>
-                        <button class="btn btn-success" onclick="abrirModalNovaOrg()" title="Nova Organização">
-                            <i class="bi bi-plus-lg"></i>
-                        </button>
-                    </div>
-                </div>
+    <nav class="navbar navbar-expand-lg navbar-dark shadow-sm sticky-top" style="background-color: var(--azul); padding: 10px 20px;">
+        <div class="container-fluid px-lg-5 position-relative">
+            <span class="navbar-brand fw-bold fs-4">
+                <i class="bi bi-shield-lock-fill me-2 text-warning"></i>NIO <span class="fw-light opacity-75">INTERNO</span>
+            </span>
+            <div class="navbar-menu-center">
+                <a class="nav-link-custom" href="painel.html">Pedidos</a>
+                <a class="nav-link-custom active" href="referencias.html">Referências</a>
+                <a class="nav-link-custom" href="relatorios.html">Relatórios</a>
             </div>
-
-            <div class="card card-controls">
-                <div class="header-azul">
-                    <i class="bi bi-plus-circle"></i> ADICIONAR REFERÊNCIA
-                </div>
-                <div class="card-body">
-                    <form id="formNovaRef" onsubmit="adicionarReferencia(event)">
-                        <div class="mb-3">
-                            <label class="fw-bold small text-muted">DATA</label>
-                            <input type="text" id="novaData" class="form-control" placeholder="DD/MM/AAAA" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="fw-bold small text-muted">REFERÊNCIA / DESCRIÇÃO</label>
-                            <textarea id="novaDescricao" class="form-control" rows="3" placeholder="Ex: Nomeação - Pág 05" required></textarea>
-                        </div>
-                        <div class="d-grid">
-                            <button type="submit" id="btnSalvar" class="btn btn-primary fw-bold">
-                                ADICIONAR À LISTA
-                            </button>
-                        </div>
-                    </form>
-                </div>
+            <div class="d-flex align-items-center text-white ms-auto">
+                <span class="me-3 d-none d-sm-inline opacity-75 small">Olá, <strong id="nomeUsuario">...</strong></span>
+                <button onclick="sair()" class="btn btn-sm btn-outline-light rounded-pill px-3 fw-bold">SAIR</button>
             </div>
         </div>
+    </nav>
 
-        <div class="col-lg-8">
-            <div class="table-container h-100">
-                <div class="header-azul d-flex justify-content-between align-items-center">
-                    <span id="tituloTabela">REFERÊNCIAS</span>
-                    <span class="badge bg-light text-primary rounded-pill" id="contadorReg">0 registros</span>
-                </div>
-
-                <div class="p-3 bg-light border-bottom">
-                    <input type="text" id="buscaInterna" class="form-control" placeholder="🔍 Filtrar nesta lista..." onkeyup="filtrarInterno()">
-                </div>
-
-                <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
-                    <table class="table table-hover mb-0 align-middle">
-                        <thead class="table-light sticky-top">
-                            <tr>
-                                <th style="width: 130px;">Data</th>
-                                <th>Referência</th>
-                                <th style="width: 60px;" class="text-center">Ação</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabelaRefs">
-                            <tr><td colspan="3" class="text-center p-5 text-muted">Selecione uma organização para ver os dados.</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+    <div class="container-fluid mt-4 px-lg-5">
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm mb-3"><div class="card-body"><label class="fw-bold text-primary mb-2">ORGANIZAÇÃO</label><div class="input-group"><select id="selectOrganizacao" class="form-select fw-bold" onchange="filtrarPorOrg()"><option>Carregando...</option></select><button class="btn btn-success" onclick="abrirModalNovaOrg()">+</button></div></div></div>
+                <div class="card border-0 shadow-sm"><div class="header-azul">Adicionar Referência</div><div class="card-body"><form id="formNovaRef" onsubmit="adicionarReferencia(event)"><div class="mb-3"><label class="small fw-bold">DATA</label><input type="text" id="novaData" class="form-control" placeholder="DD/MM/AAAA" required></div><div class="mb-3"><label class="small fw-bold">DESCRIÇÃO</label><textarea id="novaDescricao" class="form-control" rows="3" required></textarea></div><button type="submit" class="btn btn-primary w-100 fw-bold">SALVAR</button></form></div></div>
             </div>
-        </div>
-
-    </div>
-</div>
-
-<div class="modal fade" id="modalNovaOrg" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title">+ Nova Organização</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <label class="fw-bold">Nome da Organização (Sigla):</label>
-                <input type="text" id="inputNomeOrg" class="form-control text-uppercase" placeholder="EX: DETRAN">
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-success" onclick="salvarNovaOrg()">Criar</button>
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm h-100"><div class="header-azul d-flex justify-content-between"><span>REFERÊNCIAS</span><span id="contadorReg" class="badge bg-light text-primary">0</span></div><div class="table-responsive"><table class="table table-hover mb-0"><thead><tr><th>Data</th><th>Descrição</th><th class="text-center">Ação</th></tr></thead><tbody id="tabelaRefs"></tbody></table></div></div>
             </div>
         </div>
     </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Modal Nova Org -->
+    <div class="modal fade" id="modalNovaOrg" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content border-0 shadow"><div class="modal-header bg-success text-white"><h5>Nova Organização</h5></div><div class="modal-body"><input type="text" id="nomeNovaOrg" class="form-control text-uppercase"></div><div class="modal-footer"><button class="btn btn-success w-100" onclick="confirmarNovaOrg()">CRIAR</button></div></div></div></div>
 
-<script>
-    const URL_API = 'https://script.google.com/macros/s/AKfycbw1YF42SazcEuLyI-I8g-btHyYlUJWC2jllDG7T59BgOL_lvmzuwQiqyW6-oJwM5-JV/exec';
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const URL_API = 'https://script.google.com/macros/s/AKfycbwwEI9F6LFkqOqeoF4kKyARouJo-59C-34xhTWfL1bDD538muTldssosywD2G2CYyOpfA/exec';
+        let dadosCompletos = [];
+        const usuarioFull = localStorage.getItem('nio_usuario') || "Servidor";
+        const nFormatado = usuarioFull.split(' ')[0].toLowerCase().replace(/^\w/, c => c.toUpperCase());
+        document.getElementById('nomeUsuario').innerText = nFormatado;
 
-    // ✅ Sessão: 8 horas
-    const SESSION_MAX_MS = 8 * 60 * 60 * 1000;
+        function sair() { localStorage.clear(); window.location.href = 'login.html'; }
+        $(document).ready(function(){ $('#novaData').mask('00/00/0000'); carregarTudo(); });
 
-    function sessaoValida() {
-        const token = localStorage.getItem('nio_token');
-        const ts = parseInt(localStorage.getItem('nio_login_ts') || '0', 10);
-        if (token !== 'logado') return false;
-        if (!ts) return false;
-        return (Date.now() - ts) <= SESSION_MAX_MS;
-    }
-
-    function sair() {
-        localStorage.removeItem('nio_token');
-        localStorage.removeItem('nio_usuario');
-        localStorage.removeItem('nio_login_ts');
-        window.location.href = 'login.html';
-    }
-
-    if (!sessaoValida()) {
-        sair();
-    } else {
-        localStorage.setItem('nio_login_ts', String(Date.now()));
-    }
-
-    // ✅ Nome no topo
-    const usuarioFull = localStorage.getItem('nio_usuario') || "Servidor";
-    const primeiroNomeRaw = (usuarioFull.split(' ')[0] || "Servidor").toLowerCase();
-    const primeiroNomeFormatado = primeiroNomeRaw.charAt(0).toUpperCase() + primeiroNomeRaw.slice(1);
-    document.getElementById('nomeUsuario').innerText = primeiroNomeFormatado;
-
-    let dadosCompletos = [];
-    let listaOrganizacoes = [];
-
-    $(document).ready(function(){ $('#novaData').mask('00/00/0000'); });
-
-    async function carregarTudo() {
-        const select = document.getElementById('selectOrganizacao');
-        const tbody = document.getElementById('tabelaRefs');
-
-        select.innerHTML = '<option>Carregando...</option>';
-        tbody.innerHTML = '<tr><td colspan="3" class="text-center p-5"><div class="spinner-border text-primary"></div><br>Baixando base de dados...</td></tr>';
-
-        try {
-            const response = await fetch(URL_API + '?acao=listar_referencias_completa');
-            const data = await response.json();
-
-            if (data.result === 'success') {
+        async function carregarTudo() {
+            const res = await fetch(URL_API + '?acao=listar_referencias_completa');
+            const data = await res.json();
+            if(data.result === 'success') { 
                 dadosCompletos = data.referencias;
-                processarOrganizacoes();
-            } else {
-                tbody.innerHTML = '<tr><td colspan="3" class="text-center text-danger">Erro ao carregar dados.</td></tr>';
+                const orgs = [...new Set(dadosCompletos.map(i => i[0]))].sort();
+                const sel = document.getElementById('selectOrganizacao');
+                sel.innerHTML = '<option value="">SELECIONE...</option>';
+                orgs.forEach(o => { if(o) sel.innerHTML += `<option value="${o}">${o}</option>`; });
             }
-        } catch (error) {
-            console.error(error);
-            tbody.innerHTML = '<tr><td colspan="3" class="text-center text-danger">Erro de conexão.</td></tr>';
-            document.getElementById('selectOrganizacao').innerHTML = '<option>Erro</option>';
-        }
-    }
-
-    function processarOrganizacoes() {
-        const orgs = [...new Set(dadosCompletos.map(item => item[0]))].sort();
-        listaOrganizacoes = orgs;
-
-        const select = document.getElementById('selectOrganizacao');
-        select.innerHTML = '<option value="" disabled selected>SELECIONE...</option>';
-
-        listaOrganizacoes.forEach(org => {
-            if(org) select.innerHTML += `<option value="${org}">${org}</option>`;
-        });
-
-        const lastOrg = localStorage.getItem('nio_last_org');
-        if(lastOrg && listaOrganizacoes.includes(lastOrg)) {
-            select.value = lastOrg;
-            filtrarPorOrganizacao();
-        } else {
-            document.getElementById('tabelaRefs').innerHTML = '<tr><td colspan="3" class="text-center p-5 text-muted"><i class="bi bi-arrow-up-left fs-1"></i><br>Selecione uma organização acima.</td></tr>';
-        }
-    }
-
-    function filtrarPorOrganizacao() {
-        const orgSelecionada = document.getElementById('selectOrganizacao').value;
-        document.getElementById('tituloTabela').innerText = `REFERÊNCIAS DE ${orgSelecionada}`;
-        localStorage.setItem('nio_last_org', orgSelecionada);
-
-        const filtrados = dadosCompletos.filter(item => item[0] === orgSelecionada);
-        renderizarLinhas(filtrados);
-    }
-
-    function renderizarLinhas(lista) {
-        const tbody = document.getElementById('tabelaRefs');
-        tbody.innerHTML = '';
-        document.getElementById('contadorReg').innerText = `${lista.length} registros`;
-
-        if(lista.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="3" class="text-center p-4 text-muted">Nenhuma referência cadastrada para esta organização.</td></tr>';
-            return;
         }
 
-        lista.forEach(item => {
-            let data = item[1] ? item[1] : '-';
-            if(data.includes && data.includes('T')) data = data.split('T')[0];
-
-            let texto = item[2];
-            let id = item[3] || item[0];
-
-            tbody.innerHTML += `
-                <tr>
-                    <td class="fw-bold text-secondary">${data}</td>
-                    <td>${texto}</td>
-                    <td class="text-center">
-                        <button class="btn btn-outline-danger btn-sm border-0" onclick="excluirReferencia('${id}')" title="Excluir">
-                            <i class="bi bi-trash-fill"></i>
-                        </button>
-                    </td>
-                </tr>
-            `;
-        });
-    }
-
-    function filtrarInterno() {
-        const termo = document.getElementById('buscaInterna').value.toLowerCase();
-        const orgSelecionada = document.getElementById('selectOrganizacao').value;
-        if(!orgSelecionada) return;
-
-        const base = dadosCompletos.filter(item => item[0] === orgSelecionada);
-        const filtrados = base.filter(item =>
-            String(item[1]).toLowerCase().includes(termo) ||
-            String(item[2]).toLowerCase().includes(termo)
-        );
-        renderizarLinhas(filtrados);
-    }
-
-    const modalOrg = new bootstrap.Modal(document.getElementById('modalNovaOrg'));
-    function abrirModalNovaOrg() {
-        document.getElementById('inputNomeOrg').value = '';
-        modalOrg.show();
-    }
-
-    function salvarNovaOrg() {
-        const nome = document.getElementById('inputNomeOrg').value.toUpperCase().trim();
-        if(!nome) return alert("Digite o nome.");
-
-        const select = document.getElementById('selectOrganizacao');
-        const option = document.createElement("option");
-        option.text = nome;
-        option.value = nome;
-        select.add(option);
-        select.value = nome;
-
-        filtrarPorOrganizacao();
-        modalOrg.hide();
-    }
-
-    async function adicionarReferencia(e) {
-        e.preventDefault();
-        const org = document.getElementById('selectOrganizacao').value;
-        if(!org) return alert("Selecione uma organização primeiro.");
-
-        const dataRef = document.getElementById('novaData').value;
-        const textoRef = document.getElementById('novaDescricao').value;
-        const btn = document.getElementById('btnSalvar');
-
-        const dados = {
-            acao: 'nova_referencia',
-            organizacao: org,
-            data: dataRef,
-            referencia: textoRef,
-            responsavel: (localStorage.getItem('nio_usuario') || "SISTEMA")
-        };
-
-        btn.disabled = true;
-        btn.innerHTML = 'Salvando...';
-
-        try {
-            await fetch(URL_API, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(dados)
-            });
-
-            alert("Referência Salva!");
-            document.getElementById('formNovaRef').reset();
-            carregarTudo();
-
-        } catch (error) {
-            alert("Erro ao salvar.");
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = 'ADICIONAR À LISTA';
+        function filtrarPorOrg() {
+            const org = $('#selectOrganizacao').val();
+            const filtrados = dadosCompletos.filter(i => i[0] === org);
+            $('#contadorReg').text(filtrados.length);
+            document.getElementById('tabelaRefs').innerHTML = filtrados.map(i => `<tr><td>${i[1]}</td><td>${i[2]}</td><td class="text-center"><button class="btn btn-sm text-danger border-0" onclick="excluirRef('${i[3]}')"><i class="bi bi-trash-fill"></i></button></td></tr>`).join('');
         }
-    }
 
-    async function excluirReferencia(id) {
-        if(!confirm("Tem certeza que deseja excluir esta referência?")) return;
-
-        try {
-            await fetch(URL_API, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ acao: 'excluir_referencia', id: id })
-            });
-            setTimeout(() => carregarTudo(), 1500);
-        } catch (e) {
-            alert("Erro ao excluir.");
+        async function adicionarReferencia(e) {
+            e.preventDefault();
+            const org = $('#selectOrganizacao').val();
+            if(!org) return alert("Selecione a org.");
+            const dados = { acao: 'nova_referencia', organizacao: org, data: $('#novaData').val(), referencia: $('#novaDescricao').val(), responsavel: usuarioFull };
+            await fetch(URL_API, { method: 'POST', mode: 'no-cors', body: JSON.stringify(dados) });
+            location.reload();
         }
-    }
 
-    window.onload = carregarTudo;
-</script>
+        async function excluirRef(id) { if(confirm("Excluir?")) { await fetch(URL_API, { method: 'POST', mode: 'no-cors', body: JSON.stringify({acao:'excluir_referencia', id:id}) }); location.reload(); } }
+        function abrirModalNovaOrg() { new bootstrap.Modal(document.getElementById('modalNovaOrg')).show(); }
+        function confirmarNovaOrg() { const n = $('#nomeNovaOrg').val().toUpperCase(); if(n) { $('#selectOrganizacao').append(`<option value="${n}">${n}</option>`).val(n); bootstrap.Modal.getInstance(document.getElementById('modalNovaOrg')).hide(); } }
+    </script>
 </body>
 </html>
