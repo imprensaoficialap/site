@@ -20,6 +20,10 @@
         .nav-link-custom.active { color: white !important; background: rgba(255,255,255,0.2); box-shadow: inset 0 -2px 0 #ffc107; }
         .header-azul { background-color: var(--azul); color: white; padding: 15px; font-weight: bold; border-radius: 12px 12px 0 0; text-transform: uppercase; }
         @media (min-width: 993px) { .navbar-menu-center { position: absolute; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; } }
+        @media (max-width: 992px) {
+            .navbar .container-fluid { flex-wrap: wrap; }
+            .navbar-menu-center { display: flex !important; flex-wrap: wrap; gap: 8px; margin-top: 10px; width: 100%; justify-content: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; }
+        }
     </style>
 </head>
 <body class="bg-light">
