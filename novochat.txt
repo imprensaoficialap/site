@@ -7,19 +7,27 @@
 
 "Características do Sistema"
 - Nome: NIO PESQUISA (Núcleo de Imprensa Oficial)
-- Plataforma: site estático (HTML/CSS/JS) hospedado no GitHub
+- Plataforma: site estático (HTML/CSS/JS) hospedado no GitHub Pages
 - Repositório: https://github.com/imprensaoficialap/site
 - Branch de trabalho: DEV | Branch de produção: main
-- Backend: Google Apps Script (GS) publicado como Web App
-- Banco de dados: Google Sheets
+- Backend: Google Apps Script (GAS) publicado como Web App
+- Banco de dados: Google Sheets (conta oficial da Imprensa Oficial do AP)
 
 "Arquitetura"
 - Frontend: arquivos .html na raiz + css/estilo.css + imagens em img/
-- Backend: bancodedadosPortal.gs (cópia local para referência, o código real está no Google Apps Script)
-- Planilha: bancodedadosPortal.xlsx (cópia local para referência)
-- URL da API: https://script.google.com/macros/s/AKfycbwwEI9F6LFkqOqeoF4kKyARouJo-59C-34xhTWfL1bDD538muTldssosywD2G2CYyOpfA/exec
+- Backend: bancodedadosPortal.gs (cópia local — o código real está no Google Apps Script)
+- Planilha de referência local: bancodedadosPortal.xlsx (conta pessoal/antiga — ignorar)
+- URL da API ATUAL (oficial): https://script.google.com/macros/s/AKfycbwVD_orbvEi-LEMaItNI7Fd4-NvCfEEvER5wGeWvJETnjJqK_4T6eD9IC7mD4bcJYkh/exec
+- ID da Planilha Oficial: 1zFEf9Sq9FQDLvsEbxzItWa0Qn0NIkQiXQrdcVuCbSMA
+- GAS Script ID: 11s9ZBQldiDa-OnpHh8xdbQhWiQiPPJnJ4rQXH-8B18wmapzSxFdcBjiA
 
-"Abas do Google Sheets"
+"ATENÇÃO - Histórico de URLs (NÃO usar as antigas)"
+- URL ANTIGA pessoal 1: AKfycbw1YF42SazcEuLyI-I8g-btHyYlUJWC2jllDG7T59BgOL_lvmzuwQiqyW6-oJwM5-JV/exec (descartada)
+- URL ANTIGA 2: AKfycbwwEI9F6LFkqOqeoF4kKyARouJo-59C-34xhTWfL1bDD538muTldssosywD2G2CYyOpfA/exec (descartada)
+- Planilha antiga pessoal: 1DeqnrpvRGhgBC0OVYw1KnxEwpprvH5UmpVM4Fettmoo (não usar)
+- Todas as páginas HTML já apontam para a URL ATUAL oficial
+
+"Abas do Google Sheets (planilha oficial)"
 - Página1: pedidos de pesquisa (tabela principal)
 - Referencias: referências documentais
 - config: configurações (ex: link do diário oficial, célula A2)
@@ -52,12 +60,23 @@
 - Se não estiver logado, redireciona para login.html
 
 "Bugs já corrigidos"
-- painel.html: cards de filtro "Atendidos" e "Não Encontrados" retornavam zero pois as opções
-  correspondentes (ATENDIDO, NÃO ENCONTRADO) não existiam no <select id="filtroStatus">.
-  Correção: adicionadas as opções faltantes ao select.
+- painel.html: cards "Atendidos" e "Não Encontrados" retornavam zero — opções faltavam
+  no <select id="filtroStatus">. Correção: adicionadas as opções ATENDIDO e NÃO ENCONTRADO.
+- solicitacao.html: usava URL de API antiga (conta pessoal), dados iam para planilha errada.
+  Correção: URL atualizada para a oficial.
+- index.html, login.html, relatorios.html: também usavam URL antiga. Todas corrigidas.
+- painel.html: GET do GAS retornava dados em cache. Correção: adicionado &t=Date.now() na URL.
+- GAS: usava getActiveSpreadsheet() que apontava para planilha errada.
+  Correção: substituído por openById('1zFEf9Sq9FQDLvsEbxzItWa0Qn0NIkQiXQrdcVuCbSMA').
+- Todas as páginas: browser cacheava versões antigas causando problemas em outras máquinas.
+  Correção: adicionadas meta tags Cache-Control no-cache em todos os HTMLs.
 
 "Observações importantes"
 - O GS usa doGet() para leituras e doPost() para gravações
-- Posts usam mode: 'no-cors', então não é possível ler a resposta do POST diretamente
+- Posts usam mode: 'no-cors' — não é possível ler a resposta do POST diretamente
 - O robô de atualização do link do diário oficial roda automaticamente em horários definidos
-- Sempre que alterar o GS, é necessário republicar o Web App no Google Apps Script
+- Sempre que alterar o GS, é necessário: 1) Salvar, 2) Implantar → Gerenciar implantações →
+  Editar → Nova versão → Implantar (a URL do deploy permanece a mesma)
+- A URL do GAS pode mudar se um NOVO deploy for criado — nesse caso atualizar TODOS os HTMLs
+  e o novochat.txt com a nova URL
+- O arquivo bancodedadosPortal.xlsx na raiz é da conta pessoal antiga — serve só como referência histórica
