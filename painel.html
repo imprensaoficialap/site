@@ -14,8 +14,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="css/estilo.css">
     
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
     
     <style>
         /* Manutenção do Menu Horizontal Original */
@@ -254,7 +252,7 @@
                     <div class="mb-3">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <label class="fw-bold small text-muted">RETORNO / RESPOSTA AO CIDADÃO:</label>
-                            <button class="btn btn-sm btn-outline-primary border-0" onclick="$('#editRetorno').prop('disabled', false).focus();"><i class="bi bi-pencil-square"></i></button>
+                            <button class="btn btn-sm btn-outline-primary border-0" onclick="const r=document.getElementById('editRetorno');r.disabled=false;r.focus();"><i class="bi bi-pencil-square"></i></button>
                         </div>
                         <textarea id="editRetorno" class="form-control" rows="5" disabled placeholder="Digite as informações enviadas..."></textarea>
                     </div>
@@ -279,16 +277,16 @@
                     <form id="formNovoPedido">
                         <div class="mb-3">
                             <label class="fw-bold small text-muted">SOLICITANTE</label>
-                            <input type="text" id="novoSolicitante" class="form-control" required placeholder="Quem solicitou?">
+                            <input type="text" id="novoSolicitante" class="form-control" required>
                         </div>
                         <div class="mb-3">
                             <label class="fw-bold small text-muted">NOME A PESQUISAR</label>
-                            <input type="text" id="novoPesquisa" class="form-control" required placeholder="Nome, Decreto ou Lei">
+                            <input type="text" id="novoPesquisa" class="form-control" required>
                         </div>
                         <div class="row">
                             <div class="col-6 mb-3">
                                 <label class="fw-bold small text-muted">ANO / PERÍODO</label>
-                                <input type="text" id="novoPeriodo" class="form-control" required placeholder="Ex: 1990 a 1995">
+                                <input type="text" id="novoPeriodo" class="form-control" required>
                             </div>
                             <div class="col-6 mb-3">
                                 <label class="fw-bold small text-muted">WHATSAPP</label>
@@ -297,7 +295,7 @@
                         </div>
                         <div class="mb-0">
                             <label class="fw-bold small text-muted">DETALHES DA SOLICITAÇÃO</label>
-                            <textarea id="novoObs" class="form-control" rows="3" placeholder="Observações extras..."></textarea>
+                            <textarea id="novoObs" class="form-control" rows="3"></textarea>
                         </div>
                     </form>
                 </div>
@@ -338,16 +336,50 @@
         // ============================================
         // FUNÇÕES DE UTILIDADE
         // ============================================
-        function sair() { 
-            localStorage.clear(); 
-            window.location.href = 'login.html'; 
+        function sair() {
+            localStorage.clear();
+            sessionStorage.removeItem('nio_pedidos');
+            sessionStorage.removeItem('nio_pedidos_ts');
+            window.location.href = 'login.html';
         }
 
-        function copiarTexto(texto, btn) {
+        function salvarCache() {
+            sessionStorage.setItem('nio_pedidos', JSON.stringify(dadosGlobais));
+            sessionStorage.setItem('nio_pedidos_ts', Date.now());
+        }
+
+        function carregarCache() {
+            const ts = parseInt(sessionStorage.getItem('nio_pedidos_ts') || '0');
+            const dados = sessionStorage.getItem('nio_pedidos');
+            if (dados && Date.now() - ts < 5 * 60 * 1000) { // válido por 5 minutos
+                return JSON.parse(dados);
+            }
+            return null;
+        }
+
+        function escapeAttr(str) {
+            return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        }
+
+        function copiarTexto(btn) {
+            const texto = btn.dataset.copy;
             navigator.clipboard.writeText(texto);
             const icon = btn.innerHTML;
             btn.innerHTML = '<i class="bi bi-check-lg"></i>';
             setTimeout(() => { btn.innerHTML = icon; }, 1500);
+        }
+
+        function aplicarMascara(inputEl, mascara) {
+            inputEl.addEventListener('input', function() {
+                let digits = this.value.replace(/\D/g, '');
+                let out = '';
+                let d = 0;
+                for (let i = 0; i < mascara.length && d < digits.length; i++) {
+                    if (mascara[i] === '0') out += digits[d++];
+                    else out += mascara[i];
+                }
+                this.value = out;
+            });
         }
 
         // ============================================
@@ -388,6 +420,7 @@
                 if (data.result === 'success') {
                     dadosGlobais = data.pedidos.reverse();
                     ultimaCarga = Date.now();
+                    salvarCache();
                     atualizarContadores(dadosGlobais);
                     aplicarFiltros();
                     console.log('✅ Pedidos carregados:', dadosGlobais.length);
@@ -472,7 +505,7 @@
                     <td>
                         <div class="bg-light p-2 rounded small">
                             <span class="text-wrap">${p[3]}</span>
-                            <button class="btn btn-sm text-secondary p-0 ms-2" onclick="copiarTexto('${p[3]}', this)">
+                            <button class="btn btn-sm text-secondary p-0 ms-2" data-copy="${escapeAttr(p[3])}" onclick="copiarTexto(this)">
                                 <i class="bi bi-clipboard"></i>
                             </button>
                         </div>
@@ -510,7 +543,7 @@
             document.getElementById('viewOque').innerText = p[3];
             document.getElementById('viewObsOrig').innerText = p[8] || 'Nenhuma';
             
-            new bootstrap.Modal(document.getElementById('modalAtendimento')).show();
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('modalAtendimento')).show();
         }
 
         async function salvarAlteracao() {
@@ -538,9 +571,18 @@
                     mode: 'no-cors',
                     body: JSON.stringify(dados)
                 });
-                
+
+                // Atualiza localmente — sem recarregar da API
+                const idx = dadosGlobais.findIndex(item => item[0].toString() === id.toString());
+                if (idx !== -1) {
+                    dadosGlobais[idx][6] = status;
+                    dadosGlobais[idx][10] = retorno;
+                    dadosGlobais[idx][7] = usuarioFull;
+                }
+                atualizarContadores(dadosGlobais);
+                salvarCache();
+                aplicarFiltros();
                 bootstrap.Modal.getInstance(document.getElementById('modalAtendimento')).hide();
-                await carregarPedidos();
                 alert('✅ Pedido atualizado com sucesso!');
             } catch (e) {
                 console.error('❌ Erro ao salvar:', e);
@@ -556,7 +598,7 @@
         // ============================================
         function abrirModalNovo() {
             document.getElementById('formNovoPedido').reset();
-            new bootstrap.Modal(document.getElementById('modalNovoPedido')).show();
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('modalNovoPedido')).show();
         }
 
         async function salvarNovoPedido() {
@@ -588,19 +630,34 @@
                     responsavel: usuarioFull
                 };
                 
-                const response = await fetch(URL_API, {
+                await fetch(URL_API, {
                     method: 'POST',
                     mode: 'no-cors',
                     body: JSON.stringify(dados)
                 });
-                
-                // Aguarda um pouco para garantir que foi salvo
-                await new Promise(resolve => setTimeout(resolve, 500));
-                
+
+                // Adiciona localmente com dados provisórios
+                const agora = new Date();
+                const pad = n => String(n).padStart(2, '0');
+                const dataHora = `${pad(agora.getDate())}/${pad(agora.getMonth()+1)}/${agora.getFullYear()} ${pad(agora.getHours())}:${pad(agora.getMinutes())}`;
+                const novoItem = [
+                    'ID_' + Math.random().toString(36).substr(2, 8),
+                    dataHora, solicitante, pesquisa, periodo, zap,
+                    'EM ANÁLISE', usuarioFull,
+                    document.getElementById('novoObs').value.trim(), '', ''
+                ];
+                dadosGlobais.unshift(novoItem);
+                atualizarContadores(dadosGlobais);
+                salvarCache();
+
                 bootstrap.Modal.getInstance(document.getElementById('modalNovoPedido')).hide();
                 document.getElementById('formNovoPedido').reset();
-                await carregarPedidos();
+                aplicarFiltros();
                 alert('✅ Pedido cadastrado com sucesso!');
+
+                // Recarrega em segundo plano após 2s para obter o ID real do servidor
+                ultimaCarga = 0;
+                setTimeout(() => carregarPedidos(), 2000);
             } catch (e) {
                 console.error('❌ Erro ao cadastrar:', e);
                 alert('Erro ao cadastrar pedido');
@@ -626,8 +683,13 @@
                         id: id
                     })
                 });
-                
-                await carregarPedidos();
+
+                // Remove localmente — sem recarregar da API
+                const idx = dadosGlobais.findIndex(item => item[0].toString() === id.toString());
+                if (idx !== -1) dadosGlobais.splice(idx, 1);
+                atualizarContadores(dadosGlobais);
+                salvarCache();
+                aplicarFiltros();
                 alert('✅ Pedido excluído com sucesso!');
             } catch (e) {
                 console.error('❌ Erro ao excluir:', e);
@@ -651,26 +713,40 @@
         // CONTADORES
         // ============================================
         function atualizarContadores(lista) {
-            const totalAnalise = lista.filter(p => p[6] === 'EM ANÁLISE').length;
-            const totalAtendidos = lista.filter(p => p[6] === 'ATENDIDO').length;
-            const totalNaoEnc = lista.filter(p => p[6] === 'NÃO ENCONTRADO').length;
-            
+            let analise = 0, atendidos = 0, naoEnc = 0;
+            lista.forEach(p => {
+                if (p[6] === 'EM ANÁLISE') analise++;
+                else if (p[6] === 'ATENDIDO') atendidos++;
+                else if (p[6] === 'NÃO ENCONTRADO') naoEnc++;
+            });
             document.getElementById('totalPedidos').innerText = lista.length;
-            document.getElementById('totalAnalise').innerText = totalAnalise;
-            document.getElementById('totalAtendidos').innerText = totalAtendidos;
-            document.getElementById('totalNaoEnc').innerText = totalNaoEnc;
+            document.getElementById('totalAnalise').innerText = analise;
+            document.getElementById('totalAtendidos').innerText = atendidos;
+            document.getElementById('totalNaoEnc').innerText = naoEnc;
         }
 
         // ============================================
         // INICIALIZAÇÃO NA PÁGINA
         // ============================================
-        $(document).ready(function() {
-            $('#novoZap').mask('(00) 00000-0000');
-            carregarPedidos();
-            
+        document.addEventListener('DOMContentLoaded', function() {
+            aplicarMascara(document.getElementById('novoZap'), '(00) 00000-0000');
+
+            const cached = carregarCache();
+            if (cached) {
+                // Renderiza imediatamente com dados do cache
+                dadosGlobais = cached;
+                atualizarContadores(dadosGlobais);
+                aplicarFiltros();
+                // Atualiza da API em segundo plano
+                ultimaCarga = 0;
+                carregarPedidos();
+            } else {
+                carregarPedidos();
+            }
+
             // Auto-atualizar a cada 30 segundos
             setInterval(() => {
-                if (!document.hidden) { // Só atualiza se aba está visível
+                if (!document.hidden) {
                     carregarPedidos();
                 }
             }, 30000);

@@ -71,6 +71,21 @@
 - Todas as páginas: browser cacheava versões antigas causando problemas em outras máquinas.
   Correção: adicionadas meta tags Cache-Control no-cache em todos os HTMLs.
 
+"Otimizações de performance — painel.html (DEV → main)"
+- Removidos jQuery e jquery.mask (2 requisições HTTP a menos, ~100KB); substituídos por
+  vanilla JS (DOMContentLoaded + função aplicarMascara própria).
+- Salvar/excluir/atualizar pedido não fazem mais reload da API: atualizam dadosGlobais em
+  memória e re-renderizam a tabela instantaneamente. Reload real só no ciclo de 30s ou ATUALIZAR.
+- Novo pedido: adicionado localmente de imediato com ID provisório; reload real da API
+  dispara em segundo plano após 2s para obter o ID definitivo do servidor.
+- bootstrap.Modal.getOrCreateInstance() substituiu new bootstrap.Modal() em todos os modais.
+- atualizarContadores() refatorado de 3 loops .filter() para um único forEach.
+- copiarTexto() corrigido: dados do nome agora passam por escapeAttr() via data-copy
+  (previne quebra com aspas/caracteres especiais).
+- Cache sessionStorage: ao voltar para painel.html vindo de outra aba, tabela renderiza
+  instantaneamente com dados salvos (válido 5 min); API atualiza em segundo plano.
+- Logout limpa sessionStorage junto com localStorage.
+
 "Observações importantes"
 - O GS usa doGet() para leituras e doPost() para gravações
 - Posts usam mode: 'no-cors' — não é possível ler a resposta do POST diretamente
