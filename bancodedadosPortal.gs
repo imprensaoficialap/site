@@ -2,7 +2,7 @@
 // SISTEMA NIO PESQUISA - BACKEND INSTITUCIONAL
 // =============================================================
 
-var ss = SpreadsheetApp.getActiveSpreadsheet();
+var ss = SpreadsheetApp.openById('1zFEf9Sq9FQDLvsEbxzItWa0Qn0NIkQiXQrdcVuCbSMA');
 
 // Definição das abas pelos nomes exatos dos seus prints
 var sheetPedidos = ss.getSheetByName("Página1"); 
