@@ -1,0 +1,63 @@
+"Características do Usuário"
+- Não sou desenvolvedor
+- Fale sempre em PT-BR
+- Sempre utilize o horário de Brasília para referências
+- Sempre aplique e trabalhe na branch DEV, nunca na MAIN
+- Só faça merge/push para MAIN se eu pedir explicitamente
+
+"Características do Sistema"
+- Nome: NIO PESQUISA (Núcleo de Imprensa Oficial)
+- Plataforma: site estático (HTML/CSS/JS) hospedado no GitHub
+- Repositório: https://github.com/imprensaoficialap/site
+- Branch de trabalho: DEV | Branch de produção: main
+- Backend: Google Apps Script (GS) publicado como Web App
+- Banco de dados: Google Sheets
+
+"Arquitetura"
+- Frontend: arquivos .html na raiz + css/estilo.css + imagens em img/
+- Backend: bancodedadosPortal.gs (cópia local para referência, o código real está no Google Apps Script)
+- Planilha: bancodedadosPortal.xlsx (cópia local para referência)
+- URL da API: https://script.google.com/macros/s/AKfycbwwEI9F6LFkqOqeoF4kKyARouJo-59C-34xhTWfL1bDD538muTldssosywD2G2CYyOpfA/exec
+
+"Abas do Google Sheets"
+- Página1: pedidos de pesquisa (tabela principal)
+- Referencias: referências documentais
+- config: configurações (ex: link do diário oficial, célula A2)
+- usuarios: login/senha dos servidores
+
+"Estrutura de colunas da aba Página1 (pedidos)"
+- [0] ID (ex: ID_a3f2b1c4)
+- [1] Data/Hora (dd/MM/yyyy HH:mm)
+- [2] Solicitante
+- [3] Nome Pesquisado
+- [4] Período
+- [5] WhatsApp
+- [6] Status: "EM ANÁLISE" | "ATENDIDO" | "NÃO ENCONTRADO"
+- [7] Responsável
+- [8] Observações do cidadão
+- [9] (reservado)
+- [10] Retorno ao cidadão
+
+"Páginas do site"
+- index.html: página pública inicial
+- login.html: autenticação dos servidores
+- painel.html: painel administrativo (gestão de pedidos)
+- referencias.html: guia de referências documentais
+- relatorios.html: relatórios e estatísticas
+- solicitacao.html: formulário público de solicitação
+- acervo.html, institucional.html, noticias.html, publique.html: páginas institucionais
+
+"Autenticação"
+- Login salvo em localStorage: nio_token = 'logado', nio_usuario = nome do servidor
+- Se não estiver logado, redireciona para login.html
+
+"Bugs já corrigidos"
+- painel.html: cards de filtro "Atendidos" e "Não Encontrados" retornavam zero pois as opções
+  correspondentes (ATENDIDO, NÃO ENCONTRADO) não existiam no <select id="filtroStatus">.
+  Correção: adicionadas as opções faltantes ao select.
+
+"Observações importantes"
+- O GS usa doGet() para leituras e doPost() para gravações
+- Posts usam mode: 'no-cors', então não é possível ler a resposta do POST diretamente
+- O robô de atualização do link do diário oficial roda automaticamente em horários definidos
+- Sempre que alterar o GS, é necessário republicar o Web App no Google Apps Script
