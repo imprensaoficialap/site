@@ -377,7 +377,7 @@
                     return;
                 }
                 
-                const response = await fetch(URL_API + '?acao=listar_pedidos', {
+                const response = await fetch(URL_API + '?acao=listar_pedidos&t=' + Date.now(), {
                     cache: 'no-cache'
                 });
                 
