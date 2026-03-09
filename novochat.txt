@@ -86,6 +86,12 @@
   instantaneamente com dados salvos (válido 5 min); API atualiza em segundo plano.
 - Logout limpa sessionStorage junto com localStorage.
 
+"Correções de responsividade mobile"
+- referencias.html: adicionado @media (max-width: 992px) para navbar interna
+  (flex-wrap no container + navbar-menu-center centralizado em linha separada)
+- relatorios.html: cards KPI col-md-3 → col-6 col-md-3 (2 por linha no celular)
+- solicitacao.html: removidos jQuery + jquery.mask; substituídos por vanilla JS
+
 "Observações importantes"
 - O GS usa doGet() para leituras e doPost() para gravações
 - Posts usam mode: 'no-cors' — não é possível ler a resposta do POST diretamente
