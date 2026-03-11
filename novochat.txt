@@ -92,6 +92,21 @@
 - relatorios.html: cards KPI col-md-3 → col-6 col-md-3 (2 por linha no celular)
 - solicitacao.html: removidos jQuery + jquery.mask; substituídos por vanilla JS
 
+"Melhorias no painel.html (sessão atual)"
+- Paginação corrigida: botões "Anterior" e "Próxima" invertidos para fazer sentido
+  com dados em ordem cronológica reversa (mais recentes na página 1).
+  Anterior = registros mais antigos (página sobe). Próxima = registros mais recentes (página desce).
+- Botões de paginação estilizados com ícones chevron e estado disabled automático nos limites.
+- Contador "Página X de Y" adicionado à paginação.
+- Layout tela cheia: body usa flexbox vertical (100vh), tabela cresce para preencher espaço
+  disponível (flex:1 + overflow-y:auto), sem rolagem de página no desktop.
+  Mobile mantém rolagem normal via @media (max-width: 992px).
+- Responsável preservado: ao editar pedido já ATENDIDO/NÃO ENCONTRADO, o responsável
+  original é mantido. Só atribui o usuário atual se o pedido estava "EM ANÁLISE".
+  Implementado com campos hidden editResponsavelOriginal e editStatusOriginal no modal.
+- Página preservada no auto-refresh: aplicarFiltros(false) na atualização automática/manual
+  mantém a página atual. resetarPagina=true apenas em mudanças de filtro pelo usuário.
+
 "Observações importantes"
 - O GS usa doGet() para leituras e doPost() para gravações
 - Posts usam mode: 'no-cors' — não é possível ler a resposta do POST diretamente
