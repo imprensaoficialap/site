@@ -15,6 +15,321 @@
 
     <link rel="stylesheet" href="css/estilo.css">
 
+    <style>
+        /* =============================================
+           MELHORIAS VISUAIS — INDEX.HTML
+           ============================================= */
+
+        html { scroll-behavior: smooth; }
+
+        /* --- Keyframes --- */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to   { opacity: 1; transform: translateY(0);    }
+        }
+        @keyframes fadeInLeft {
+            from { opacity: 0; transform: translateX(-35px); }
+            to   { opacity: 1; transform: translateX(0);     }
+        }
+        @keyframes fadeInRight {
+            from { opacity: 0; transform: translateX(35px); }
+            to   { opacity: 1; transform: translateX(0);    }
+        }
+        @keyframes floatY {
+            0%, 100% { transform: translateY(0);   }
+            50%       { transform: translateY(-9px); }
+        }
+        @keyframes shimmerSlide {
+            0%   { background-position: -200% center; }
+            100% { background-position:  200% center; }
+        }
+        @keyframes gradMove {
+            0%   { background-position: 0%   50%; }
+            50%  { background-position: 100% 50%; }
+            100% { background-position: 0%   50%; }
+        }
+        @keyframes pulseGreen {
+            0%   { box-shadow: 0 0 0 0   rgba(41,167,113,0.55); }
+            70%  { box-shadow: 0 0 0 13px rgba(41,167,113,0);   }
+            100% { box-shadow: 0 0 0 0   rgba(41,167,113,0);   }
+        }
+        @keyframes scanLine {
+            0%   { left: -60%; }
+            100% { left: 160%; }
+        }
+
+        /* --- Navbar sticky + sombra no scroll --- */
+        .navbar-gov {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            transition: box-shadow 0.35s ease;
+        }
+        .navbar-gov.scrolled {
+            box-shadow: 0 6px 24px rgba(0,0,0,0.13);
+        }
+
+        /* --- Banner ID: brilho deslizante --- */
+        .banner-id {
+            position: relative;
+            overflow: hidden;
+        }
+        .banner-id::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -60%;
+            width: 50%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+            animation: scanLine 4s ease-in-out 1.5s infinite;
+        }
+
+        /* --- Hero card: gradiente animado + entrada --- */
+        .hero-card {
+            background: linear-gradient(135deg, #002b5c, #001a4d, #00407a, #001535) !important;
+            background-size: 300% 300% !important;
+            animation: gradMove 12s ease infinite, fadeInLeft 0.75s ease both;
+            transition: box-shadow 0.4s ease !important;
+        }
+        .hero-card:hover {
+            box-shadow: 0 16px 50px rgba(0,43,92,0.38) !important;
+        }
+
+        /* --- Imagem hero: flutuação suave --- */
+        .hero-img {
+            transition: transform 0.6s ease !important;
+            animation: floatY 6s ease-in-out infinite;
+        }
+        .hero-img-wrapper:hover .hero-img {
+            animation: none;
+            transform: scale(1.04) !important;
+        }
+
+        /* --- Tag destaque: shimmer dourado --- */
+        .tag-destaque {
+            background: linear-gradient(90deg, #c5a059, #f2d67a, #c5a059, #f2d67a) !important;
+            background-size: 300% auto !important;
+            animation: shimmerSlide 3s linear infinite;
+        }
+
+        /* --- Botão ACESSAR: shine + lift --- */
+        .btn-acessar {
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.25s ease, box-shadow 0.25s ease !important;
+            box-shadow: 0 5px 18px rgba(41,167,113,0.35);
+            animation: fadeInUp 0.8s ease 0.6s both;
+        }
+        .btn-acessar::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 55%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent);
+            transition: left 0.45s ease;
+        }
+        .btn-acessar:hover::before { left: 160%; }
+        .btn-acessar:hover {
+            transform: translateY(-4px) !important;
+            box-shadow: 0 12px 32px rgba(41,167,113,0.55) !important;
+        }
+
+        /* --- Features: entrada escalonada --- */
+        .acervo-features li {
+            opacity: 0;
+            animation: fadeInUp 0.5s ease both;
+        }
+        .acervo-features li:nth-child(1) { animation-delay: 0.7s;  }
+        .acervo-features li:nth-child(2) { animation-delay: 0.85s; }
+        .acervo-features li:nth-child(3) { animation-delay: 1.0s;  }
+
+        /* --- Coluna lateral: entrada da direita --- */
+        .coluna-lateral {
+            animation: fadeInRight 0.75s ease 0.3s both;
+        }
+
+        /* --- Sidebar widget: lift no hover --- */
+        .sidebar-widget {
+            transition: box-shadow 0.35s ease, transform 0.35s ease !important;
+        }
+        .sidebar-widget:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 18px 45px rgba(0,43,92,0.16) !important;
+        }
+
+        /* --- DOE header: linha shimmer animada --- */
+        .doe-header {
+            position: relative;
+            overflow: hidden;
+        }
+        .doe-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0;
+            width: 100%; height: 5px;
+            background: linear-gradient(90deg, #c5a059, #f2d67a, #c5a059);
+            background-size: 200% auto;
+            animation: shimmerSlide 2.5s linear infinite;
+        }
+
+        /* --- Capa do diário: lift suave --- */
+        .doe-capa {
+            transition: transform 0.35s ease, box-shadow 0.35s ease !important;
+        }
+        .doe-capa:hover {
+            transform: scale(1.06);
+            box-shadow: 0 10px 28px rgba(0,0,0,0.22) !important;
+        }
+
+        /* --- Botão diário oficial: pulse + hover --- */
+        .btn-diario-oficial {
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.25s ease, filter 0.25s ease !important;
+            animation: pulseGreen 2.8s infinite;
+        }
+        .btn-diario-oficial::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 55%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.4s ease;
+        }
+        .btn-diario-oficial:hover::before { left: 160%; }
+        .btn-diario-oficial:hover {
+            animation: none;
+            transform: translateY(-3px);
+            filter: brightness(1.1);
+            box-shadow: 0 10px 24px rgba(41,167,113,0.45);
+        }
+
+        /* --- Link secundário: ícone animado --- */
+        .link-secundario {
+            transition: color 0.25s ease, letter-spacing 0.25s ease !important;
+        }
+        .link-secundario:hover { letter-spacing: 0.4px; }
+        .link-secundario .bi {
+            display: inline-block;
+            transition: transform 0.25s ease;
+        }
+        .link-secundario:hover .bi { transform: translateX(5px); }
+
+        /* --- App icon: float + hover --- */
+        .app-icon {
+            animation: floatY 4s ease-in-out 1s infinite;
+            transition: transform 0.3s ease !important;
+            display: inline-block;
+        }
+        .app-icon:hover {
+            animation: none;
+            transform: scale(1.12) rotate(4deg) !important;
+        }
+
+        /* --- WhatsApp banner --- */
+        .img-zap-lateral {
+            transition: transform 0.35s ease, box-shadow 0.35s ease !important;
+        }
+        .img-zap-lateral:hover {
+            transform: scale(1.025) translateY(-3px);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.22) !important;
+        }
+
+        /* --- Rodapé: link hover --- */
+        .rodape-oficial a {
+            transition: color 0.25s ease, opacity 0.25s ease;
+        }
+        .rodape-oficial a:hover {
+            color: var(--verde-gov) !important;
+            opacity: 0.85;
+        }
+
+        /* --- Banner destaque Acervo DOE --- */
+        .doe-acervo-destaque {
+            background: linear-gradient(135deg, #002b5c 0%, #001a4d 60%, #00407a 100%);
+            border-top: 5px solid var(--ouro);
+            padding: 28px 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        .doe-acervo-destaque::before {
+            content: '\F4A5';
+            font-family: 'Bootstrap-Icons';
+            position: absolute;
+            right: 40px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 7rem;
+            color: rgba(255,255,255,0.04);
+            pointer-events: none;
+        }
+        .doe-acervo-destaque::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -60%;
+            width: 40%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+            animation: scanLine 6s ease-in-out infinite;
+        }
+        .doe-acervo-destaque-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+        .doe-acervo-destaque-texto h3 {
+            color: #fff;
+            font-size: 1.35rem;
+            font-weight: 800;
+            margin: 6px 0 6px;
+        }
+        .doe-acervo-destaque-texto p {
+            color: rgba(255,255,255,0.75);
+            font-size: 0.9rem;
+            margin: 0;
+        }
+        .doe-acervo-tag {
+            background: var(--ouro);
+            color: var(--azul);
+            font-size: 0.68rem;
+            font-weight: 900;
+            padding: 2px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .doe-acervo-btn {
+            background: var(--verde-gov);
+            color: #fff !important;
+            padding: 13px 28px;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            white-space: nowrap;
+            text-decoration: none;
+            transition: transform 0.2s ease, filter 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 5px 18px rgba(0,158,88,0.35);
+            flex-shrink: 0;
+        }
+        .doe-acervo-btn:hover {
+            transform: translateY(-3px);
+            filter: brightness(1.1);
+            box-shadow: 0 10px 28px rgba(0,158,88,0.5);
+        }
+
+        @media (max-width: 992px) {
+            .doe-acervo-destaque { padding: 22px 16px; }
+            .doe-acervo-destaque-inner { flex-direction: column; align-items: flex-start; gap: 16px; }
+            .doe-acervo-btn { width: 100%; justify-content: center; }
+            .doe-acervo-destaque-texto h3 { font-size: 1.15rem; }
+        }
+    </style>
+
     <!-- Seus Scripts -->
     <script src="js/dados.js"></script>
     <script src="js/noticias.js"></script>
@@ -31,13 +346,14 @@
         </div>
 
         <!-- MENU DE NAVEGAÇÃO -->
-        <nav class="navbar-gov">
+        <nav class="navbar-gov" id="navbarPrincipal">
             <button class="btn-menu-mobile" onclick="toggleMenu()">
                 <i class="bi bi-list"></i> MENU DE NAVEGAÇÃO
             </button>
 
             <ul class="menu-lista" id="menuPrincipal">
                 <li><a class="nav-link active" href="index.html">Início</a></li>
+                <li><a class="nav-link" href="diariooficial.html">Diário Oficial</a></li>
                 <li><a class="nav-link" href="acervo.html">Acervo Histórico</a></li>
                 <li><a class="nav-link" href="solicitacao.html">Solicitar Pesquisa</a></li>
                 <li><a class="nav-link" href="publique.html">Como Publicar</a></li>
@@ -101,14 +417,14 @@
                                 <span class="spinner-border spinner-border-sm" id="loaderBtn"></span> Verificando...
                             </a>
 
-                            <a href="https://diofe.portal.ap.gov.br" target="_blank" class="link-secundario">
-                                Acesse todas as Edições <i class="bi bi-box-arrow-up-right"></i>
+                            <a href="diariooficial.html" class="link-secundario">
+                                Ver acervo completo (desde 1964) <i class="bi bi-arrow-right"></i>
                             </a>
 
                             <div class="mt-3 pt-3 border-top">
                                 <p class="small text-muted fw-bold mb-2">Baixe o App do Diário Oficial</p>
                                 <a href="https://play.google.com/store/apps/details?id=br.com.ionews.amapa.ap.boletim" target="_blank">
-                                    <img src="img/icone-app.png" alt="App" style="width: 100px; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
+                                    <img src="img/icone-app.png" alt="App" class="app-icon" style="width: 100px; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
                                 </a>
                             </div>
                         </div>
@@ -119,6 +435,20 @@
                         <img src="img/banner-whatsapp.png" alt="WhatsApp" class="img-zap-lateral shadow-sm">
                     </a>
                 </div>
+            </div>
+        </div>
+
+        <!-- DESTAQUE: ACERVO DO DIÁRIO OFICIAL -->
+        <div class="doe-acervo-destaque">
+            <div class="doe-acervo-destaque-inner">
+                <div class="doe-acervo-destaque-texto">
+                    <span class="doe-acervo-tag"><i class="bi bi-star-fill"></i> NOVO</span>
+                    <h3>Acervo Digital do Diário Oficial</h3>
+                    <p>Todas as edições desde <strong>1964</strong> reunidas em um só lugar. Consulte, pesquise e baixe gratuitamente.</p>
+                </div>
+                <a href="diariooficial.html" class="doe-acervo-btn">
+                    <i class="bi bi-newspaper"></i> ACESSAR ACERVO
+                </a>
             </div>
         </div>
 
@@ -164,6 +494,12 @@
             const loader = document.getElementById('loaderBtn');
             if (loader) loader.style.display = 'none';
         }
+
+        // Sombra na navbar ao rolar
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('navbarPrincipal');
+            nav.classList.toggle('scrolled', window.scrollY > 10);
+        });
 
         window.onload = atualizarBotaoDiario;
     </script>

@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diário Oficial — Imprensa Oficial do Amapá</title>
+  <link rel="shortcut icon" href="img/favicon1.png" type="image/x-icon">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="css/estilo.css">
+
+  <style>
+    /* ============================================================
+       DIÁRIO OFICIAL — estilos específicos da página
+       ============================================================ */
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(22px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes shimmerSlide {
+      0%   { background-position: -200% center; }
+      100% { background-position:  200% center; }
+    }
+    @keyframes pulseGreen {
+      0%   { box-shadow: 0 0 0 0   rgba(0,158,88,.55); }
+      70%  { box-shadow: 0 0 0 12px rgba(0,158,88,0);  }
+      100% { box-shadow: 0 0 0 0   rgba(0,158,88,0);  }
+    }
+
+    /* Navbar sticky */
+    .navbar-gov {
+      position: sticky;
+      top: 0;
+      transition: box-shadow .3s;
+    }
+    .navbar-gov.scrolled { box-shadow: 0 4px 20px rgba(0,0,0,.12); }
+
+    /* --- Container da página --- */
+    .doe-page {
+      padding: 32px 40px;
+      flex-grow: 1;
+    }
+
+    /* --- Título --- */
+    .doe-page-header { margin-bottom: 24px; animation: fadeInUp .55s ease both; }
+    .doe-page-header h2 {
+      font-family: var(--fonte-titulo);
+      color: var(--azul);
+      font-size: 1.6rem;
+      font-weight: 800;
+      margin: 0 0 4px;
+      border-left: 8px solid var(--verde-gov);
+      padding-left: 16px;
+    }
+    .doe-page-header p {
+      color: #777;
+      font-size: .85rem;
+      margin: 0 0 0 24px;
+    }
+
+    /* --- Card última edição --- */
+    .ultima-edicao-card {
+      background: linear-gradient(135deg, #002b5c 0%, #001a4d 50%, #00407a 100%);
+      background-size: 300% 300%;
+      border-radius: 12px;
+      padding: 26px 30px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      border-left: 6px solid var(--ouro);
+      position: relative;
+      overflow: hidden;
+      animation: fadeInUp .55s ease .05s both;
+    }
+    .ultima-edicao-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -60%;
+      width: 40%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.07), transparent);
+      animation: shimmerSlide 5s ease-in-out infinite;
+    }
+    .ultima-edicao-info { flex: 1; }
+    .ue-badge {
+      background: var(--ouro);
+      color: var(--azul);
+      font-size: .68rem;
+      font-weight: 900;
+      padding: 3px 12px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: inline-block;
+      margin-bottom: 10px;
+    }
+    .ue-numero {
+      color: #fff;
+      font-size: 2rem;
+      font-weight: 900;
+      font-family: var(--fonte-titulo);
+      margin: 0 0 6px;
+      line-height: 1;
+    }
+    .ue-datas {
+      color: rgba(255,255,255,.7);
+      font-size: .88rem;
+      margin: 0;
+    }
+    .ue-icone-fundo {
+      font-size: 5rem;
+      color: rgba(255,255,255,.06);
+      position: absolute;
+      right: 140px;
+      bottom: -8px;
+      pointer-events: none;
+    }
+    .btn-ultima-edicao {
+      background: var(--verde-gov);
+      color: #fff !important;
+      padding: 13px 24px;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: .9rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      text-decoration: none;
+      animation: pulseGreen 2.5s infinite;
+      transition: transform .2s, filter .2s;
+      position: relative;
+      z-index: 1;
+    }
+    .btn-ultima-edicao:hover {
+      animation: none;
+      transform: translateY(-2px);
+      filter: brightness(1.1);
+      box-shadow: 0 8px 24px rgba(0,158,88,.45);
+    }
+
+    /* --- Painel de filtros --- */
+    .doe-filtros {
+      background: #fff;
+      border-radius: 10px 10px 0 0;
+      border: 1px solid #e2e6ea;
+      border-bottom: none;
+      overflow: hidden;
+      animation: fadeInUp .55s ease .1s both;
+    }
+    .doe-filtros-top {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 18px;
+      border-bottom: 1px solid #f0f2f5;
+      flex-wrap: wrap;
+    }
+    .doe-ano-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .doe-ano-wrapper label {
+      font-weight: 700;
+      color: var(--azul);
+      font-size: .82rem;
+      white-space: nowrap;
+      margin: 0;
+    }
+    .doe-ano-select {
+      padding: 7px 12px;
+      border: 1px solid #dee2e6;
+      border-radius: 6px;
+      font-weight: 700;
+      color: var(--azul);
+      cursor: pointer;
+      background: #f8f9fa;
+      font-size: .9rem;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .doe-ano-select:focus { border-color: var(--azul); }
+    .doe-busca-wrapper {
+      flex: 1;
+      min-width: 180px;
+      position: relative;
+    }
+    .doe-busca-wrapper i {
+      position: absolute;
+      left: 11px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #aaa;
+      font-size: .9rem;
+    }
+    .doe-busca-input {
+      width: 100%;
+      padding: 7px 14px 7px 34px;
+      border: 1px solid #dee2e6;
+      border-radius: 6px;
+      font-size: .88rem;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .doe-busca-input:focus { border-color: var(--azul); }
+    .doe-total-badge {
+      background: #f0f2f5;
+      color: #555;
+      font-size: .8rem;
+      font-weight: 700;
+      padding: 5px 14px;
+      border-radius: 20px;
+      white-space: nowrap;
+      margin-left: auto;
+    }
+
+    /* --- Container da tabela (conectado aos filtros) --- */
+    .doe-tabela-outer { animation: fadeInUp .55s ease .15s both; }
+    .doe-tabela-outer .container-tabela {
+      border-radius: 0 0 12px 12px;
+      border-top: none;
+    }
+
+    /* Row animation */
+    #doeTbody tr {
+      animation: fadeInUp .3s ease both;
+    }
+
+    /* Loading / empty */
+    .doe-loading, .doe-empty {
+      text-align: center;
+      padding: 56px 20px;
+      color: #bbb;
+      background: #fff;
+    }
+    .doe-loading .spinner-border { width: 2rem; height: 2rem; border-width: .22em; color: var(--azul) !important; }
+    .doe-loading p, .doe-empty p { margin-top: 12px; font-size: .95rem; color: #999; }
+    .doe-empty i { font-size: 3rem; display: block; margin-bottom: 6px; opacity: .4; }
+
+    /* Nota informativa */
+    .doe-nota {
+      margin-top: 14px;
+      padding: 10px 16px;
+      background: #fffbea;
+      border-left: 4px solid var(--ouro);
+      border-radius: 4px;
+      font-size: .8rem;
+      color: #7a6200;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Coluna circulação levemente suavizada */
+    .td-circ { color: #888; }
+
+    /* ============================================================
+       MOBILE
+       ============================================================ */
+    @media (max-width: 992px) {
+      .doe-page { padding: 16px 14px; }
+
+      /* Card última edição em coluna */
+      .ultima-edicao-card {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 18px;
+      }
+      .ue-icone-fundo { display: none; }
+      .btn-ultima-edicao { width: 100%; justify-content: center; }
+      .ue-numero { font-size: 1.6rem; }
+
+      /* Filtros */
+      .doe-filtros-top { padding: 12px; gap: 10px; }
+      .doe-total-badge { margin-left: 0; }
+
+      /* Tabela → cards */
+      .doe-tabela-outer .container-tabela table thead { display: none !important; }
+
+      .doe-tabela-outer .container-tabela table tbody tr {
+        display: grid !important;
+        grid-template-columns: 1fr auto;
+        gap: 4px 12px;
+        padding: 12px !important;
+        margin: 10px !important;
+        border-radius: 12px !important;
+        background: #fff !important;
+        border: 1px solid #e9ecef !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,.05);
+      }
+      .doe-tabela-outer .container-tabela table tbody td {
+        border: none !important;
+        padding: 0 !important;
+      }
+      /* DOE nº */
+      .doe-tabela-outer .container-tabela table tbody td:nth-child(1) {
+        font-weight: 900;
+        font-size: 1.05rem;
+        color: var(--azul);
+        grid-column: 1; grid-row: 1;
+      }
+      /* Data publicação */
+      .doe-tabela-outer .container-tabela table tbody td:nth-child(2) {
+        font-size: .86rem;
+        color: #6c757d;
+        grid-column: 1; grid-row: 2;
+      }
+      /* Circulação — oculta no celular (geralmente igual à publicação) */
+      .doe-tabela-outer .container-tabela table tbody td:nth-child(3) {
+        display: none !important;
+      }
+      /* Botão */
+      .doe-tabela-outer .container-tabela table tbody td:nth-child(4) {
+        grid-column: 2;
+        grid-row: 1 / span 2;
+        align-self: center;
+        justify-self: end;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .ue-numero { font-size: 1.4rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="caixa-central">
+
+  <!-- TOPO -->
+  <div class="topo-container">
+    <div class="topo-banner"></div>
+  </div>
+
+  <!-- NAVBAR -->
+  <nav class="navbar-gov" id="navbarPrincipal">
+    <button class="btn-menu-mobile" onclick="toggleMenu()">
+      <i class="bi bi-list"></i> MENU DE NAVEGAÇÃO
+    </button>
+    <ul class="menu-lista" id="menuPrincipal">
+      <li><a class="nav-link" href="index.html">Início</a></li>
+      <li><a class="nav-link active" href="diariooficial.html">Diário Oficial</a></li>
+      <li><a class="nav-link" href="acervo.html">Acervo Histórico</a></li>
+      <li><a class="nav-link" href="solicitacao.html">Solicitar Pesquisa</a></li>
+      <li><a class="nav-link" href="publique.html">Como Publicar</a></li>
+      <li><a class="nav-link" href="noticias.html">Notícias</a></li>
+      <li><a class="nav-link" href="institucional.html">Institucional</a></li>
+    </ul>
+  </nav>
+
+  <!-- BANNER IDENTIDADE -->
+  <div class="banner-id"></div>
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <div class="doe-page">
+
+    <!-- Título -->
+    <div class="doe-page-header">
+      <h2><i class="bi bi-newspaper me-2"></i>Diário Oficial do Estado do Amapá</h2>
+      <p>Acervo completo desde 1964 · Atualizado automaticamente a cada nova edição</p>
+    </div>
+
+    <!-- Card última edição -->
+    <div class="ultima-edicao-card">
+      <i class="bi bi-journal-text ue-icone-fundo"></i>
+      <div class="ultima-edicao-info">
+        <span class="ue-badge"><i class="bi bi-lightning-fill"></i> Última Edição Publicada</span>
+        <p class="ue-numero" id="ueNumero">DOE nº —</p>
+        <p class="ue-datas" id="ueDatas">Carregando...</p>
+      </div>
+      <a href="#" id="ueBtn" class="btn-ultima-edicao" target="_blank">
+        <i class="bi bi-file-earmark-pdf-fill"></i> Abrir PDF
+      </a>
+    </div>
+
+    <!-- Filtros: ano + busca + meses -->
+    <div class="doe-filtros">
+      <div class="doe-filtros-top">
+        <div class="doe-ano-wrapper">
+          <label><i class="bi bi-calendar3 me-1"></i>Ano</label>
+          <select class="doe-ano-select" id="selectAno" onchange="onAnoChange()"></select>
+        </div>
+        <div class="doe-busca-wrapper">
+          <i class="bi bi-search"></i>
+          <input type="text" class="doe-busca-input" id="inputBusca"
+                 placeholder="Buscar pelo nº DOE..." oninput="filtrarLocal()">
+        </div>
+        <span class="doe-total-badge" id="totalBadge">— edições</span>
+      </div>
+
+      <!-- Abas de meses -->
+      <div class="mes-nav" id="mesNav"></div>
+    </div>
+
+    <!-- Tabela -->
+    <div class="doe-tabela-outer">
+      <div class="container-tabela">
+
+        <div class="header-tabela">
+          <i class="bi bi-journal-richtext"></i>
+          <span id="tabelaHeaderTxt">Edições</span>
+        </div>
+
+        <div id="loadingState" class="doe-loading">
+          <div class="spinner-border"></div>
+          <p>Carregando edições...</p>
+        </div>
+
+        <div id="emptyState" class="doe-empty" style="display:none">
+          <i class="bi bi-journal-x"></i>
+          <p>Nenhuma edição encontrada para este período.</p>
+        </div>
+
+        <table class="table table-hover mb-0" id="doeTabela" style="display:none">
+          <thead style="background:var(--azul); color:#fff;">
+            <tr>
+              <th style="padding:12px 16px; font-size:.82rem; font-weight:800; letter-spacing:.5px;">Nº DOE</th>
+              <th style="padding:12px 16px; font-size:.82rem; font-weight:800; letter-spacing:.5px;">Publicação</th>
+              <th style="padding:12px 16px; font-size:.82rem; font-weight:800; letter-spacing:.5px;">Circulação</th>
+              <th style="padding:12px 16px; font-size:.82rem; font-weight:800; letter-spacing:.5px; text-align:center;">PDF</th>
+            </tr>
+          </thead>
+          <tbody id="doeTbody"></tbody>
+        </table>
+
+      </div>
+    </div>
+
+    <!-- Nota -->
+    <div class="doe-nota">
+      <i class="bi bi-info-circle-fill"></i>
+      Encontrou algum problema? Entre em contato com o Núcleo de Imprensa Oficial.
+    </div>
+
+  </div><!-- /doe-page -->
+
+  <!-- RODAPÉ -->
+  <footer class="rodape-oficial">
+    <img src="img/banner-governo-rodape.png" alt="Governo" class="img-rodape">
+    <div class="pb-3">
+      <a href="login.html" class="text-secondary small text-decoration-none">
+        <i class="bi bi-shield-lock-fill"></i> Acesso Restrito
+      </a>
+      <div class="text-muted small mt-1">© 2026 Núcleo de Imprensa Oficial</div>
+    </div>
+  </footer>
+
+</div><!-- /caixa-central -->
+
+<script>
+/* ============================================================
+   CONFIGURAÇÃO DA API
+   ============================================================ */
+const URL_API = 'https://script.google.com/macros/s/AKfycbwVD_orbvEi-LEMaItNI7Fd4-NvCfEEvER5wGeWvJETnjJqK_4T6eD9IC7mD4bcJYkh/exec';
+
+/* ============================================================
+   CONSTANTES E ESTADO
+   ============================================================ */
+const MESES = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
+const ANO_INICIAL = 1964;
+const ANO_ATUAL   = new Date().getFullYear();
+const MES_ATUAL   = new Date().getMonth() + 1;
+
+let anoSel      = ANO_ATUAL;
+let mesSel      = MES_ATUAL;
+let edicoesMes  = [];
+
+/* ============================================================
+   INICIALIZAÇÃO
+   ============================================================ */
+window.onload = function () {
+  preencherAnos();
+  renderizarMeses();
+  carregarEdicoes(anoSel, mesSel);
+  configurarUltimaEdicao();
+
+  window.addEventListener('scroll', () => {
+    document.getElementById('navbarPrincipal')
+            .classList.toggle('scrolled', window.scrollY > 10);
+  });
+};
+
+/* ============================================================
+   DROPDOWN DE ANOS — mais recente primeiro
+   ============================================================ */
+function preencherAnos() {
+  const sel = document.getElementById('selectAno');
+  for (let a = ANO_ATUAL; a >= ANO_INICIAL; a--) {
+    const opt = document.createElement('option');
+    opt.value = a;
+    opt.textContent = a;
+    if (a === ANO_ATUAL) opt.selected = true;
+    sel.appendChild(opt);
+  }
+}
+
+/* ============================================================
+   TABS DE MESES
+   ============================================================ */
+function renderizarMeses() {
+  const nav = document.getElementById('mesNav');
+  nav.innerHTML = '';
+  MESES.forEach((nome, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'mes-link' + (i + 1 === mesSel ? ' active' : '');
+    btn.textContent = nome;
+    btn.onclick = () => selecionarMes(i + 1, btn);
+    nav.appendChild(btn);
+  });
+}
+
+function selecionarMes(mes, btn) {
+  document.querySelectorAll('#mesNav .mes-link').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  mesSel = mes;
+  document.getElementById('inputBusca').value = '';
+  carregarEdicoes(anoSel, mesSel);
+}
+
+function onAnoChange() {
+  anoSel = parseInt(document.getElementById('selectAno').value);
+  document.getElementById('inputBusca').value = '';
+  carregarEdicoes(anoSel, mesSel);
+}
+
+/* ============================================================
+   CARREGAR EDIÇÕES — API real GAS
+   ============================================================ */
+function carregarEdicoes(ano, mes) {
+  mostrarLoading(true);
+
+  fetch(`${URL_API}?acao=acervo_doe&ano=${ano}&mes=${mes}&t=${Date.now()}`)
+    .then(r => r.json())
+    .then(data => {
+      edicoesMes = (data.result === 'success') ? data.edicoes : [];
+      renderizarTabela(edicoesMes, ano, mes);
+      mostrarLoading(false);
+    })
+    .catch(() => {
+      edicoesMes = [];
+      renderizarTabela([], ano, mes);
+      mostrarLoading(false);
+    });
+}
+
+/* ============================================================
+   RENDERIZAR TABELA
+   ============================================================ */
+function renderizarTabela(edicoes, ano, mes) {
+  const tabela = document.getElementById('doeTabela');
+  const tbody  = document.getElementById('doeTbody');
+  const empty  = document.getElementById('emptyState');
+  const badge  = document.getElementById('totalBadge');
+  const header = document.getElementById('tabelaHeaderTxt');
+
+  header.textContent = `${MESES[mes - 1]} / ${ano}`;
+  badge.textContent  = `${edicoes.length} edição${edicoes.length !== 1 ? 'ões' : ''}`;
+
+  if (edicoes.length === 0) {
+    tabela.style.display = 'none';
+    empty.style.display  = 'block';
+    return;
+  }
+
+  empty.style.display  = 'none';
+  tabela.style.display = 'table';
+  tbody.innerHTML = '';
+
+  edicoes.forEach((e, idx) => {
+    const tr = document.createElement('tr');
+    tr.style.animationDelay = (idx * 0.04) + 's';
+    tr.innerHTML = `
+      <td style="font-weight:700; color:var(--azul); padding:12px 16px;">DOE nº ${e.n}</td>
+      <td style="padding:12px 16px;">${e.pub}</td>
+      <td class="td-circ" style="padding:12px 16px;">${e.circ}</td>
+      <td style="padding:12px 16px; text-align:center;">
+        <a href="${e.url}" target="_blank" class="btn-visualizar">
+          <i class="bi bi-file-earmark-pdf"></i> Abrir
+        </a>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+/* ============================================================
+   BUSCA LOCAL
+   ============================================================ */
+function filtrarLocal() {
+  const q = document.getElementById('inputBusca').value.trim().toLowerCase();
+  const filtrados = q
+    ? edicoesMes.filter(e => String(e.n).includes(q) || e.pub.includes(q))
+    : edicoesMes;
+  renderizarTabela(filtrados, anoSel, mesSel);
+}
+
+/* ============================================================
+   CARD ÚLTIMA EDIÇÃO — API real GAS
+   ============================================================ */
+function configurarUltimaEdicao() {
+  fetch(`${URL_API}?acao=ultima_doe&t=${Date.now()}`)
+    .then(r => r.json())
+    .then(data => {
+      if (data.result === 'success') {
+        document.getElementById('ueNumero').textContent = `DOE nº ${data.n}`;
+        document.getElementById('ueDatas').textContent  =
+          `Publicação: ${data.pub}  ·  Circulação: ${data.circ}`;
+        document.getElementById('ueBtn').href = data.url;
+      }
+    })
+    .catch(() => {});
+
+}
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+function mostrarLoading(sim) {
+  document.getElementById('loadingState').style.display = sim ? 'block' : 'none';
+  if (sim) {
+    document.getElementById('doeTabela').style.display  = 'none';
+    document.getElementById('emptyState').style.display = 'none';
+  }
+}
+
+function toggleMenu() {
+  document.getElementById('menuPrincipal').classList.toggle('ativo');
+}
+</script>
+</body>
+</html>
