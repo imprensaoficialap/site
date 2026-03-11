@@ -146,3 +146,161 @@
 - A URL do GAS pode mudar se um NOVO deploy for criado — nesse caso atualizar TODOS os HTMLs
   e o novochat.txt com a nova URL
 - O arquivo bancodedadosPortal.xlsx na raiz é da conta pessoal antiga — serve só como referência histórica
+
+"PROJETO ACERVO DOE — Diário Oficial do Amapá (em andamento)"
+
+== OBJETIVO ==
+Construir um acervo completo do Diário Oficial do Estado (DOE) no site NIO PESQUISA,
+cobrindo PDFs de 1964 até hoje com atualização diária automática.
+
+== FONTE DOS DADOS ==
+- Site da SEAD (Secretaria de Administração do AP): https://sead.portal.ap.gov.br
+- URL de cada mês: https://sead.portal.ap.gov.br/diario_oficial/{ano}/{mes_abrev}
+  ex: https://sead.portal.ap.gov.br/diario_oficial/1964/jan
+- Meses abreviados: jan, fev, mar, abr, mai, jun, jul, ago, set, out, nov, dez
+- PDF direto: https://seadantigo.portal.ap.gov.br/diario/DOEn{NUMERO}.pdf?ts={TS}
+
+== ESTRUTURA DA TABELA NO HTML DA SEAD ==
+- Seletor: table tbody tr
+- Colunas por ordem (IMPORTANTE — não inverter):
+  tds[0] = data_pub    (data de publicação)
+  tds[1] = data_circ   (data de circulação)
+  tds[2] = numero_doe  (número + link do PDF, ex: "DOE nº 8543")
+- O link do PDF está em tds[2].querySelector('a').href
+
+== NOVA ABA NA PLANILHA OFICIAL ==
+- Aba: acervo_doe
+- Colunas (linha 1 = cabeçalho):
+  A: numero_doe | B: data_pub | C: data_circ | D: ano | E: mes | F: url_pdf
+- ID da Planilha: 1zFEf9Sq9FQDLvsEbxzItWa0Qn0NIkQiXQrdcVuCbSMA (mesma planilha oficial)
+
+== ESTRATÉGIA DE COLETA (browser console) ==
+- Por que browser e não GAS: o servidor da SEAD bloqueia IPs do Google (range de IPs do GAS).
+  No browser, a requisição sai com o IP do usuário e funciona.
+- O script roda no console do navegador com a aba ABERTA em sead.portal.ap.gov.br
+  (mesmo domínio = sem CORS). Não funciona de outra aba/origem.
+- Progresso salvo em localStorage (chave: doe_progresso) para retomar após interrupções.
+- Saída: CSV com BOM UTF-8, separador ponto-e-vírgula.
+- Processamento em lotes de 5 anos para evitar timeout do browser.
+
+== SCRIPT FINAL (versão com retry — rodar no console em sead.portal.ap.gov.br) ==
+
+ANTES DE RODAR: limpar progresso anterior se quiser reiniciar do zero:
+  localStorage.removeItem('doe_progresso')
+
+SCRIPT:
+```javascript
+(async function() {
+  const MESES     = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+  const ANO_INICIO = 1964;
+  const ANO_FIM    = new Date().getFullYear();
+  const LOTE       = 5;
+  const CHAVE      = 'doe_progresso';
+  const DELAY      = 800;
+  const TENTATIVAS = 4;
+
+  async function buscarMes(url) {
+    for (let t = 1; t <= TENTATIVAS; t++) {
+      try {
+        const resp = await fetch(url);
+        if (resp.ok) return resp;
+        if (resp.status === 502 || resp.status === 503) {
+          const espera = t * 3000;
+          console.warn(`  ⚠ ${url} → ${resp.status}. Tentativa ${t}/${TENTATIVAS}. Aguardando ${espera/1000}s...`);
+          await new Promise(r => setTimeout(r, espera));
+          continue;
+        }
+        return null;
+      } catch(e) {
+        console.warn(`  ⚠ Erro de rede. Tentativa ${t}/${TENTATIVAS}.`);
+        await new Promise(r => setTimeout(r, t * 3000));
+      }
+    }
+    return null;
+  }
+
+  let prog = JSON.parse(localStorage.getItem(CHAVE) || '{"anoAtual":null,"linhas":[]}');
+  if (!prog.linhas) prog.linhas = [];
+
+  const anoInicioLote = prog.anoAtual || ANO_INICIO;
+  const anoFimLote    = Math.min(anoInicioLote + LOTE - 1, ANO_FIM);
+
+  console.log(`▶ Processando ${anoInicioLote}–${anoFimLote} (${prog.linhas.length} linhas já coletadas)`);
+
+  for (let ano = anoInicioLote; ano <= anoFimLote; ano++) {
+    for (let mi = 0; mi < MESES.length; mi++) {
+      const mes = MESES[mi];
+      const url = `https://sead.portal.ap.gov.br/diario_oficial/${ano}/${mes}`;
+      await new Promise(r => setTimeout(r, DELAY));
+
+      const resp = await buscarMes(url);
+      if (!resp) { console.warn(`  ✗ Ignorado: ${url}`); continue; }
+
+      const html   = await resp.text();
+      const doc    = new DOMParser().parseFromString(html, 'text/html');
+      const linhas = doc.querySelectorAll('table tbody tr');
+
+      if (!linhas.length) { console.log(`  — Sem dados: ${ano}/${mes}`); continue; }
+
+      linhas.forEach(tr => {
+        const tds     = tr.querySelectorAll('td');
+        if (tds.length < 3) return;
+        const dataPub  = tds[0].textContent.trim();
+        const dataCirc = tds[1].textContent.trim();
+        const numDoe   = tds[2].textContent.trim();
+        const link     = tds[2].querySelector('a');
+        const urlPdf   = link ? link.href : '';
+        const numLimpo = numDoe.replace(/\s+/g,' ').trim();
+        prog.linhas.push(`${numLimpo};${dataPub};${dataCirc};${ano};${mes};${urlPdf}`);
+      });
+
+      console.log(`  ✓ ${ano}/${mes}: ${linhas.length} DOE(s)`);
+    }
+  }
+
+  // Salvar progresso
+  prog.anoAtual = anoFimLote + 1;
+  localStorage.setItem(CHAVE, JSON.stringify(prog));
+
+  // Gerar CSV
+  const cabecalho = 'numero_doe;data_pub;data_circ;ano;mes;url_pdf';
+  const csv = '\uFEFF' + cabecalho + '\n' + prog.linhas.join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
+  a.download = `acervo_doe_${ANO_INICIO}_${anoFimLote}.csv`;
+  a.click();
+
+  if (anoFimLote < ANO_FIM) {
+    console.log(`✅ Lote concluído. Próximo lote: ${anoFimLote+1}–${Math.min(anoFimLote+LOTE, ANO_FIM)}. Rode o script novamente.`);
+  } else {
+    console.log('🎉 Coleta completa! Todos os anos processados.');
+    localStorage.removeItem(CHAVE);
+  }
+})();
+```
+
+== STATUS ATUAL DA COLETA ==
+- Situação: muitos erros 502 Bad Gateway do servidor da SEAD durante a coleta.
+  O servidor da SEAD é instável. Retry com 4 tentativas e backoff progressivo (3s/6s/9s/12s)
+  não foi suficiente — os erros continuam.
+- Estratégia: tentar rodar em horário de menor uso do servidor (madrugada/final de semana).
+- Coleta ainda NÃO concluída — CSVs parciais gerados mas não importados para a planilha.
+
+== PENDÊNCIAS DO PROJETO ACERVO DOE ==
+1. Concluir coleta: rodar o script por lotes (5 anos cada) até cobrir 1964–hoje.
+   Dica: tentar de madrugada ou final de semana para evitar 502.
+2. Importar CSVs para a aba acervo_doe da planilha Google Sheets.
+3. Criar função roboDiarioOficial no GAS (bancodedadosPortal.gs):
+   - Roda diariamente (trigger às 6h)
+   - Acessa o mês atual de sead.portal.ap.gov.br/diario_oficial/{ano}/{mes}
+   - Adiciona novos DOEs à aba acervo_doe se ainda não existirem (checa numero_doe)
+   PROBLEMA CONHECIDO: SEAD bloqueia IPs do Google → o robô GAS provavelmente não vai funcionar.
+   Solução alternativa: manter atualização manual via script no browser ou buscar proxy.
+4. Publicar nova versão do GAS (deploy) após adicionar o robô.
+5. Criar página acervo.html com busca/listagem dos DOEs (usa API GAS handler 'acervo_doe').
+
+== ENCODING — LIÇÃO APRENDIDA ==
+- NÃO usar fixMojibake nem TextDecoder('iso-8859-1') — o servidor da SEAD serve UTF-8 correto.
+- Usar apenas resp.text() puro. Qualquer pós-processamento de encoding vai corromper o texto.
+- Se aparecer "DOE nº" correto no CSV, está certo. Se aparecer "DOE nÂº" ou "DOE nï¿½", há problema.
