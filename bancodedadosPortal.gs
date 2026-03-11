@@ -5,10 +5,11 @@
 var ss = SpreadsheetApp.openById('1zFEf9Sq9FQDLvsEbxzItWa0Qn0NIkQiXQrdcVuCbSMA');
 
 // Definição das abas pelos nomes exatos dos seus prints
-var sheetPedidos = ss.getSheetByName("Página1"); 
+var sheetPedidos = ss.getSheetByName("Página1");
 var sheetRefs    = ss.getSheetByName("Referencias");
 var sheetConfig  = ss.getSheetByName("config");
 var sheetUsers   = ss.getSheetByName("usuarios");
+var sheetAcervo  = ss.getSheetByName("acervo_doe");
 
 // --- FUNÇÃO GET (Leitura de dados) ---
 function doGet(e) {
@@ -30,7 +31,19 @@ function doGet(e) {
     return outputJSON({ "result": "success", "referencias": dadosRef });
   }
 
-  // 3. BUSCAR LINK DO DIÁRIO (Para o botão da Index)
+  // 3. ACERVO DOE — edições de um mês específico
+  else if (acao == "acervo_doe") {
+    var ano = parseInt(e.parameter.ano);
+    var mes = parseInt(e.parameter.mes);
+    return getAcervoPorMes(ano, mes);
+  }
+
+  // 4. ÚLTIMA EDIÇÃO DO DOE — para o card de destaque
+  else if (acao == "ultima_doe") {
+    return getUltimaEdicao();
+  }
+
+  // 5. BUSCAR LINK DO DIÁRIO (Para o botão da Index)
   else if (acao == "link_diario") {
     if (!sheetConfig) return outputJSON({ "result": "empty", "link": "" });
     var linkDoDia = sheetConfig.getRange("A2").getValue();
@@ -196,4 +209,220 @@ function ehUmPDFReal(url) {
     var contentType = response.getHeaders()['Content-Type'] || response.getHeaders()['content-type'] || "";
     return (contentType.indexOf("pdf") !== -1);
   } catch (e) { return false; }
+}
+
+
+// =============================================================
+// ACERVO DOE — leitura via doGet
+// =============================================================
+
+function getAcervoPorMes(ano, mes) {
+  var sheet = ss.getSheetByName("acervo_doe");
+  if (!sheet) return outputJSON({ result: "error", message: "Aba acervo_doe não encontrada." });
+
+  var dados = sheet.getDataRange().getDisplayValues();
+  var edicoes = [];
+
+  for (var i = 1; i < dados.length; i++) {
+    if (parseInt(dados[i][3]) === ano && parseInt(dados[i][4]) === mes) {
+      edicoes.push({
+        n:    parseInt(dados[i][0]),
+        pub:  dados[i][1],
+        circ: dados[i][2],
+        url:  dados[i][5]
+      });
+    }
+  }
+
+  // Mais recentes primeiro
+  edicoes.sort(function(a, b) { return b.n - a.n; });
+  return outputJSON({ result: "success", edicoes: edicoes });
+}
+
+function getUltimaEdicao() {
+  var sheet = ss.getSheetByName("acervo_doe");
+  if (!sheet) return outputJSON({ result: "empty" });
+
+  var dados = sheet.getDataRange().getDisplayValues();
+  if (dados.length < 2) return outputJSON({ result: "empty" });
+
+  // Última linha inserida = edição mais recente
+  var u = dados[dados.length - 1];
+  return outputJSON({
+    result: "success",
+    n:    parseInt(u[0]),
+    pub:  u[1],
+    circ: u[2],
+    ano:  parseInt(u[3]),
+    mes:  parseInt(u[4]),
+    url:  u[5]
+  });
+}
+
+
+// =============================================================
+// RASPAGEM HISTÓRICA — rode manualmente, 1 vez por bloco de anos
+// Progresso salvo na aba "config", célula B2
+// =============================================================
+
+var MESES_URL  = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+var SEAD_BASE  = 'https://sead.portal.ap.gov.br/diario_oficial/';
+var ANOS_POR_EXEC = 5; // quantos anos processa por execução (ajuste se precisar)
+
+function rasparAcervoHistorico() {
+  var sheet = ss.getSheetByName("acervo_doe");
+
+  // Cria a aba com cabeçalho se não existir
+  if (!sheet) {
+    sheet = ss.insertSheet("acervo_doe");
+    sheet.appendRow(["numero_doe","data_pub","data_circ","ano","mes","url_pdf"]);
+    sheet.setFrozenRows(1);
+  }
+
+  var anoInicio = getProgressoRaspagem();
+  var anoFim    = Math.min(anoInicio + ANOS_POR_EXEC - 1, new Date().getFullYear());
+
+  Logger.log("▶ Raspando " + anoInicio + " → " + anoFim);
+
+  for (var ano = anoInicio; ano <= anoFim; ano++) {
+    var mesMax = (ano === new Date().getFullYear()) ? new Date().getMonth() + 1 : 12;
+
+    for (var mes = 1; mes <= mesMax; mes++) {
+      if (mesJaRaspado(sheet, ano, mes)) {
+        Logger.log("  [OK] " + ano + "/" + MESES_URL[mes-1] + " já existe, pulando");
+        continue;
+      }
+      rasparMes(sheet, ano, mes);
+      Utilities.sleep(1000); // pausa para não sobrecarregar o SEAD
+    }
+  }
+
+  salvarProgressoRaspagem(anoFim + 1);
+  Logger.log("✔ Concluído! Próxima execução começa em: " + (anoFim + 1));
+}
+
+function rasparMes(sheet, ano, mes) {
+  var mesStr = MESES_URL[mes - 1];
+  var url    = SEAD_BASE + ano + '/' + mesStr;
+
+  try {
+    var opcoes = {
+      muteHttpExceptions: true,
+      validateHttpsCertificates: false,
+      followRedirects: true,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'pt-BR,pt;q=0.9',
+        'Referer': 'https://sead.portal.ap.gov.br/diario_oficial'
+      }
+    };
+
+    var resp = UrlFetchApp.fetch(url, opcoes);
+    if (resp.getResponseCode() !== 200) {
+      Logger.log("  [" + resp.getResponseCode() + "] " + ano + "/" + mesStr);
+      return;
+    }
+
+    var html    = resp.getContentText("UTF-8");
+    var edicoes = parsearTabelaSEAD(html);
+
+    for (var i = 0; i < edicoes.length; i++) {
+      var e = edicoes[i];
+      if (e.numero && e.url) {
+        sheet.appendRow([e.numero, e.pub, e.circ, ano, mes, e.url]);
+      }
+    }
+
+    Logger.log("  [" + edicoes.length + "] " + ano + "/" + mesStr);
+  } catch (err) {
+    Logger.log("  [ERRO] " + ano + "/" + mesStr + " — " + err.message);
+  }
+}
+
+function parsearTabelaSEAD(html) {
+  var edicoes   = [];
+  var rowRegex  = /<tr[\s\S]*?>([\s\S]*?)<\/tr>/gi;
+  var tdRegex   = /<td[^>]*>([\s\S]*?)<\/td>/gi;
+  var linkRegex = /href=["'](https?:\/\/[^"']+\.pdf[^"']*)/i;
+  var numRegex  = /DOE[^n]*n[°º\.\s]*(\d+)/i;
+  var dateRegex = /(\d{2}\/\d{2}\/\d{4})/;
+
+  var rowMatch;
+  while ((rowMatch = rowRegex.exec(html)) !== null) {
+    var rowHtml = rowMatch[1];
+    var tds = [];
+    var tdMatch;
+
+    while ((tdMatch = tdRegex.exec(rowHtml)) !== null) {
+      // Remove tags internas para pegar o texto limpo
+      tds.push(tdMatch[1].replace(/<[^>]+>/g, ' ').trim());
+    }
+
+    if (tds.length < 3) continue;
+
+    var pub      = (tds[0].match(dateRegex) || [])[1] || '';
+    var circ     = (tds[1].match(dateRegex) || [])[1] || '';
+    var numMatch = (tds[2] || '').match(numRegex);
+    if (!numMatch) continue;
+
+    var numero = parseInt(numMatch[1]);
+
+    // Link PDF — busca em toda a linha (pode estar em qualquer <td>)
+    var urlMatch = rowHtml.match(linkRegex);
+    if (!urlMatch) continue;
+
+    edicoes.push({ numero: numero, pub: pub, circ: circ, url: urlMatch[1] });
+  }
+
+  return edicoes;
+}
+
+function mesJaRaspado(sheet, ano, mes) {
+  var dados = sheet.getDataRange().getValues();
+  for (var i = 1; i < dados.length; i++) {
+    if (parseInt(dados[i][3]) === ano && parseInt(dados[i][4]) === mes) return true;
+  }
+  return false;
+}
+
+function getProgressoRaspagem() {
+  var config = ss.getSheetByName("config");
+  if (!config) return 1964;
+  var val = config.getRange("B2").getValue();
+  return (val && !isNaN(parseInt(val))) ? parseInt(val) : 1964;
+}
+
+function salvarProgressoRaspagem(proximoAno) {
+  var config = ss.getSheetByName("config");
+  if (config) config.getRange("B2").setValue(proximoAno);
+}
+
+
+// =============================================================
+// ROBÔ DIÁRIO — atualiza automaticamente via trigger
+// Configure: Triggers → roboDiarioOficial → Por hora → 23h–00h
+// =============================================================
+
+function roboDiarioOficial() {
+  var agora = new Date();
+  var ano   = agora.getFullYear();
+  var mes   = agora.getMonth() + 1;
+
+  var sheet = ss.getSheetByName("acervo_doe");
+  if (!sheet) return;
+
+  // Registra quantas linhas havia antes
+  var linhasAntes = sheet.getLastRow();
+
+  rasparMes(sheet, ano, mes);
+
+  var linhasDepois = sheet.getLastRow();
+  var novas = linhasDepois - linhasAntes;
+
+  Logger.log(
+    "Robô DOE — " +
+    Utilities.formatDate(agora, "GMT-3", "dd/MM/yyyy HH:mm") +
+    " — " + novas + " nova(s) edição(ões) adicionada(s)."
+  );
 }
