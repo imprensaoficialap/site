@@ -6,301 +6,68 @@
 - Só faça merge/push para MAIN se eu pedir explicitamente
 
 "Características do Sistema"
-- Nome: NIO PESQUISA (Núcleo de Imprensa Oficial)
-- Plataforma: site estático (HTML/CSS/JS) hospedado no GitHub Pages
+- Nome: NIO PESQUISA (Núcleo de Imprensa Oficial do Amapá)
+- Plataforma: site estático (HTML/CSS/JS) no GitHub Pages
 - Repositório: https://github.com/imprensaoficialap/site
 - Branch de trabalho: DEV | Branch de produção: main
-- Backend: Google Apps Script (GAS) publicado como Web App
-- Banco de dados: Google Sheets (conta oficial da Imprensa Oficial do AP)
+- Backend: Google Apps Script (GAS) como Web App
+- Banco de dados: Google Sheets (conta oficial)
 
 "Arquitetura"
-- Frontend: arquivos .html na raiz + css/estilo.css + imagens em img/
-- Backend: bancodedadosPortal.gs (cópia local — o código real está no Google Apps Script)
-- Planilha de referência local: bancodedadosPortal.xlsx (conta pessoal/antiga — ignorar)
-- URL da API ATUAL (oficial): https://script.google.com/macros/s/AKfycbwVD_orbvEi-LEMaItNI7Fd4-NvCfEEvER5wGeWvJETnjJqK_4T6eD9IC7mD4bcJYkh/exec
+- Frontend: arquivos .html na raiz + css/estilo.css + img/
+- Backend: bancodedadosPortal.gs (cópia local — real está no GAS)
+- URL da API ATUAL: https://script.google.com/macros/s/AKfycbwVD_orbvEi-LEMaItNI7Fd4-NvCfEEvER5wGeWvJETnjJqK_4T6eD9IC7mD4bcJYkh/exec
 - ID da Planilha Oficial: 1zFEf9Sq9FQDLvsEbxzItWa0Qn0NIkQiXQrdcVuCbSMA
 - GAS Script ID: 11s9ZBQldiDa-OnpHh8xdbQhWiQiPPJnJ4rQXH-8B18wmapzSxFdcBjiA
-
-"ATENÇÃO - Histórico de URLs (NÃO usar as antigas)"
-- URL ANTIGA pessoal 1: AKfycbw1YF42SazcEuLyI-I8g-btHyYlUJWC2jllDG7T59BgOL_lvmzuwQiqyW6-oJwM5-JV/exec (descartada)
-- URL ANTIGA 2: AKfycbwwEI9F6LFkqOqeoF4kKyARouJo-59C-34xhTWfL1bDD538muTldssosywD2G2CYyOpfA/exec (descartada)
-- Planilha antiga pessoal: 1DeqnrpvRGhgBC0OVYw1KnxEwpprvH5UmpVM4Fettmoo (não usar)
-- Todas as páginas HTML já apontam para a URL ATUAL oficial
+- bancodedadosPortal.xlsx na raiz = conta pessoal antiga, ignorar
 
 "Abas do Google Sheets (planilha oficial)"
-- Página1: pedidos de pesquisa (tabela principal)
+- Página1: pedidos de pesquisa
 - Referencias: referências documentais
-- config: configurações (ex: link do diário oficial, célula A2)
+- config: configurações (A2=link diário atual)
 - usuarios: login/senha dos servidores
+- acervo_doe: acervo DOE SEAD — colunas: numero_doe|data_pub|data_circ|ano|mes|url_pdf
 
 "Estrutura de colunas da aba Página1 (pedidos)"
-- [0] ID (ex: ID_a3f2b1c4)
-- [1] Data/Hora (dd/MM/yyyy HH:mm)
-- [2] Solicitante
-- [3] Nome Pesquisado
-- [4] Período
-- [5] WhatsApp
-- [6] Status: "EM ANÁLISE" | "ATENDIDO" | "NÃO ENCONTRADO"
-- [7] Responsável
-- [8] Observações do cidadão
-- [9] (reservado)
-- [10] Retorno ao cidadão
+- [0] ID | [1] Data/Hora | [2] Solicitante | [3] Nome Pesquisado | [4] Período
+- [5] WhatsApp | [6] Status (EM ANÁLISE|ATENDIDO|NÃO ENCONTRADO) | [7] Responsável
+- [8] Observações do cidadão | [9] reservado | [10] Retorno ao cidadão
 
 "Páginas do site"
-- index.html: página pública inicial
+- index.html: página pública inicial (com efeitos visuais/animações)
 - login.html: autenticação dos servidores
 - painel.html: painel administrativo (gestão de pedidos)
 - referencias.html: guia de referências documentais
 - relatorios.html: relatórios e estatísticas
 - solicitacao.html: formulário público de solicitação
-- acervo.html, institucional.html, noticias.html, publique.html: páginas institucionais
+- diariooficial.html: acervo DOE SEAD (1964-hoje), público, dados via GAS acao=acervo_doe
+- acervo.html: acervo histórico jornais 1945-1974
+- institucional.html, noticias.html, publique.html: páginas institucionais
 
 "Autenticação"
-- Login salvo em localStorage: nio_token = 'logado', nio_usuario = nome do servidor
-- Se não estiver logado, redireciona para login.html
-
-"Bugs já corrigidos"
-- painel.html: cards "Atendidos" e "Não Encontrados" retornavam zero — opções faltavam
-  no <select id="filtroStatus">. Correção: adicionadas as opções ATENDIDO e NÃO ENCONTRADO.
-- solicitacao.html: usava URL de API antiga (conta pessoal), dados iam para planilha errada.
-  Correção: URL atualizada para a oficial.
-- index.html, login.html, relatorios.html: também usavam URL antiga. Todas corrigidas.
-- painel.html: GET do GAS retornava dados em cache. Correção: adicionado &t=Date.now() na URL.
-- GAS: usava getActiveSpreadsheet() que apontava para planilha errada.
-  Correção: substituído por openById('1zFEf9Sq9FQDLvsEbxzItWa0Qn0NIkQiXQrdcVuCbSMA').
-- Todas as páginas: browser cacheava versões antigas causando problemas em outras máquinas.
-  Correção: adicionadas meta tags Cache-Control no-cache em todos os HTMLs.
-
-"Otimizações de performance — painel.html (DEV → main)"
-- Removidos jQuery e jquery.mask (2 requisições HTTP a menos, ~100KB); substituídos por
-  vanilla JS (DOMContentLoaded + função aplicarMascara própria).
-- Salvar/excluir/atualizar pedido não fazem mais reload da API: atualizam dadosGlobais em
-  memória e re-renderizam a tabela instantaneamente. Reload real só no ciclo de 30s ou ATUALIZAR.
-- Novo pedido: adicionado localmente de imediato com ID provisório; reload real da API
-  dispara em segundo plano após 2s para obter o ID definitivo do servidor.
-- bootstrap.Modal.getOrCreateInstance() substituiu new bootstrap.Modal() em todos os modais.
-- atualizarContadores() refatorado de 3 loops .filter() para um único forEach.
-- copiarTexto() corrigido: dados do nome agora passam por escapeAttr() via data-copy
-  (previne quebra com aspas/caracteres especiais).
-- Cache sessionStorage: ao voltar para painel.html vindo de outra aba, tabela renderiza
-  instantaneamente com dados salvos (válido 5 min); API atualiza em segundo plano.
-- Logout limpa sessionStorage junto com localStorage.
-
-"Correções de responsividade mobile"
-- referencias.html: adicionado @media (max-width: 992px) para navbar interna
-  (flex-wrap no container + navbar-menu-center centralizado em linha separada)
-- relatorios.html: cards KPI col-md-3 → col-6 col-md-3 (2 por linha no celular)
-- solicitacao.html: removidos jQuery + jquery.mask; substituídos por vanilla JS
-
-"Melhorias no painel.html (sessão atual)"
-- Paginação corrigida: botões "Anterior" e "Próxima" invertidos para fazer sentido
-  com dados em ordem cronológica reversa (mais recentes na página 1).
-  Anterior = registros mais antigos (página sobe). Próxima = registros mais recentes (página desce).
-- Botões de paginação estilizados com ícones chevron e estado disabled automático nos limites.
-- Contador "Página X de Y" adicionado à paginação.
-- Layout tela cheia: body usa flexbox vertical (100vh), tabela cresce para preencher espaço
-  disponível (flex:1 + overflow-y:auto), sem rolagem de página no desktop.
-  Mobile mantém rolagem normal via @media (max-width: 992px).
-- Responsável preservado: ao editar pedido já ATENDIDO/NÃO ENCONTRADO, o responsável
-  original é mantido. Só atribui o usuário atual se o pedido estava "EM ANÁLISE".
-  Implementado com campos hidden editResponsavelOriginal e editStatusOriginal no modal.
-- Página preservada no auto-refresh: aplicarFiltros(false) na atualização automática/manual
-  mantém a página atual. resetarPagina=true apenas em mudanças de filtro pelo usuário.
-
-"Reescrita relatorios.html"
-- html2canvas removido; PDF gerado 100% via jsPDF (texto real, selecionável, rápido)
-- Cache sessionStorage compartilhado com painel.html (5 min)
-- 5 KPIs: Total | Atendidos | Não Encontrados | Taxa de Resolução % | Em Análise
-- Novo gráfico: evolução mensal (últimos 6 meses) com linha dupla Total vs Concluídos
-- Gráfico pizza → doughnut com tooltip mostrando valor e %
-- Ranking com medalhas 🥇🥈🥉, badges coloridos e barra de progresso proporcional
-- Exportação CSV com BOM UTF-8 (compatível Excel), separador ponto-e-vírgula
-- Checkbox "Período completo" desabilita filtros mês/ano e usa todos os dados
-- Contador "Total geral no sistema" independente do filtro ativo
-- TMA removido (campo p[9] é reservado/vazio)
-- Código duplicado eliminado: loop único em calcularStats()
-- API chamada com &t=Date.now()
-- Navbar corrigida: "NIO INTERNO" → "NIO PESQUISA"
-
-"Reescrita referencias.html"
-- jQuery e jquery.mask removidos (vanilla JS puro)
-- location.reload() eliminado — atualizações em memória com re-render
-- confirm() e alert() eliminados — feedback visual por toast + CSS inline
-- Navbar corrigida: "NIO INTERNO" → "NIO PESQUISA"
-- Novo layout: sidebar (280px) + painel principal
-  - Sidebar: lista de orgs clicável com badge de contagem e busca em tempo real
-  - Painel: cabeçalho dinâmico, busca local, cards visuais com animação slideIn
-- Exclusão: botão vira spinner → card some com fade (sem reload)
-- Adição: aparece instantaneamente; após 2s recarrega API para substituir ID temp
-- Toast system no canto inferior direito (sucesso verde / erro vermelho)
-- Skeleton loading no sidebar durante carregamento inicial
-- Nova Org: cria localmente com tag "(NOVA)" até 1ª referência ser salva
-- Responsivo: sidebar vira faixa horizontal no mobile
+- Login salvo em localStorage: nio_token='logado', nio_usuario=nome, nio_login_ts=timestamp
+- Sessão válida por 8 horas. Se expirada, redireciona para login.html
 
 "Observações importantes"
-- O GS usa doGet() para leituras e doPost() para gravações
-- Posts usam mode: 'no-cors' — não é possível ler a resposta do POST diretamente
-- O robô de atualização do link do diário oficial roda automaticamente em horários definidos
-- Sempre que alterar o GS, é necessário: 1) Salvar, 2) Implantar → Gerenciar implantações →
-  Editar → Nova versão → Implantar (a URL do deploy permanece a mesma)
-- A URL do GAS pode mudar se um NOVO deploy for criado — nesse caso atualizar TODOS os HTMLs
-  e o novochat.txt com a nova URL
-- O arquivo bancodedadosPortal.xlsx na raiz é da conta pessoal antiga — serve só como referência histórica
+- GAS usa doGet() para leituras e doPost() para gravações
+- Posts usam mode:'no-cors' — não é possível ler a resposta do POST diretamente
+- Sempre adicionar &t=Date.now() nas chamadas GET para evitar cache
+- Ao alterar o GAS: Salvar → Implantar → Gerenciar implantações → Editar → Nova versão → Implantar
+- A URL do GAS só muda se criar um NOVO deploy — nesse caso atualizar todos os HTMLs e este arquivo
 
-"PROJETO ACERVO DOE — Diário Oficial do Amapá (em andamento)"
+"PROJETO ACERVO DOE — status e pendências"
+- Página: diariooficial.html (pronta, aguardando dados)
+- Fonte: sead.portal.ap.gov.br/diario_oficial/{ano}/{mes_abrev} (jan,fev,...,dez)
+- PDF: seadantigo.portal.ap.gov.br/diario/DOEn{NUMERO}.pdf
+- Tabela SEAD: tds[0]=data_pub | tds[1]=data_circ | tds[2]=numero+link
+- GAS precisa dos handlers: acao=acervo_doe (listar por ano/mes) e acao=ultima_doe
+- Coleta via browser console (SEAD bloqueia IPs do Google/GAS)
+  → Script salva progresso em localStorage('doe_progresso'), lotes de 5 anos, saída CSV BOM UTF-8
+  → Servidor SEAD instável (502). Rodar de madrugada/fim de semana
+  → Coleta NÃO concluída — CSVs parciais ainda não importados para planilha
+- Encoding: usar resp.text() puro — NÃO usar TextDecoder('iso-8859-1')
 
-== OBJETIVO ==
-Construir um acervo completo do Diário Oficial do Estado (DOE) no site NIO PESQUISA,
-cobrindo PDFs de 1964 até hoje com atualização diária automática.
-
-== FONTE DOS DADOS ==
-- Site da SEAD (Secretaria de Administração do AP): https://sead.portal.ap.gov.br
-- URL de cada mês: https://sead.portal.ap.gov.br/diario_oficial/{ano}/{mes_abrev}
-  ex: https://sead.portal.ap.gov.br/diario_oficial/1964/jan
-- Meses abreviados: jan, fev, mar, abr, mai, jun, jul, ago, set, out, nov, dez
-- PDF direto: https://seadantigo.portal.ap.gov.br/diario/DOEn{NUMERO}.pdf?ts={TS}
-
-== ESTRUTURA DA TABELA NO HTML DA SEAD ==
-- Seletor: table tbody tr
-- Colunas por ordem (IMPORTANTE — não inverter):
-  tds[0] = data_pub    (data de publicação)
-  tds[1] = data_circ   (data de circulação)
-  tds[2] = numero_doe  (número + link do PDF, ex: "DOE nº 8543")
-- O link do PDF está em tds[2].querySelector('a').href
-
-== NOVA ABA NA PLANILHA OFICIAL ==
-- Aba: acervo_doe
-- Colunas (linha 1 = cabeçalho):
-  A: numero_doe | B: data_pub | C: data_circ | D: ano | E: mes | F: url_pdf
-- ID da Planilha: 1zFEf9Sq9FQDLvsEbxzItWa0Qn0NIkQiXQrdcVuCbSMA (mesma planilha oficial)
-
-== ESTRATÉGIA DE COLETA (browser console) ==
-- Por que browser e não GAS: o servidor da SEAD bloqueia IPs do Google (range de IPs do GAS).
-  No browser, a requisição sai com o IP do usuário e funciona.
-- O script roda no console do navegador com a aba ABERTA em sead.portal.ap.gov.br
-  (mesmo domínio = sem CORS). Não funciona de outra aba/origem.
-- Progresso salvo em localStorage (chave: doe_progresso) para retomar após interrupções.
-- Saída: CSV com BOM UTF-8, separador ponto-e-vírgula.
-- Processamento em lotes de 5 anos para evitar timeout do browser.
-
-== SCRIPT FINAL (versão com retry — rodar no console em sead.portal.ap.gov.br) ==
-
-ANTES DE RODAR: limpar progresso anterior se quiser reiniciar do zero:
-  localStorage.removeItem('doe_progresso')
-
-SCRIPT:
-```javascript
-(async function() {
-  const MESES     = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
-  const ANO_INICIO = 1964;
-  const ANO_FIM    = new Date().getFullYear();
-  const LOTE       = 5;
-  const CHAVE      = 'doe_progresso';
-  const DELAY      = 800;
-  const TENTATIVAS = 4;
-
-  async function buscarMes(url) {
-    for (let t = 1; t <= TENTATIVAS; t++) {
-      try {
-        const resp = await fetch(url);
-        if (resp.ok) return resp;
-        if (resp.status === 502 || resp.status === 503) {
-          const espera = t * 3000;
-          console.warn(`  ⚠ ${url} → ${resp.status}. Tentativa ${t}/${TENTATIVAS}. Aguardando ${espera/1000}s...`);
-          await new Promise(r => setTimeout(r, espera));
-          continue;
-        }
-        return null;
-      } catch(e) {
-        console.warn(`  ⚠ Erro de rede. Tentativa ${t}/${TENTATIVAS}.`);
-        await new Promise(r => setTimeout(r, t * 3000));
-      }
-    }
-    return null;
-  }
-
-  let prog = JSON.parse(localStorage.getItem(CHAVE) || '{"anoAtual":null,"linhas":[]}');
-  if (!prog.linhas) prog.linhas = [];
-
-  const anoInicioLote = prog.anoAtual || ANO_INICIO;
-  const anoFimLote    = Math.min(anoInicioLote + LOTE - 1, ANO_FIM);
-
-  console.log(`▶ Processando ${anoInicioLote}–${anoFimLote} (${prog.linhas.length} linhas já coletadas)`);
-
-  for (let ano = anoInicioLote; ano <= anoFimLote; ano++) {
-    for (let mi = 0; mi < MESES.length; mi++) {
-      const mes = MESES[mi];
-      const url = `https://sead.portal.ap.gov.br/diario_oficial/${ano}/${mes}`;
-      await new Promise(r => setTimeout(r, DELAY));
-
-      const resp = await buscarMes(url);
-      if (!resp) { console.warn(`  ✗ Ignorado: ${url}`); continue; }
-
-      const html   = await resp.text();
-      const doc    = new DOMParser().parseFromString(html, 'text/html');
-      const linhas = doc.querySelectorAll('table tbody tr');
-
-      if (!linhas.length) { console.log(`  — Sem dados: ${ano}/${mes}`); continue; }
-
-      linhas.forEach(tr => {
-        const tds     = tr.querySelectorAll('td');
-        if (tds.length < 3) return;
-        const dataPub  = tds[0].textContent.trim();
-        const dataCirc = tds[1].textContent.trim();
-        const numDoe   = tds[2].textContent.trim();
-        const link     = tds[2].querySelector('a');
-        const urlPdf   = link ? link.href : '';
-        const numLimpo = numDoe.replace(/\s+/g,' ').trim();
-        prog.linhas.push(`${numLimpo};${dataPub};${dataCirc};${ano};${mes};${urlPdf}`);
-      });
-
-      console.log(`  ✓ ${ano}/${mes}: ${linhas.length} DOE(s)`);
-    }
-  }
-
-  // Salvar progresso
-  prog.anoAtual = anoFimLote + 1;
-  localStorage.setItem(CHAVE, JSON.stringify(prog));
-
-  // Gerar CSV
-  const cabecalho = 'numero_doe;data_pub;data_circ;ano;mes;url_pdf';
-  const csv = '\uFEFF' + cabecalho + '\n' + prog.linhas.join('\n');
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const a    = document.createElement('a');
-  a.href     = URL.createObjectURL(blob);
-  a.download = `acervo_doe_${ANO_INICIO}_${anoFimLote}.csv`;
-  a.click();
-
-  if (anoFimLote < ANO_FIM) {
-    console.log(`✅ Lote concluído. Próximo lote: ${anoFimLote+1}–${Math.min(anoFimLote+LOTE, ANO_FIM)}. Rode o script novamente.`);
-  } else {
-    console.log('🎉 Coleta completa! Todos os anos processados.');
-    localStorage.removeItem(CHAVE);
-  }
-})();
-```
-
-== STATUS ATUAL DA COLETA ==
-- Situação: muitos erros 502 Bad Gateway do servidor da SEAD durante a coleta.
-  O servidor da SEAD é instável. Retry com 4 tentativas e backoff progressivo (3s/6s/9s/12s)
-  não foi suficiente — os erros continuam.
-- Estratégia: tentar rodar em horário de menor uso do servidor (madrugada/final de semana).
-- Coleta ainda NÃO concluída — CSVs parciais gerados mas não importados para a planilha.
-
-== PENDÊNCIAS DO PROJETO ACERVO DOE ==
-1. Concluir coleta: rodar o script por lotes (5 anos cada) até cobrir 1964–hoje.
-   Dica: tentar de madrugada ou final de semana para evitar 502.
-2. Importar CSVs para a aba acervo_doe da planilha Google Sheets.
-3. Criar função roboDiarioOficial no GAS (bancodedadosPortal.gs):
-   - Roda diariamente (trigger às 6h)
-   - Acessa o mês atual de sead.portal.ap.gov.br/diario_oficial/{ano}/{mes}
-   - Adiciona novos DOEs à aba acervo_doe se ainda não existirem (checa numero_doe)
-   PROBLEMA CONHECIDO: SEAD bloqueia IPs do Google → o robô GAS provavelmente não vai funcionar.
-   Solução alternativa: manter atualização manual via script no browser ou buscar proxy.
-4. Publicar nova versão do GAS (deploy) após adicionar o robô.
-5. Criar página acervo.html com busca/listagem dos DOEs (usa API GAS handler 'acervo_doe').
-
-== ENCODING — LIÇÃO APRENDIDA ==
-- NÃO usar fixMojibake nem TextDecoder('iso-8859-1') — o servidor da SEAD serve UTF-8 correto.
-- Usar apenas resp.text() puro. Qualquer pós-processamento de encoding vai corromper o texto.
-- Se aparecer "DOE nº" correto no CSV, está certo. Se aparecer "DOE nÂº" ou "DOE nï¿½", há problema.
+"Pendências abertas"
+1. Concluir coleta DOE: rodar script por lotes no console de sead.portal.ap.gov.br
+2. Importar CSVs para aba acervo_doe da planilha
+3. Adicionar handlers acervo_doe e ultima_doe no GAS + novo deploy
