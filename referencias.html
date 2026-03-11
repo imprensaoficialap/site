@@ -1,107 +1,1094 @@
-<!-- START OF FILE referencias.html -->
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Referências - NIO INTERNO</title>
-    <link rel="shortcut icon" href="img/favicon1.png" type="image/x-icon">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="css/estilo.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
-    <style>
-        .nav-link-custom { color: rgba(255,255,255,0.7) !important; font-weight: 600; padding: 8px 18px !important; border-radius: 8px; transition: 0.3s; display: flex; align-items: center; gap: 8px; text-decoration: none; }
-        .nav-link-custom:hover { color: white !important; background: rgba(255,255,255,0.1); }
-        .nav-link-custom.active { color: white !important; background: rgba(255,255,255,0.2); box-shadow: inset 0 -2px 0 #ffc107; }
-        .header-azul { background-color: var(--azul); color: white; padding: 15px; font-weight: bold; border-radius: 12px 12px 0 0; text-transform: uppercase; }
-        @media (min-width: 993px) { .navbar-menu-center { position: absolute; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; } }
-        @media (max-width: 992px) {
-            .navbar .container-fluid { flex-wrap: wrap; }
-            .navbar-menu-center { display: flex !important; flex-wrap: wrap; gap: 8px; margin-top: 10px; width: 100%; justify-content: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Referências - NIO PESQUISA</title>
+  <link rel="shortcut icon" href="img/favicon1.png" type="image/x-icon">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="css/estilo.css">
+  <style>
+    /* ── NAVBAR ── */
+    .navbar-top-modern {
+      background-color: #002b5c;
+      padding: 12px 20px;
+    }
+    .nav-link-custom {
+      color: rgba(255,255,255,0.7) !important;
+      font-weight: 600;
+      padding: 8px 18px !important;
+      border-radius: 8px;
+      transition: 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+    .nav-link-custom:hover {
+      color: white !important;
+      background: rgba(255,255,255,0.1);
+    }
+    .nav-link-custom.active {
+      color: white !important;
+      background: rgba(255,255,255,0.2);
+      box-shadow: inset 0 -2px 0 #ffc107;
+    }
+    @media (min-width: 993px) {
+      .navbar-menu-center {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 10px;
+      }
+    }
+    @media (max-width: 992px) {
+      .navbar-menu-center {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+        margin: 15px 0;
+        width: 100%;
+        border-top: 1px solid rgba(255,255,255,0.1);
+        padding-top: 10px;
+      }
+    }
+
+    /* ── BODY / LAYOUT ── */
+    body {
+      background: #f0f2f5;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      margin: 0;
+    }
+    .page-wrapper {
+      display: flex;
+      height: calc(100vh - 57px);
+      overflow: hidden;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 280px;
+      min-width: 280px;
+      background: white;
+      border-right: 1px solid #e9ecef;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .sidebar-header {
+      padding: 16px;
+      border-bottom: 1px solid #e9ecef;
+    }
+    .sidebar-header-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #adb5bd;
+      margin-bottom: 10px;
+    }
+    .sidebar-search {
+      width: 100%;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .sidebar-search:focus {
+      border-color: #556ee6;
+    }
+    .org-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px;
+    }
+    .org-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 4px;
+      border: none;
+      background: transparent;
+      width: 100%;
+      text-align: left;
+      font-weight: 600;
+      color: #495057;
+      font-size: 0.9rem;
+    }
+    .org-item:hover {
+      background: #f8f9fa;
+      color: #002b5c;
+    }
+    .org-item.active {
+      background: #eef0fb;
+      color: #556ee6;
+    }
+    .org-badge {
+      background: #e9ecef;
+      color: #6c757d;
+      border-radius: 99px;
+      padding: 2px 8px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .org-item.active .org-badge {
+      background: #556ee6;
+      color: white;
+    }
+    .org-nova-tag {
+      font-size: 0.65rem;
+      background: #fff3cd;
+      color: #856404;
+      border-radius: 4px;
+      padding: 1px 5px;
+      font-weight: 700;
+      margin-left: 4px;
+      flex-shrink: 0;
+    }
+    .sidebar-footer {
+      padding: 12px;
+      border-top: 1px solid #e9ecef;
+    }
+
+    /* ── MAIN PANEL ── */
+    .main-panel {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px 28px;
+    }
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .panel-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #002b5c;
+      margin: 0;
+    }
+    .panel-count {
+      font-size: 0.85rem;
+      color: #6c757d;
+      margin-left: 8px;
+      font-weight: 500;
+    }
+    .panel-search-wrap {
+      margin-bottom: 16px;
+      position: relative;
+    }
+    .panel-search-wrap i {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #adb5bd;
+    }
+    .panel-search {
+      width: 100%;
+      border: 1px solid #dee2e6;
+      border-radius: 10px;
+      padding: 9px 12px 9px 36px;
+      font-size: 0.9rem;
+      outline: none;
+      background: white;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .panel-search:focus {
+      border-color: #556ee6;
+      box-shadow: 0 0 0 3px rgba(85,110,230,0.12);
+    }
+
+    /* ── REF CARD ── */
+    .ref-card {
+      background: white;
+      border-radius: 12px;
+      padding: 16px 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      transition: box-shadow 0.2s, opacity 0.3s, transform 0.3s;
+      animation: slideIn 0.22s ease;
+    }
+    .ref-card:hover {
+      box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+    }
+    .ref-card.removendo {
+      opacity: 0;
+      transform: translateX(20px);
+      pointer-events: none;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .ref-date-badge {
+      background: #eef0fb;
+      color: #556ee6;
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      white-space: nowrap;
+      flex-shrink: 0;
+      min-width: 85px;
+      text-align: center;
+    }
+    .ref-desc {
+      flex: 1;
+      color: #343a40;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+    .ref-delete {
+      border: none;
+      background: none;
+      color: #adb5bd;
+      padding: 4px 8px;
+      border-radius: 6px;
+      transition: 0.2s;
+      flex-shrink: 0;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .ref-delete:hover {
+      background: #fff5f5;
+      color: #e74c3c;
+    }
+    .ref-delete:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #adb5bd;
+    }
+    .empty-state i {
+      font-size: 3rem;
+      margin-bottom: 12px;
+      display: block;
+    }
+    .empty-state p {
+      margin: 0;
+      font-size: 1rem;
+    }
+    .empty-state .sub {
+      font-size: 0.85rem;
+      margin-top: 6px;
+      color: #ced4da;
+    }
+
+    /* ── SKELETON LOADING ── */
+    .skeleton {
+      background: linear-gradient(90deg, #f0f2f5 25%, #e4e6ea 50%, #f0f2f5 75%);
+      background-size: 400% 100%;
+      animation: shimmer 1.4s ease infinite;
+      border-radius: 8px;
+    }
+    @keyframes shimmer {
+      0%   { background-position: 100% 50%; }
+      100% { background-position: 0%   50%; }
+    }
+    .skeleton-card {
+      background: white;
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    /* ── FEEDBACK TOAST ── */
+    .toast-area {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .toast-msg {
+      background: #212529;
+      color: white;
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+      animation: toastIn 0.25s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .toast-msg.sucesso { background: #1a6b3a; }
+    .toast-msg.erro    { background: #c0392b; }
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── MODAL ── */
+    .modal-header-custom {
+      background: #002b5c;
+      color: white;
+      border-radius: 12px 12px 0 0;
+      padding: 18px 24px;
+    }
+    .modal-content {
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.18);
+    }
+    .form-label-custom {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #6c757d;
+      margin-bottom: 5px;
+    }
+    .form-control.is-invalid-custom {
+      border-color: #dc3545;
+      box-shadow: 0 0 0 3px rgba(220,53,69,0.15);
+    }
+    .invalid-feedback-custom {
+      color: #dc3545;
+      font-size: 0.8rem;
+      margin-top: 4px;
+      display: none;
+    }
+    .invalid-feedback-custom.visible {
+      display: block;
+    }
+
+    /* ── RESPONSIVO MOBILE ── */
+    @media (max-width: 991px) {
+      .page-wrapper {
+        flex-direction: column;
+        height: auto;
+        overflow: visible;
+      }
+      .sidebar {
+        width: 100%;
+        min-width: unset;
+        border-right: none;
+        border-bottom: 1px solid #e9ecef;
+        max-height: 220px;
+      }
+      .main-panel {
+        padding: 16px;
+      }
+      .panel-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
 </head>
-<body class="bg-light">
+<body>
 
-    <nav class="navbar navbar-expand-lg navbar-dark shadow-sm sticky-top" style="background-color: var(--azul); padding: 10px 20px;">
-        <div class="container-fluid px-lg-5 position-relative">
-            <span class="navbar-brand fw-bold fs-4">
-                <i class="bi bi-shield-lock-fill me-2 text-warning"></i>NIO <span class="fw-light opacity-75">INTERNO</span>
-            </span>
-            <div class="navbar-menu-center">
-                <a class="nav-link-custom" href="painel.html">Pedidos</a>
-                <a class="nav-link-custom active" href="referencias.html">Referências</a>
-                <a class="nav-link-custom" href="relatorios.html">Relatórios</a>
-            </div>
-            <div class="d-flex align-items-center text-white ms-auto">
-                <span class="me-3 d-none d-sm-inline opacity-75 small">Olá, <strong id="nomeUsuario">...</strong></span>
-                <button onclick="sair()" class="btn btn-sm btn-outline-light rounded-pill px-3 fw-bold">SAIR</button>
-            </div>
-        </div>
-    </nav>
-
-    <div class="container-fluid mt-4 px-lg-5">
-        <div class="row g-4">
-            <div class="col-lg-4">
-                <div class="card border-0 shadow-sm mb-3"><div class="card-body"><label class="fw-bold text-primary mb-2">ORGANIZAÇÃO</label><div class="input-group"><select id="selectOrganizacao" class="form-select fw-bold" onchange="filtrarPorOrg()"><option>Carregando...</option></select><button class="btn btn-success" onclick="abrirModalNovaOrg()">+</button></div></div></div>
-                <div class="card border-0 shadow-sm"><div class="header-azul">Adicionar Referência</div><div class="card-body"><form id="formNovaRef" onsubmit="adicionarReferencia(event)"><div class="mb-3"><label class="small fw-bold">DATA</label><input type="text" id="novaData" class="form-control" placeholder="DD/MM/AAAA" required></div><div class="mb-3"><label class="small fw-bold">DESCRIÇÃO</label><textarea id="novaDescricao" class="form-control" rows="3" required></textarea></div><button type="submit" class="btn btn-primary w-100 fw-bold">SALVAR</button></form></div></div>
-            </div>
-            <div class="col-lg-8">
-                <div class="card border-0 shadow-sm h-100"><div class="header-azul d-flex justify-content-between"><span>REFERÊNCIAS</span><span id="contadorReg" class="badge bg-light text-primary">0</span></div><div class="table-responsive"><table class="table table-hover mb-0"><thead><tr><th>Data</th><th>Descrição</th><th class="text-center">Ação</th></tr></thead><tbody id="tabelaRefs"></tbody></table></div></div>
-            </div>
-        </div>
+  <!-- ═══════════════ NAVBAR ═══════════════ -->
+  <nav class="navbar navbar-expand-lg navbar-dark shadow-sm sticky-top navbar-top-modern">
+    <div class="container-fluid px-lg-5 position-relative">
+      <span class="navbar-brand fw-bold fs-4">
+        <i class="bi bi-shield-lock-fill me-2 text-warning"></i>NIO <span class="fw-light opacity-75">PESQUISA</span>
+      </span>
+      <div class="navbar-menu-center">
+        <a class="nav-link-custom" href="painel.html"><i class="bi bi-list-task"></i> Pedidos</a>
+        <a class="nav-link-custom active" href="referencias.html"><i class="bi bi-book"></i> Referências</a>
+        <a class="nav-link-custom" href="relatorios.html"><i class="bi bi-graph-up-arrow"></i> Relatórios</a>
+      </div>
+      <div class="d-flex align-items-center text-white ms-auto">
+        <span class="me-3 d-none d-sm-inline opacity-75 small">Olá, <strong id="nomeUsuario">...</strong></span>
+        <button onclick="sair()" class="btn btn-sm btn-outline-light rounded-pill px-3 fw-bold">SAIR</button>
+      </div>
     </div>
+  </nav>
 
-    <!-- Modal Nova Org -->
-    <div class="modal fade" id="modalNovaOrg" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content border-0 shadow"><div class="modal-header bg-success text-white"><h5>Nova Organização</h5></div><div class="modal-body"><input type="text" id="nomeNovaOrg" class="form-control text-uppercase"></div><div class="modal-footer"><button class="btn btn-success w-100" onclick="confirmarNovaOrg()">CRIAR</button></div></div></div></div>
+  <!-- ═══════════════ PAGE WRAPPER ═══════════════ -->
+  <div class="page-wrapper">
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        const URL_API = 'https://script.google.com/macros/s/AKfycbwVD_orbvEi-LEMaItNI7Fd4-NvCfEEvER5wGeWvJETnjJqK_4T6eD9IC7mD4bcJYkh/exec';
-        let dadosCompletos = [];
-        const usuarioFull = localStorage.getItem('nio_usuario') || "Servidor";
-        const nFormatado = usuarioFull.split(' ')[0].toLowerCase().replace(/^\w/, c => c.toUpperCase());
-        document.getElementById('nomeUsuario').innerText = nFormatado;
+    <!-- ─── SIDEBAR ─── -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-header-title">Organizações</div>
+        <input
+          type="text"
+          id="buscaOrg"
+          class="sidebar-search"
+          placeholder="&#128269; Buscar organização..."
+          oninput="renderizarSidebar(this.value)"
+          autocomplete="off"
+        >
+      </div>
 
-        function sair() { localStorage.clear(); window.location.href = 'login.html'; }
-        $(document).ready(function(){ $('#novaData').mask('00/00/0000'); carregarTudo(); });
+      <div class="org-list" id="orgList">
+        <!-- orgs injetadas aqui -->
+        <div class="skeleton-card" style="justify-content:center;padding:20px;">
+          <div class="skeleton" style="height:14px;width:60%;border-radius:6px;"></div>
+        </div>
+      </div>
 
-        async function carregarTudo() {
-            const res = await fetch(URL_API + '?acao=listar_referencias_completa');
-            const data = await res.json();
-            if(data.result === 'success') { 
-                dadosCompletos = data.referencias;
-                const orgs = [...new Set(dadosCompletos.map(i => i[0]))].sort();
-                const sel = document.getElementById('selectOrganizacao');
-                sel.innerHTML = '<option value="">SELECIONE...</option>';
-                orgs.forEach(o => { if(o) sel.innerHTML += `<option value="${o}">${o}</option>`; });
-            }
+      <div class="sidebar-footer">
+        <button
+          class="btn btn-sm w-100 fw-bold"
+          style="background:#eef0fb;color:#556ee6;border:none;border-radius:8px;padding:9px;"
+          onclick="abrirModalNovaOrg()"
+        >
+          <i class="bi bi-plus-circle me-1"></i> Nova Organização
+        </button>
+      </div>
+    </aside>
+
+    <!-- ─── MAIN PANEL ─── -->
+    <main class="main-panel" id="mainPanel">
+      <!-- estado inicial: nenhuma org selecionada -->
+      <div class="empty-state" id="emptySelectOrg">
+        <i class="bi bi-arrow-left-circle text-primary" style="opacity:0.35;"></i>
+        <p>Selecione uma organização no menu lateral</p>
+        <p class="sub">As referências aparecerão aqui</p>
+      </div>
+    </main>
+
+  </div>
+
+  <!-- ═══════════════ ÁREA DE TOASTS ═══════════════ -->
+  <div class="toast-area" id="toastArea"></div>
+
+  <!-- ═══════════════ MODAL: NOVA REFERÊNCIA ═══════════════ -->
+  <div class="modal fade" id="modalNovaRef" tabindex="-1" aria-labelledby="modalNovaRefLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header-custom">
+          <h5 class="modal-title mb-0 fw-bold" id="modalNovaRefLabel">
+            <i class="bi bi-plus-circle me-2"></i>Nova Referência
+          </h5>
+        </div>
+        <div class="modal-body p-4">
+
+          <div class="mb-3">
+            <label class="form-label-custom">Organização</label>
+            <select id="selectOrgModal" class="form-select">
+              <!-- preenchido por JS -->
+            </select>
+            <div class="invalid-feedback-custom" id="erroOrg">Selecione uma organização.</div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label-custom">Data <span class="text-muted fw-normal" style="text-transform:none;">(DD/MM/AAAA)</span></label>
+            <input type="text" id="novaData" class="form-control" placeholder="DD/MM/AAAA" maxlength="10" autocomplete="off">
+            <div class="invalid-feedback-custom" id="erroData">Informe uma data válida.</div>
+          </div>
+
+          <div class="mb-1">
+            <label class="form-label-custom">Descrição</label>
+            <textarea id="novaDescricao" class="form-control" rows="4" placeholder="Ex: Portaria 475/SEAD publicada no Diário Oficial de 27/05/1997"></textarea>
+            <div class="invalid-feedback-custom" id="erroDesc">Preencha a descrição.</div>
+          </div>
+
+        </div>
+        <div class="modal-footer px-4 pb-4 pt-0 border-0">
+          <button type="button" class="btn btn-light fw-bold rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" id="btnSalvarRef" class="btn btn-primary fw-bold rounded-pill px-4" onclick="salvarNovaRef()">
+            <span id="btnSalvarTexto"><i class="bi bi-check-lg me-1"></i>Salvar</span>
+            <span id="btnSalvarSpinner" class="d-none">
+              <span class="spinner-border spinner-border-sm me-1"></span>Salvando...
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ MODAL: NOVA ORGANIZAÇÃO ═══════════════ -->
+  <div class="modal fade" id="modalNovaOrg" tabindex="-1" aria-labelledby="modalNovaOrgLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+      <div class="modal-content">
+        <div class="modal-header-custom">
+          <h5 class="modal-title mb-0 fw-bold" id="modalNovaOrgLabel">
+            <i class="bi bi-building me-2"></i>Nova Organização
+          </h5>
+        </div>
+        <div class="modal-body p-4">
+          <label class="form-label-custom">Nome da organização</label>
+          <input
+            type="text"
+            id="nomeNovaOrg"
+            class="form-control text-uppercase fw-bold"
+            placeholder="Ex: SEAD"
+            maxlength="60"
+            autocomplete="off"
+            oninput="this.value = this.value.toUpperCase()"
+          >
+          <div class="invalid-feedback-custom" id="erroNomeOrg">Informe o nome da organização.</div>
+        </div>
+        <div class="modal-footer px-4 pb-4 pt-0 border-0">
+          <button type="button" class="btn btn-light fw-bold rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-success fw-bold rounded-pill px-4" onclick="confirmarNovaOrg()">
+            <i class="bi bi-check-lg me-1"></i>Criar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // ─────────────────────────────────────────────
+    //  CONFIGURAÇÃO
+    // ─────────────────────────────────────────────
+    const URL_API = 'https://script.google.com/macros/s/AKfycbwVD_orbvEi-LEMaItNI7Fd4-NvCfEEvER5wGeWvJETnjJqK_4T6eD9IC7mD4bcJYkh/exec';
+
+    let dadosCompletos = [];   // [[org, data, desc, id], ...]
+    let orgAtiva       = null;
+    let orgsNovas      = [];   // orgs criadas localmente ainda sem referências salvas
+
+    // ─────────────────────────────────────────────
+    //  AUTH + INICIALIZAÇÃO
+    // ─────────────────────────────────────────────
+    (function verificarAuth() {
+      if (localStorage.getItem('nio_token') !== 'logado') {
+        window.location.href = 'login.html';
+      }
+    })();
+
+    function sair() {
+      localStorage.clear();
+      window.location.href = 'login.html';
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      // preenche nome do usuário
+      const usuarioFull = localStorage.getItem('nio_usuario') || 'Servidor';
+      const primeiroNome = usuarioFull.split(' ')[0];
+      const nomeFormatado = primeiroNome.charAt(0).toUpperCase() + primeiroNome.slice(1).toLowerCase();
+      document.getElementById('nomeUsuario').textContent = nomeFormatado;
+
+      // máscara de data no modal
+      aplicarMascaraData(document.getElementById('novaData'));
+
+      carregarReferencias();
+    });
+
+    // ─────────────────────────────────────────────
+    //  API — CARREGAR
+    // ─────────────────────────────────────────────
+    async function carregarReferencias(silencioso = false) {
+      if (!silencioso) mostrarSkeletonSidebar();
+
+      try {
+        const res  = await fetch(URL_API + '?acao=listar_referencias_completa');
+        const data = await res.json();
+
+        if (data.result === 'success') {
+          dadosCompletos = data.referencias || [];
+          // remove orgs novas que já chegaram da API
+          const orgsNaAPI = new Set(dadosCompletos.map(r => r[0]));
+          orgsNovas = orgsNovas.filter(o => !orgsNaAPI.has(o));
+          renderizarSidebar(document.getElementById('buscaOrg').value);
+          // se havia org ativa, re-renderiza refs
+          if (orgAtiva) renderizarRefs(obterFiltroPainelAtual());
+        } else {
+          mostrarToast('Erro ao carregar referências.', 'erro');
+        }
+      } catch (e) {
+        mostrarToast('Falha na conexão com a API.', 'erro');
+      }
+    }
+
+    // ─────────────────────────────────────────────
+    //  SIDEBAR — RENDERIZAR ORGS
+    // ─────────────────────────────────────────────
+    function mostrarSkeletonSidebar() {
+      const list = document.getElementById('orgList');
+      list.innerHTML = [1,2,3,4].map(() => `
+        <div class="skeleton-card">
+          <div class="skeleton" style="height:13px;width:65%;border-radius:6px;"></div>
+          <div class="skeleton" style="height:18px;width:26px;border-radius:99px;margin-left:auto;"></div>
+        </div>
+      `).join('');
+    }
+
+    function renderizarSidebar(filtro = '') {
+      const list = document.getElementById('orgList');
+
+      // coleta orgs da API
+      const orgsAPI = [...new Set(dadosCompletos.map(r => r[0]).filter(Boolean))].sort();
+      // junta com orgs locais novas
+      const todasOrgs = [...new Set([...orgsAPI, ...orgsNovas])].sort();
+
+      const filtradas = filtro
+        ? todasOrgs.filter(o => o.toLowerCase().includes(filtro.toLowerCase()))
+        : todasOrgs;
+
+      if (filtradas.length === 0) {
+        list.innerHTML = `<div class="empty-state" style="padding:30px 10px;">
+          <i class="bi bi-search" style="font-size:1.8rem;"></i>
+          <p style="font-size:0.85rem;">Nenhuma organização encontrada</p>
+        </div>`;
+        return;
+      }
+
+      list.innerHTML = filtradas.map(org => {
+        const count    = dadosCompletos.filter(r => r[0] === org).length;
+        const isAtiva  = org === orgAtiva;
+        const isNova   = orgsNovas.includes(org);
+        return `
+          <button
+            class="org-item${isAtiva ? ' active' : ''}"
+            onclick="selecionarOrg('${escaparAttr(org)}')"
+            title="${escaparAttr(org)}"
+          >
+            <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">
+              ${escaparHTML(org)}
+              ${isNova ? '<span class="org-nova-tag">NOVA</span>' : ''}
+            </span>
+            <span class="org-badge">${count}</span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    // ─────────────────────────────────────────────
+    //  SELECIONAR ORG
+    // ─────────────────────────────────────────────
+    function selecionarOrg(org) {
+      orgAtiva = org;
+      renderizarSidebar(document.getElementById('buscaOrg').value);
+      renderizarRefs();
+    }
+
+    function obterFiltroPainelAtual() {
+      const el = document.getElementById('buscaRefs');
+      return el ? el.value : '';
+    }
+
+    // ─────────────────────────────────────────────
+    //  MAIN PANEL — RENDERIZAR REFERÊNCIAS
+    // ─────────────────────────────────────────────
+    function renderizarRefs(filtro = '') {
+      const panel = document.getElementById('mainPanel');
+
+      if (!orgAtiva) {
+        panel.innerHTML = `
+          <div class="empty-state" id="emptySelectOrg">
+            <i class="bi bi-arrow-left-circle text-primary" style="opacity:0.35;"></i>
+            <p>Selecione uma organização no menu lateral</p>
+            <p class="sub">As referências aparecerão aqui</p>
+          </div>`;
+        return;
+      }
+
+      const refs = dadosCompletos
+        .filter(r =>
+          r[0] === orgAtiva &&
+          (filtro === '' || r[2].toLowerCase().includes(filtro.toLowerCase()))
+        )
+        .sort((a, b) => converterData(b[1]) - converterData(a[1]));
+
+      const isNova = orgsNovas.includes(orgAtiva);
+
+      panel.innerHTML = `
+        <div class="panel-header">
+          <div>
+            <h1 class="panel-title">
+              ${escaparHTML(orgAtiva)}
+              ${isNova ? '<span class="org-nova-tag" style="font-size:0.7rem;vertical-align:middle;">NOVA</span>' : ''}
+              <span class="panel-count" id="contadorRefs">${refs.length} referência${refs.length !== 1 ? 's' : ''}</span>
+            </h1>
+          </div>
+          <button
+            class="btn btn-primary fw-bold rounded-pill px-4"
+            onclick="abrirModalNovaRef()"
+          >
+            <i class="bi bi-plus-lg me-1"></i>Nova Referência
+          </button>
+        </div>
+
+        <div class="panel-search-wrap">
+          <i class="bi bi-search"></i>
+          <input
+            type="text"
+            id="buscaRefs"
+            class="panel-search"
+            placeholder="Buscar nesta organização..."
+            value="${escaparAttr(filtro)}"
+            oninput="renderizarRefs(this.value)"
+            autocomplete="off"
+          >
+        </div>
+
+        <div id="listaRefs">
+          ${refs.length === 0 ? renderizarEmptyRefs(filtro) : refs.map(r => renderizarCard(r)).join('')}
+        </div>
+      `;
+    }
+
+    function renderizarEmptyRefs(filtro) {
+      if (filtro) {
+        return `<div class="empty-state">
+          <i class="bi bi-search"></i>
+          <p>Nenhum resultado para "<strong>${escaparHTML(filtro)}</strong>"</p>
+        </div>`;
+      }
+      return `<div class="empty-state">
+        <i class="bi bi-journal-x"></i>
+        <p>Nenhuma referência cadastrada</p>
+        <p class="sub">Clique em "Nova Referência" para adicionar</p>
+      </div>`;
+    }
+
+    function renderizarCard(ref) {
+      const [org, data, desc, id] = ref;
+      return `
+        <div class="ref-card" id="card-${escaparAttr(id)}">
+          <div class="ref-date-badge">${escaparHTML(data || '—')}</div>
+          <div class="ref-desc">${escaparHTML(desc)}</div>
+          <button
+            class="ref-delete"
+            title="Excluir referência"
+            onclick="excluirRef('${escaparAttr(id)}', this)"
+          >
+            <i class="bi bi-trash3"></i>
+          </button>
+        </div>
+      `;
+    }
+
+    // ─────────────────────────────────────────────
+    //  MODAL: NOVA REFERÊNCIA
+    // ─────────────────────────────────────────────
+    let _modalNovaRef = null;
+
+    function abrirModalNovaRef() {
+      // limpa erros e campos
+      limparErrosModal();
+      document.getElementById('novaData').value       = '';
+      document.getElementById('novaDescricao').value  = '';
+
+      // preenche select de orgs
+      const orgsAPI  = [...new Set(dadosCompletos.map(r => r[0]).filter(Boolean))].sort();
+      const todas    = [...new Set([...orgsAPI, ...orgsNovas])].sort();
+      const sel      = document.getElementById('selectOrgModal');
+      sel.innerHTML  = todas.map(o =>
+        `<option value="${escaparAttr(o)}"${o === orgAtiva ? ' selected' : ''}>${escaparHTML(o)}</option>`
+      ).join('');
+
+      if (!_modalNovaRef) {
+        _modalNovaRef = new bootstrap.Modal(document.getElementById('modalNovaRef'));
+      }
+      _modalNovaRef.show();
+    }
+
+    function limparErrosModal() {
+      ['selectOrgModal','novaData','novaDescricao'].forEach(id => {
+        document.getElementById(id).classList.remove('is-invalid-custom');
+      });
+      ['erroOrg','erroData','erroDesc'].forEach(id => {
+        document.getElementById(id).classList.remove('visible');
+      });
+    }
+
+    function mostrarErro(inputId, feedbackId) {
+      document.getElementById(inputId).classList.add('is-invalid-custom');
+      document.getElementById(feedbackId).classList.add('visible');
+    }
+
+    // ─────────────────────────────────────────────
+    //  SALVAR NOVA REFERÊNCIA
+    // ─────────────────────────────────────────────
+    async function salvarNovaRef() {
+      limparErrosModal();
+
+      const org  = document.getElementById('selectOrgModal').value.trim();
+      const data = document.getElementById('novaData').value.trim();
+      const desc = document.getElementById('novaDescricao').value.trim();
+
+      let valido = true;
+
+      if (!org) {
+        mostrarErro('selectOrgModal', 'erroOrg');
+        valido = false;
+      }
+      if (!validarData(data)) {
+        mostrarErro('novaData', 'erroData');
+        valido = false;
+      }
+      if (!desc) {
+        mostrarErro('novaDescricao', 'erroDesc');
+        valido = false;
+      }
+
+      if (!valido) return;
+
+      // estado de loading no botão
+      const btnSalvar  = document.getElementById('btnSalvarRef');
+      const btnTexto   = document.getElementById('btnSalvarTexto');
+      const btnSpinner = document.getElementById('btnSalvarSpinner');
+      btnSalvar.disabled  = true;
+      btnTexto.classList.add('d-none');
+      btnSpinner.classList.remove('d-none');
+
+      const usuarioFull = localStorage.getItem('nio_usuario') || 'Servidor';
+
+      try {
+        await fetch(URL_API, {
+          method: 'POST',
+          mode:   'no-cors',
+          body:   JSON.stringify({
+            acao:         'nova_referencia',
+            organizacao:  org,
+            data:         data,
+            referencia:   desc,
+            responsavel:  usuarioFull
+          })
+        });
+
+        // adiciona localmente com ID temporário
+        const idTemp = 'temp_' + Date.now();
+        dadosCompletos.push([org, data, desc, idTemp]);
+
+        // remove da lista de orgs novas se estava lá
+        orgsNovas = orgsNovas.filter(o => o !== org);
+
+        // fecha modal
+        _modalNovaRef.hide();
+
+        // seleciona a org e re-renderiza
+        orgAtiva = org;
+        renderizarSidebar(document.getElementById('buscaOrg').value);
+        renderizarRefs(obterFiltroPainelAtual());
+
+        mostrarToast('Referência adicionada com sucesso!', 'sucesso');
+
+        // recarrega da API após 2s para obter ID real
+        setTimeout(() => carregarReferencias(true), 2000);
+
+      } catch (e) {
+        mostrarToast('Erro ao salvar. Tente novamente.', 'erro');
+      } finally {
+        btnSalvar.disabled  = false;
+        btnTexto.classList.remove('d-none');
+        btnSpinner.classList.add('d-none');
+      }
+    }
+
+    // ─────────────────────────────────────────────
+    //  EXCLUIR REFERÊNCIA
+    // ─────────────────────────────────────────────
+    async function excluirRef(id, btn) {
+      // troca ícone para spinner
+      btn.disabled   = true;
+      btn.innerHTML  = '<span class="spinner-border spinner-border-sm"></span>';
+
+      try {
+        await fetch(URL_API, {
+          method: 'POST',
+          mode:   'no-cors',
+          body:   JSON.stringify({ acao: 'excluir_referencia', id: id })
+        });
+
+        // anima o card e remove do array
+        const card = document.getElementById('card-' + id);
+        if (card) {
+          card.classList.add('removendo');
+          setTimeout(() => {
+            card.remove();
+            atualizarContadorRefs();
+          }, 320);
         }
 
-        function filtrarPorOrg() {
-            const org = $('#selectOrganizacao').val();
-            const filtrados = dadosCompletos.filter(i => i[0] === org);
-            $('#contadorReg').text(filtrados.length);
-            document.getElementById('tabelaRefs').innerHTML = filtrados.map(i => `<tr><td>${i[1]}</td><td>${i[2]}</td><td class="text-center"><button class="btn btn-sm text-danger border-0" onclick="excluirRef('${i[3]}')"><i class="bi bi-trash-fill"></i></button></td></tr>`).join('');
-        }
+        // remove de dadosCompletos
+        dadosCompletos = dadosCompletos.filter(r => r[3] !== id);
 
-        async function adicionarReferencia(e) {
-            e.preventDefault();
-            const org = $('#selectOrganizacao').val();
-            if(!org) return alert("Selecione a org.");
-            const dados = { acao: 'nova_referencia', organizacao: org, data: $('#novaData').val(), referencia: $('#novaDescricao').val(), responsavel: usuarioFull };
-            await fetch(URL_API, { method: 'POST', mode: 'no-cors', body: JSON.stringify(dados) });
-            location.reload();
-        }
+        // atualiza badge da org no sidebar
+        renderizarSidebar(document.getElementById('buscaOrg').value);
 
-        async function excluirRef(id) { if(confirm("Excluir?")) { await fetch(URL_API, { method: 'POST', mode: 'no-cors', body: JSON.stringify({acao:'excluir_referencia', id:id}) }); location.reload(); } }
-        function abrirModalNovaOrg() { new bootstrap.Modal(document.getElementById('modalNovaOrg')).show(); }
-        function confirmarNovaOrg() { const n = $('#nomeNovaOrg').val().toUpperCase(); if(n) { $('#selectOrganizacao').append(`<option value="${n}">${n}</option>`).val(n); bootstrap.Modal.getInstance(document.getElementById('modalNovaOrg')).hide(); } }
-    </script>
+        mostrarToast('Referência excluída.', 'sucesso');
+
+      } catch (e) {
+        btn.disabled   = false;
+        btn.innerHTML  = '<i class="bi bi-trash3"></i>';
+        mostrarToast('Erro ao excluir. Tente novamente.', 'erro');
+      }
+    }
+
+    function atualizarContadorRefs() {
+      const lista    = document.getElementById('listaRefs');
+      const contador = document.getElementById('contadorRefs');
+      if (!lista || !contador) return;
+
+      const cards = lista.querySelectorAll('.ref-card');
+      const n = cards.length;
+
+      contador.textContent = n + ' referência' + (n !== 1 ? 's' : '');
+
+      if (n === 0) {
+        lista.innerHTML = renderizarEmptyRefs(obterFiltroPainelAtual());
+      }
+    }
+
+    // ─────────────────────────────────────────────
+    //  MODAL: NOVA ORGANIZAÇÃO
+    // ─────────────────────────────────────────────
+    let _modalNovaOrg = null;
+
+    function abrirModalNovaOrg() {
+      document.getElementById('nomeNovaOrg').value = '';
+      document.getElementById('erroNomeOrg').classList.remove('visible');
+      document.getElementById('nomeNovaOrg').classList.remove('is-invalid-custom');
+
+      if (!_modalNovaOrg) {
+        _modalNovaOrg = new bootstrap.Modal(document.getElementById('modalNovaOrg'));
+      }
+      _modalNovaOrg.show();
+
+      // foca no input após abrir
+      document.getElementById('modalNovaOrg').addEventListener('shown.bs.modal', () => {
+        document.getElementById('nomeNovaOrg').focus();
+      }, { once: true });
+    }
+
+    function confirmarNovaOrg() {
+      const nome = document.getElementById('nomeNovaOrg').value.trim().toUpperCase();
+      const erroEl = document.getElementById('erroNomeOrg');
+
+      document.getElementById('nomeNovaOrg').classList.remove('is-invalid-custom');
+      erroEl.classList.remove('visible');
+
+      if (!nome) {
+        document.getElementById('nomeNovaOrg').classList.add('is-invalid-custom');
+        erroEl.classList.add('visible');
+        return;
+      }
+
+      // verifica se já existe
+      const jaExiste =
+        dadosCompletos.some(r => r[0] === nome) || orgsNovas.includes(nome);
+
+      if (jaExiste) {
+        erroEl.textContent = 'Esta organização já existe.';
+        document.getElementById('nomeNovaOrg').classList.add('is-invalid-custom');
+        erroEl.classList.add('visible');
+        return;
+      }
+
+      erroEl.textContent = 'Informe o nome da organização.';
+      orgsNovas.push(nome);
+
+      _modalNovaOrg.hide();
+
+      // seleciona a nova org
+      orgAtiva = nome;
+      renderizarSidebar(document.getElementById('buscaOrg').value);
+      renderizarRefs();
+
+      mostrarToast(`Organização "${nome}" criada. Adicione referências para salvá-la.`, 'sucesso');
+    }
+
+    // ─────────────────────────────────────────────
+    //  MÁSCARA DE DATA (vanilla JS)
+    // ─────────────────────────────────────────────
+    function aplicarMascaraData(input) {
+      input.addEventListener('input', () => {
+        let v = input.value.replace(/\D/g, '').slice(0, 8);
+        if (v.length >= 5)      v = v.slice(0,2) + '/' + v.slice(2,4) + '/' + v.slice(4);
+        else if (v.length >= 3) v = v.slice(0,2) + '/' + v.slice(2);
+        input.value = v;
+      });
+    }
+
+    function validarData(str) {
+      if (!str || str.length !== 10) return false;
+      const parts = str.split('/');
+      if (parts.length !== 3) return false;
+      const [d, m, a] = parts.map(Number);
+      if (isNaN(d) || isNaN(m) || isNaN(a)) return false;
+      if (d < 1 || d > 31 || m < 1 || m > 12 || a < 1900) return false;
+      return true;
+    }
+
+    // ─────────────────────────────────────────────
+    //  CONVERTER DATA DD/MM/AAAA → Date (para ordenação)
+    // ─────────────────────────────────────────────
+    function converterData(str) {
+      if (!str) return new Date(0);
+      const parts = str.split('/');
+      if (parts.length !== 3) return new Date(0);
+      const [d, m, a] = parts;
+      return new Date(Number(a), Number(m) - 1, Number(d));
+    }
+
+    // ─────────────────────────────────────────────
+    //  TOAST
+    // ─────────────────────────────────────────────
+    function mostrarToast(msg, tipo = '') {
+      const area  = document.getElementById('toastArea');
+      const toast = document.createElement('div');
+      toast.className = 'toast-msg' + (tipo ? ' ' + tipo : '');
+
+      const icone = tipo === 'sucesso'
+        ? '<i class="bi bi-check-circle-fill"></i>'
+        : tipo === 'erro'
+          ? '<i class="bi bi-x-circle-fill"></i>'
+          : '<i class="bi bi-info-circle-fill"></i>';
+
+      toast.innerHTML = icone + ' ' + escaparHTML(msg);
+      area.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity   = '0';
+        toast.style.transform = 'translateY(10px)';
+        toast.style.transition = 'opacity 0.3s, transform 0.3s';
+        setTimeout(() => toast.remove(), 350);
+      }, 3500);
+    }
+
+    // ─────────────────────────────────────────────
+    //  UTILS
+    // ─────────────────────────────────────────────
+    function escaparHTML(str) {
+      if (str == null) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function escaparAttr(str) {
+      if (str == null) return '';
+      return String(str).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    }
+  </script>
 </body>
 </html>

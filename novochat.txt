@@ -107,6 +107,36 @@
 - Página preservada no auto-refresh: aplicarFiltros(false) na atualização automática/manual
   mantém a página atual. resetarPagina=true apenas em mudanças de filtro pelo usuário.
 
+"Reescrita relatorios.html"
+- html2canvas removido; PDF gerado 100% via jsPDF (texto real, selecionável, rápido)
+- Cache sessionStorage compartilhado com painel.html (5 min)
+- 5 KPIs: Total | Atendidos | Não Encontrados | Taxa de Resolução % | Em Análise
+- Novo gráfico: evolução mensal (últimos 6 meses) com linha dupla Total vs Concluídos
+- Gráfico pizza → doughnut com tooltip mostrando valor e %
+- Ranking com medalhas 🥇🥈🥉, badges coloridos e barra de progresso proporcional
+- Exportação CSV com BOM UTF-8 (compatível Excel), separador ponto-e-vírgula
+- Checkbox "Período completo" desabilita filtros mês/ano e usa todos os dados
+- Contador "Total geral no sistema" independente do filtro ativo
+- TMA removido (campo p[9] é reservado/vazio)
+- Código duplicado eliminado: loop único em calcularStats()
+- API chamada com &t=Date.now()
+- Navbar corrigida: "NIO INTERNO" → "NIO PESQUISA"
+
+"Reescrita referencias.html"
+- jQuery e jquery.mask removidos (vanilla JS puro)
+- location.reload() eliminado — atualizações em memória com re-render
+- confirm() e alert() eliminados — feedback visual por toast + CSS inline
+- Navbar corrigida: "NIO INTERNO" → "NIO PESQUISA"
+- Novo layout: sidebar (280px) + painel principal
+  - Sidebar: lista de orgs clicável com badge de contagem e busca em tempo real
+  - Painel: cabeçalho dinâmico, busca local, cards visuais com animação slideIn
+- Exclusão: botão vira spinner → card some com fade (sem reload)
+- Adição: aparece instantaneamente; após 2s recarrega API para substituir ID temp
+- Toast system no canto inferior direito (sucesso verde / erro vermelho)
+- Skeleton loading no sidebar durante carregamento inicial
+- Nova Org: cria localmente com tag "(NOVA)" até 1ª referência ser salva
+- Responsivo: sidebar vira faixa horizontal no mobile
+
 "Observações importantes"
 - O GS usa doGet() para leituras e doPost() para gravações
 - Posts usam mode: 'no-cors' — não é possível ler a resposta do POST diretamente
