@@ -91,10 +91,44 @@
             opacity: 0.65;
         }
 
-        @media (min-width: 993px) { 
-            .navbar-menu-center { position: absolute; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; } 
+        /* ---- Layout tela cheia sem rolagem ---- */
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+        .main-content {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            padding-top: 0.75rem;
+            padding-bottom: 0.5rem;
+            overflow: hidden;
+        }
+        .tabela-wrapper {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+        }
+        /* Cards KPI um pouco mais compactos para caber na tela */
+        .card-resumo {
+            min-height: 100px;
+            padding: 14px 18px;
+        }
+        .kpi-value { font-size: 2.6rem; }
+
+        @media (min-width: 993px) {
+            .navbar-menu-center { position: absolute; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; }
         }
         @media (max-width: 992px) {
+            html, body { overflow: auto; height: auto; }
+            body { display: block; }
+            .main-content { height: auto; overflow: visible; flex: none; }
+            .tabela-wrapper { overflow: visible; min-height: unset; }
             .navbar-menu-center { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 15px 0; width: 100%; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; }
             .table thead { display: none; }
             .table tr { display: block; margin-bottom: 15px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #eee; }
@@ -125,14 +159,14 @@
         </div>
     </nav>
 
-    <div class="container-fluid mt-4 px-lg-5">
-        <div class="d-flex justify-content-between align-items-end mb-4">
+    <div class="container-fluid px-lg-5 main-content">
+        <div class="d-flex justify-content-between align-items-end mb-2">
             <div><h2 class="fw-bold text-dark m-0">Gestão de Pedidos</h2><small class="text-muted"><i class="bi bi-circle-fill text-success small me-1"></i> Atualização automática ativa</small></div>
             <button class="btn btn-success fw-bold shadow-sm px-4 py-2 rounded-3" id="btnNovoRegistro" onclick="abrirModalNovo()">+ NOVO PEDIDO</button>
         </div>
 
         <!-- CARDS KPI COM FILTROS CORRIGIDOS -->
-        <div class="row g-3 mb-4">
+        <div class="row g-2 mb-2">
             <div class="col-6 col-md-3">
                 <div class="card-resumo bg-pendente shadow-sm" id="cardPendentes" onclick="filtrarPorCard('EM ANÁLISE')" style="cursor: pointer;">
                     <div>
@@ -172,7 +206,7 @@
         </div>
 
         <!-- BARRA DE FILTROS -->
-        <div class="card shadow-sm border-0 mb-4 rounded-3">
+        <div class="card shadow-sm border-0 mb-2 rounded-3">
             <div class="card-body p-3">
                 <div class="row g-2 align-items-center">
                     <div class="col-12 col-md">
@@ -197,7 +231,7 @@
         </div>
 
         <!-- TABELA PEDIDOS -->
-        <div class="table-responsive bg-white shadow-sm rounded-3">
+        <div class="table-responsive bg-white shadow-sm rounded-3 tabela-wrapper">
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light text-uppercase small fw-bold">
                     <tr>
@@ -216,11 +250,15 @@
         </div>
 
         <!-- PAGINAÇÃO -->
-        <div class="d-flex justify-content-between align-items-center mt-3">
-            <span class="text-muted small">Página <span id="paginaAtual" class="fw-bold text-primary">1</span></span>
-            <div class="btn-group shadow-sm">
-                <button class="btn btn-white btn-sm border" onclick="mudarPagina(-1)">Anterior</button>
-                <button class="btn btn-white btn-sm border" onclick="mudarPagina(1)">Próxima</button>
+        <div class="d-flex justify-content-between align-items-center mt-2 mb-1">
+            <span class="text-muted small">Página <strong id="paginaAtual" class="text-primary">1</strong> de <strong id="totalPaginasLabel" class="text-secondary">1</strong></span>
+            <div class="d-flex gap-2">
+                <button id="btnAnterior" class="btn btn-outline-secondary btn-sm px-3 fw-semibold" onclick="mudarPagina(1)">
+                    <i class="bi bi-chevron-left me-1"></i>Anterior
+                </button>
+                <button id="btnProxima" class="btn btn-primary btn-sm px-3 fw-semibold" onclick="mudarPagina(-1)">
+                    Próxima<i class="bi bi-chevron-right ms-1"></i>
+                </button>
             </div>
         </div>
     </div>
@@ -235,6 +273,8 @@
                 </div>
                 <div class="modal-body p-4">
                     <input type="hidden" id="editId">
+                    <input type="hidden" id="editResponsavelOriginal">
+                    <input type="hidden" id="editStatusOriginal">
                     <div class="mb-3 p-3 bg-light rounded border small">
                         <strong>Solicitante:</strong> <span id="viewNome"></span><br>
                         <strong>WhatsApp:</strong> <span id="viewZap"></span><br>
@@ -422,7 +462,7 @@
                     ultimaCarga = Date.now();
                     salvarCache();
                     atualizarContadores(dadosGlobais);
-                    aplicarFiltros();
+                    aplicarFiltros(false); // preserva a página atual
                     console.log('✅ Pedidos carregados:', dadosGlobais.length);
                 }
             } catch (e) {
@@ -438,21 +478,28 @@
         // ============================================
         // FILTROS FUNCIONAIS
         // ============================================
-        function aplicarFiltros() {
+        function aplicarFiltros(resetarPagina = true) {
             const termo = document.getElementById('inputPesquisa').value.toLowerCase();
             const status = document.getElementById('filtroStatus').value;
-            
+
             filtroAtivo = status;
-            
+
             dadosFiltrados = dadosGlobais.filter(p => {
                 const correspondeStatus = status === 'TODOS' || p[6] === status;
-                const correspondeTexto = p[2].toLowerCase().includes(termo) || 
+                const correspondeTexto = p[2].toLowerCase().includes(termo) ||
                                        p[3].toLowerCase().includes(termo) ||
                                        p[4].toLowerCase().includes(termo);
                 return correspondeStatus && correspondeTexto;
             });
-            
-            paginaAtual = 1;
+
+            if (resetarPagina) {
+                paginaAtual = 1;
+            } else {
+                // Garante que a página atual ainda é válida após atualização
+                const totalPaginas = Math.ceil(dadosFiltrados.length / itensPorPagina) || 1;
+                if (paginaAtual > totalPaginas) paginaAtual = totalPaginas;
+            }
+
             renderizarTabela();
             atualizarSeleçãoCards();
         }
@@ -486,8 +533,14 @@
             const inicio = (paginaAtual - 1) * itensPorPagina;
             const paginaDados = dadosFiltrados.slice(inicio, inicio + itensPorPagina);
             
+            const totalPaginas = Math.ceil(dadosFiltrados.length / itensPorPagina) || 1;
             document.getElementById('paginaAtual').innerText = paginaAtual;
-            
+            document.getElementById('totalPaginasLabel').innerText = totalPaginas;
+            // Anterior = vai para registros mais antigos (página maior)
+            document.getElementById('btnAnterior').disabled = paginaAtual >= totalPaginas;
+            // Próxima = vai para registros mais recentes (página menor)
+            document.getElementById('btnProxima').disabled = paginaAtual <= 1;
+
             if (paginaDados.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="8" class="text-center py-5 text-muted"><i class="bi bi-inbox"></i> Nenhum pedido encontrado</td></tr>';
                 return;
@@ -536,6 +589,8 @@
             
             document.getElementById('editId').value = id;
             document.getElementById('editStatus').value = p[6];
+            document.getElementById('editStatusOriginal').value = p[6];
+            document.getElementById('editResponsavelOriginal').value = p[7] || '';
             document.getElementById('editRetorno').value = p[10] || "";
             document.getElementById('editRetorno').disabled = p[6] !== 'EM ANÁLISE';
             document.getElementById('viewNome').innerText = p[2];
@@ -550,22 +605,28 @@
             const id = document.getElementById('editId').value;
             const status = document.getElementById('editStatus').value;
             const retorno = document.getElementById('editRetorno').value;
-            
+            const statusOriginal = document.getElementById('editStatusOriginal').value;
+            const responsavelOriginal = document.getElementById('editResponsavelOriginal').value;
+
+            // Só atribui o usuário atual como responsável se o pedido estava "EM ANÁLISE"
+            // (primeira vez sendo atendido). Caso contrário, mantém o responsável original.
+            const responsavel = (statusOriginal === 'EM ANÁLISE') ? usuarioFull : (responsavelOriginal || usuarioFull);
+
             if (!id || !status) return alert('Preencha todos os campos obrigatórios');
-            
+
             const btnSalvar = document.getElementById('btnSalvarModal');
             btnSalvar.disabled = true;
             btnSalvar.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Salvando...';
-            
+
             try {
                 const dados = {
                     acao: 'atualizar_pedido',
                     id: id,
                     status: status,
                     retorno: retorno,
-                    responsavel: usuarioFull
+                    responsavel: responsavel
                 };
-                
+
                 await fetch(URL_API, {
                     method: 'POST',
                     mode: 'no-cors',
@@ -577,7 +638,7 @@
                 if (idx !== -1) {
                     dadosGlobais[idx][6] = status;
                     dadosGlobais[idx][10] = retorno;
-                    dadosGlobais[idx][7] = usuarioFull;
+                    dadosGlobais[idx][7] = responsavel;
                 }
                 atualizarContadores(dadosGlobais);
                 salvarCache();
