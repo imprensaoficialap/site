@@ -404,6 +404,12 @@ function salvarProgressoRaspagem(proximoAno) {
 // Configure: Triggers → roboDiarioOficial → Por hora → 23h–00h
 // =============================================================
 
+// Trigger: a cada 30 minutos — só executa entre 08h e 12h (Brasília)
+function roboDiarioOficialAgendado() {
+  var hora = parseInt(Utilities.formatDate(new Date(), "GMT-3", "HH"));
+  if (hora >= 8 && hora < 12) { roboDiarioOficial(); }
+}
+
 function roboDiarioOficial() {
   var agora = new Date();
   var ano   = agora.getFullYear();

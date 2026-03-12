@@ -16,7 +16,7 @@
 "Arquitetura"
 - Frontend: arquivos .html na raiz + css/estilo.css + img/
 - Backend: bancodedadosPortal.gs (cópia local — real está no GAS)
-- URL da API ATUAL: https://script.google.com/macros/s/AKfycbwVD_orbvEi-LEMaItNI7Fd4-NvCfEEvER5wGeWvJETnjJqK_4T6eD9IC7mD4bcJYkh/exec
+- URL da API ATUAL: https://script.google.com/macros/s/AKfycbzlzpbrn12nS-jS7iIwJ_j6X31q9tLyyVImkLaMbgOgd8mwUnNQXC3tWWpswZAPp1UC/exec
 - ID da Planilha Oficial: 1zFEf9Sq9FQDLvsEbxzItWa0Qn0NIkQiXQrdcVuCbSMA
 - GAS Script ID: 11s9ZBQldiDa-OnpHh8xdbQhWiQiPPJnJ4rQXH-8B18wmapzSxFdcBjiA
 - bancodedadosPortal.xlsx na raiz = conta pessoal antiga, ignorar
@@ -55,19 +55,11 @@
 - Ao alterar o GAS: Salvar → Implantar → Gerenciar implantações → Editar → Nova versão → Implantar
 - A URL do GAS só muda se criar um NOVO deploy — nesse caso atualizar todos os HTMLs e este arquivo
 
-"PROJETO ACERVO DOE — status e pendências"
-- Página: diariooficial.html (pronta, aguardando dados)
-- Fonte: sead.portal.ap.gov.br/diario_oficial/{ano}/{mes_abrev} (jan,fev,...,dez)
-- PDF: seadantigo.portal.ap.gov.br/diario/DOEn{NUMERO}.pdf
-- Tabela SEAD: tds[0]=data_pub | tds[1]=data_circ | tds[2]=numero+link
-- GAS precisa dos handlers: acao=acervo_doe (listar por ano/mes) e acao=ultima_doe
-- Coleta via browser console (SEAD bloqueia IPs do Google/GAS)
-  → Script salva progresso em localStorage('doe_progresso'), lotes de 5 anos, saída CSV BOM UTF-8
-  → Servidor SEAD instável (502). Rodar de madrugada/fim de semana
-  → Coleta NÃO concluída — CSVs parciais ainda não importados para planilha
+"PROJETO ACERVO DOE — status"
+- Página: diariooficial.html (funcionando)
+- Dados coletados via browser console (fetch no sead.portal.ap.gov.br) em lotes de ~10 anos
+- Coleta concluída: 1964 (jul) até 2026 (mar) — importados na aba acervo_doe
+- GAS handlers ativos: acao=acervo_doe (listar por ano/mes) e acao=ultima_doe
+- Robô automático: roboDiarioOficialAgendado — trigger a cada 30 min, executa entre 08h-12h
+- Robô raspa sead.portal.ap.gov.br e adiciona novas edições na planilha automaticamente
 - Encoding: usar resp.text() puro — NÃO usar TextDecoder('iso-8859-1')
-
-"Pendências abertas"
-1. Concluir coleta DOE: rodar script por lotes no console de sead.portal.ap.gov.br
-2. Importar CSVs para aba acervo_doe da planilha
-3. Adicionar handlers acervo_doe e ultima_doe no GAS + novo deploy
