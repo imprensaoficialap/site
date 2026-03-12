@@ -63,3 +63,6 @@
 - Robô automático: roboDiarioOficialAgendado — trigger a cada 30 min, executa entre 08h-12h
 - Robô raspa sead.portal.ap.gov.br e adiciona novas edições na planilha automaticamente
 - Encoding: usar resp.text() puro — NÃO usar TextDecoder('iso-8859-1')
+- Card "Última Edição Publicada": usa acao=acervo_doe do mês atual (edicoes[0] = maior nº), NÃO usa ultima_doe
+- getUltimaEdicao() no GAS foi atualizado para usar data_pub (DD/MM/YYYY) como critério principal
+- bancodedadosPortal.gs local está sempre atualizado — ao alterar, copiar tudo e fazer nova versão no GAS

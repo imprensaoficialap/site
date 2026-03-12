@@ -600,21 +600,39 @@ function filtrarLocal() {
 }
 
 /* ============================================================
-   CARD ÚLTIMA EDIÇÃO — API real GAS
+   CARD ÚLTIMA EDIÇÃO — usa acervo_doe (já funciona corretamente)
+   Busca o mês atual; se vazio, tenta o anterior
    ============================================================ */
 function configurarUltimaEdicao() {
-  fetch(`${URL_API}?acao=ultima_doe&t=${Date.now()}`)
-    .then(r => r.json())
-    .then(data => {
-      if (data.result === 'success') {
-        document.getElementById('ueNumero').textContent = `DOE nº ${data.n}`;
-        document.getElementById('ueDatas').textContent  =
-          `Publicação: ${data.pub}  ·  Circulação: ${data.circ}`;
-        document.getElementById('ueBtn').href = data.url;
-      }
-    })
-    .catch(() => {});
+  const agora = new Date();
+  const anoAtual = agora.getFullYear();
+  const mesAtual = agora.getMonth() + 1;
 
+  function buscarMes(ano, mes) {
+    return fetch(`${URL_API}?acao=acervo_doe&ano=${ano}&mes=${mes}&t=${Date.now()}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.result === 'success' && data.edicoes && data.edicoes.length > 0) {
+          // edicoes já vem ordenado do maior para o menor número
+          const ultima = data.edicoes[0];
+          document.getElementById('ueNumero').textContent = `DOE nº ${ultima.n}`;
+          document.getElementById('ueDatas').textContent  =
+            `Publicação: ${ultima.pub}  ·  Circulação: ${ultima.circ}`;
+          document.getElementById('ueBtn').href = ultima.url;
+          return true;
+        }
+        return false;
+      });
+  }
+
+  buscarMes(anoAtual, mesAtual).then(ok => {
+    if (!ok) {
+      // Tenta o mês anterior
+      const mesAnt = mesAtual === 1 ? 12 : mesAtual - 1;
+      const anoAnt = mesAtual === 1 ? anoAtual - 1 : anoAtual;
+      buscarMes(anoAnt, mesAnt);
+    }
+  }).catch(() => {});
 }
 
 /* ============================================================
