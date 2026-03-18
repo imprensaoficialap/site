@@ -560,7 +560,7 @@ function renderizarTabela(edicoes, ano, mes) {
   const header = document.getElementById('tabelaHeaderTxt');
 
   header.textContent = `${MESES[mes - 1]} / ${ano}`;
-  badge.textContent  = `${edicoes.length} edição${edicoes.length !== 1 ? 'ões' : ''}`;
+  badge.textContent  = `${edicoes.length} ${edicoes.length !== 1 ? 'edições' : 'edição'}`;
 
   if (edicoes.length === 0) {
     tabela.style.display = 'none';
