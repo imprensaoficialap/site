@@ -246,17 +246,35 @@ function getUltimaEdicao() {
   var dados = sheet.getDataRange().getDisplayValues();
   if (dados.length < 2) return outputJSON({ result: "empty" });
 
-  // Última linha inserida = edição mais recente
-  var u = dados[dados.length - 1];
-  return outputJSON({
-    result: "success",
-    n:    parseInt(u[0]),
-    pub:  u[1],
-    circ: u[2],
-    ano:  parseInt(u[3]),
-    mes:  parseInt(u[4]),
-    url:  u[5]
-  });
+  // Usa data_pub (DD/MM/YYYY) como critério principal — mais confiável que as colunas ano/mes
+  var melhor = null;
+  var melhorVal = -1;
+  var melhorN = -1;
+
+  for (var i = 1; i < dados.length; i++) {
+    var n   = parseInt(dados[i][0]);
+    var pub = (dados[i][1] || '').trim();
+    if (isNaN(n) || !pub) continue;
+
+    var partes = pub.split('/');
+    if (partes.length !== 3) continue;
+
+    var dia = parseInt(partes[0]);
+    var mes = parseInt(partes[1]);
+    var ano = parseInt(partes[2]);
+    if (isNaN(dia) || isNaN(mes) || isNaN(ano)) continue;
+
+    var val = ano * 10000 + mes * 100 + dia;
+
+    if (val > melhorVal || (val === melhorVal && n > melhorN)) {
+      melhorVal = val;
+      melhorN   = n;
+      melhor    = { n: n, pub: pub, circ: dados[i][2], ano: ano, mes: mes, url: dados[i][5] };
+    }
+  }
+
+  if (!melhor) return outputJSON({ result: "empty" });
+  return outputJSON({ result: "success", n: melhor.n, pub: melhor.pub, circ: melhor.circ, ano: melhor.ano, mes: melhor.mes, url: melhor.url });
 }
 
 
@@ -403,6 +421,12 @@ function salvarProgressoRaspagem(proximoAno) {
 // ROBÔ DIÁRIO — atualiza automaticamente via trigger
 // Configure: Triggers → roboDiarioOficial → Por hora → 23h–00h
 // =============================================================
+
+// Trigger: a cada 30 minutos — só executa entre 08h e 12h (Brasília)
+function roboDiarioOficialAgendado() {
+  var hora = parseInt(Utilities.formatDate(new Date(), "GMT-3", "HH"));
+  if (hora >= 8 && hora < 12) { roboDiarioOficial(); }
+}
 
 function roboDiarioOficial() {
   var agora = new Date();
