@@ -421,11 +421,12 @@
                                 Ver acervo completo (desde 1964) <i class="bi bi-arrow-right"></i>
                             </a>
 
-                            <div class="mt-3 pt-3 border-top">
+                            <div class="mt-3 pt-3 border-top text-center">
                                 <p class="small text-muted fw-bold mb-2">Baixe o App do Diário Oficial</p>
-                                <a href="https://play.google.com/store/apps/details?id=br.com.ionews.amapa.ap.boletim" target="_blank">
-                                    <img src="img/icone-app.png" alt="App" class="app-icon" style="width: 100px; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
+                                <a href="#" onclick="abrirLoja(event)" title="Baixar o app">
+                                    <img src="img/icone-app.png" alt="Diário AP" class="app-icon" style="width: 80px; border-radius: 18px; box-shadow: 0 6px 18px rgba(0,0,0,0.18);">
                                 </a>
+                                <p class="text-muted mt-2" style="font-size:0.75rem;">Toque na logo para baixar</p>
                             </div>
                         </div>
                     </div>
@@ -502,6 +503,16 @@
         });
 
         window.onload = atualizarBotaoDiario;
+
+        function abrirLoja(e) {
+            e.preventDefault();
+            const ua = navigator.userAgent || '';
+            if (/iPhone|iPad|iPod/i.test(ua)) {
+                window.open('https://apps.apple.com/br/app/di%C3%A1rio-ap/id6744703317', '_blank');
+            } else {
+                window.open('https://play.google.com/store/apps/details?id=br.com.ionews.amapa.ap.boletim', '_blank');
+            }
+        }
     </script>
 </body>
 </html>
