@@ -55,6 +55,13 @@
 - Ao alterar o GAS: Salvar → Implantar → Gerenciar implantações → Editar → Nova versão → Implantar
 - A URL do GAS só muda se criar um NOVO deploy — nesse caso atualizar todos os HTMLs e este arquivo
 
+"Performance — otimizações aplicadas em 26/03/2026"
+- index.html: scripts dados.js/noticias.js movidos para fim do body (eram bloqueantes no head)
+- index.html: meta tags no-cache removidas (browser agora usa cache entre visitas)
+- index.html: preconnect adicionado para cdn.jsdelivr.net e Google Fonts
+- index.html: fetchpriority=high no banner principal; loading=lazy nos banners secundários
+- Imagens grandes ainda não comprimidas (banner-vintage.png 3MB, capa-diario.png 2.2MB, etc.) — ganho potencial futuro
+
 "PROJETO ACERVO DOE — status"
 - Página: diariooficial.html (funcionando)
 - Dados coletados via browser console (fetch no sead.portal.ap.gov.br) em lotes de ~10 anos
@@ -66,3 +73,11 @@
 - Card "Última Edição Publicada": usa acao=acervo_doe do mês atual (edicoes[0] = maior nº), NÃO usa ultima_doe
 - getUltimaEdicao() no GAS foi atualizado para usar data_pub (DD/MM/YYYY) como critério principal
 - bancodedadosPortal.gs local está sempre atualizado — ao alterar, copiar tudo e fazer nova versão no GAS
+
+"ACERVO HISTÓRICO (acervo.html) — status"
+- Dados em js/dados.js: array estático com objetos {ano, edicao, data, link}
+- Cobre jornais Amapá/Novo Amapá de 1945 a 1974
+- 1964 corrigido em 26/03/2026: bloco era cópia duplicada de 1963; substituído por 45 edições reais
+- 1964 tem edições de Nº 1260 (26/02/1964) a Nº 1305 (31/12/1964) — Nº 1264 não localizado
+- Janeiro de 1964 sem edições digitalizadas (exibe "Nenhuma edição encontrada")
+- Ao adicionar dados novos em dados.js, manter formato: {ano: XXXX, edicao: 'Nº XXXX', data: 'DD/MM/AAAA', link: '...'}
