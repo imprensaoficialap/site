@@ -1,4 +1,4 @@
-// =============================================================
+﻿// =============================================================
 // SISTEMA NIO PESQUISA - BACKEND INSTITUCIONAL
 // =============================================================
 
@@ -273,14 +273,25 @@ function getAcervoPorMes(ano, mes) {
 
   var dados = sheet.getDataRange().getDisplayValues();
   var edicoes = [];
+  var vistos = {};
 
   for (var i = 1; i < dados.length; i++) {
     if (parseInt(dados[i][3]) === ano && parseInt(dados[i][4]) === mes) {
+      var numero = parseInt(dados[i][0]);
+      var url = (dados[i][5] || '').toString().trim();
+      // Contenção de base poluída: mantém 1 registro por data de publicação/circulação.
+      // Isso evita "multiplicação" de março quando o robô gravou vários números para os mesmos dias.
+      var pub = (dados[i][1] || '').toString().trim();
+      var circ = (dados[i][2] || '').toString().trim();
+      var chave = pub + '|' + circ;
+      if (vistos[chave]) continue;
+      vistos[chave] = true;
+
       edicoes.push({
-        n:    parseInt(dados[i][0]),
-        pub:  dados[i][1],
-        circ: dados[i][2],
-        url:  dados[i][5]
+        n: numero,
+        pub: pub,
+        circ: circ,
+        url: url
       });
     }
   }
