@@ -402,6 +402,13 @@ function DIAGNOSTICO_DIOFE() {
 // =============================================================
 
 function getAcervoPorMes(ano, mes) {
+  var cache = CacheService.getScriptCache();
+  var cacheKey = "acervo_" + ano + "_" + mes;
+  var cached = cache.get(cacheKey);
+  if (cached) {
+    return outputJSON(JSON.parse(cached));
+  }
+
   var sheet = ss.getSheetByName("acervo_doe");
   if (!sheet) return outputJSON({ result: "error", message: "Aba acervo_doe não encontrada." });
 
@@ -452,7 +459,9 @@ function getAcervoPorMes(ano, mes) {
 
   // Mais recentes primeiro
   edicoes.sort(function(a, b) { return b.n - a.n; });
-  return outputJSON({ result: "success", edicoes: edicoes });
+  var payload = { result: "success", edicoes: edicoes };
+  cache.put(cacheKey, JSON.stringify(payload), 300); // 5 minutos
+  return outputJSON(payload);
 }
 
 function urlEhSead(url) {

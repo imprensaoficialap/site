@@ -467,6 +467,7 @@ const MES_ATUAL   = new Date().getMonth() + 1;
 let anoSel      = ANO_ATUAL;
 let mesSel      = MES_ATUAL;
 let edicoesMes  = [];
+const cacheMes  = new Map();
 
 /* ============================================================
    INICIALIZAÇÃO
@@ -531,12 +532,20 @@ function onAnoChange() {
    ============================================================ */
 function carregarEdicoes(ano, mes) {
   mostrarLoading(true);
+  const chave = `${ano}-${mes}`;
+  if (cacheMes.has(chave)) {
+    edicoesMes = cacheMes.get(chave);
+    renderizarTabela(edicoesMes, ano, mes);
+    mostrarLoading(false);
+    return;
+  }
 
-  fetch(`${URL_API}?acao=acervo_doe&ano=${ano}&mes=${mes}&t=${Date.now()}`)
+  fetch(`${URL_API}?acao=acervo_doe&ano=${ano}&mes=${mes}`)
     .then(r => r.json())
     .then(data => {
       const lista = (data.result === 'success') ? data.edicoes : [];
       edicoesMes = deduplicarEdicoesPorData(lista);
+      cacheMes.set(chave, edicoesMes);
       renderizarTabela(edicoesMes, ano, mes);
       mostrarLoading(false);
     })
@@ -634,12 +643,28 @@ function configurarUltimaEdicao() {
   }
 
   function buscarMes(ano, mes) {
-    return fetch(`${URL_API}?acao=acervo_doe&ano=${ano}&mes=${mes}&t=${Date.now()}`)
+    const chave = `${ano}-${mes}`;
+    if (cacheMes.has(chave)) {
+      const lista = cacheMes.get(chave);
+      if (lista && lista.length > 0) {
+        const ultima = lista[0];
+        document.getElementById('ueNumero').textContent = `DOE nº ${ultima.n}`;
+        document.getElementById('ueDatas').textContent  =
+          `Publicação: ${ultima.pub}  ·  Circulação: ${ultima.circ}`;
+        document.getElementById('ueBtn').href = ultima.url;
+        return Promise.resolve(true);
+      }
+      return Promise.resolve(false);
+    }
+
+    return fetch(`${URL_API}?acao=acervo_doe&ano=${ano}&mes=${mes}`)
       .then(r => r.json())
       .then(data => {
         if (data.result === 'success' && data.edicoes && data.edicoes.length > 0) {
-          // edicoes já vem ordenado do maior para o menor número
-          const ultima = data.edicoes[0];
+          const lista = deduplicarEdicoesPorData(data.edicoes);
+          cacheMes.set(chave, lista);
+          if (lista.length === 0) return false;
+          const ultima = lista[0];
           document.getElementById('ueNumero').textContent = `DOE nº ${ultima.n}`;
           document.getElementById('ueDatas').textContent  =
             `Publicação: ${ultima.pub}  ·  Circulação: ${ultima.circ}`;
