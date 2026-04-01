@@ -406,33 +406,55 @@ function getAcervoPorMes(ano, mes) {
   if (!sheet) return outputJSON({ result: "error", message: "Aba acervo_doe não encontrada." });
 
   var dados = sheet.getDataRange().getDisplayValues();
-  var edicoes = [];
-  var vistos = {};
+  var porData = {};
 
   for (var i = 1; i < dados.length; i++) {
     if (parseInt(dados[i][3]) === ano && parseInt(dados[i][4]) === mes) {
       var numero = parseInt(dados[i][0]);
       var url = (dados[i][5] || '').toString().trim();
-      // Contenção de base poluída: mantém 1 registro por data de publicação/circulação.
-      // Isso evita "multiplicação" de março quando o robô gravou vários números para os mesmos dias.
       var pub = (dados[i][1] || '').toString().trim();
       var circ = (dados[i][2] || '').toString().trim();
       var chave = pub + '|' + circ;
-      if (vistos[chave]) continue;
-      vistos[chave] = true;
-
-      edicoes.push({
+      var atual = porData[chave];
+      var cand = {
         n: numero,
         pub: pub,
         circ: circ,
         url: url
-      });
+      };
+
+      if (!atual) {
+        porData[chave] = cand;
+      } else {
+        var atualSead = urlEhSead(atual.url);
+        var candSead = urlEhSead(cand.url);
+        if (candSead && !atualSead) {
+          porData[chave] = cand;
+        } else if (candSead === atualSead) {
+          // Empate de fonte: mantém menor número > 0 (evita preservar inflado sintético)
+          var nAtual = parseInt(atual.n);
+          var nCand = parseInt(cand.n);
+          if (nAtual <= 0 && nCand > 0) {
+            porData[chave] = cand;
+          } else if (nAtual > 0 && nCand > 0 && nCand < nAtual) {
+            porData[chave] = cand;
+          }
+        }
+      }
     }
   }
+
+  var edicoes = [];
+  for (var k in porData) edicoes.push(porData[k]);
 
   // Mais recentes primeiro
   edicoes.sort(function(a, b) { return b.n - a.n; });
   return outputJSON({ result: "success", edicoes: edicoes });
+}
+
+function urlEhSead(url) {
+  var u = (url || '').toString().toLowerCase();
+  return u.indexOf('sead.portal.ap.gov.br') !== -1 || u.indexOf('seadantigo.portal.ap.gov.br') !== -1;
 }
 
 function getUltimaEdicao() {
@@ -797,4 +819,170 @@ function REPROCESSAR_MES_SEAD(ano, mes) {
 
 function REPROCESSAR_MAR_2026() {
   REPROCESSAR_MES_SEAD(2026, 3);
+}
+
+function CORRIGIR_MAR_2026_MANTER_SEAD() {
+  var sheet = ss.getSheetByName("acervo_doe");
+  if (!sheet) { Logger.log("ERRO: aba acervo_doe não encontrada"); return; }
+
+  var dataBackup = Utilities.formatDate(new Date(), "GMT-3", "yyyyMMdd_HHmm");
+  var nomeBackup = "acervo_doe_backup_fix_mar_2026_" + dataBackup;
+  sheet.copyTo(ss).setName(nomeBackup);
+  Logger.log("Backup criado: " + nomeBackup);
+
+  var dados = sheet.getDataRange().getDisplayValues();
+  var cab = dados[0];
+  var saida = [cab];
+  var removidas = 0;
+
+  for (var i = 1; i < dados.length; i++) {
+    var ano = parseInt(dados[i][3]);
+    var mes = parseInt(dados[i][4]);
+    var url = (dados[i][5] || '').toString();
+    if (ano === 2026 && mes === 3 && !urlEhSead(url)) {
+      removidas++;
+      continue;
+    }
+    saida.push(dados[i]);
+  }
+
+  sheet.clearContents();
+  sheet.getRange(1, 1, saida.length, cab.length).setValues(saida);
+  if (sheet.getMaxRows() > saida.length) {
+    sheet.deleteRows(saida.length + 1, sheet.getMaxRows() - saida.length);
+  }
+
+  Logger.log("MAR/2026 não-SEAD removidas: " + removidas);
+  Logger.log("Concluído. Rollback: " + nomeBackup);
+}
+
+function parseDDMMYYYY_(s) {
+  var p = (s || '').toString().trim().split('/');
+  if (p.length !== 3) return 0;
+  var d = parseInt(p[0], 10), m = parseInt(p[1], 10), a = parseInt(p[2], 10);
+  if (isNaN(d) || isNaN(m) || isNaN(a)) return 0;
+  return a * 10000 + m * 100 + d;
+}
+
+function normalizarLinha_(linha, totalCols) {
+  var out = (linha || []).slice(0, totalCols);
+  while (out.length < totalCols) out.push('');
+  return out;
+}
+
+// Restaura somente MAR/2026 a partir de uma aba de backup.
+// Ex.: RESTAURAR_MARCO_DO_BACKUP('acervo_doe_backup_20260401_1121')
+function RESTAURAR_MARCO_DO_BACKUP(nomeAbaBackup) {
+  var sheet = ss.getSheetByName("acervo_doe");
+  var backup = ss.getSheetByName(nomeAbaBackup);
+  if (!sheet) { Logger.log("ERRO: aba acervo_doe não encontrada"); return; }
+  if (!backup) { Logger.log("ERRO: aba backup não encontrada: " + nomeAbaBackup); return; }
+
+  var stamp = Utilities.formatDate(new Date(), "GMT-3", "yyyyMMdd_HHmm");
+  var nomeSeg = "acervo_doe_backup_pre_restore_mar_2026_" + stamp;
+  sheet.copyTo(ss).setName(nomeSeg);
+  Logger.log("Backup de segurança criado: " + nomeSeg);
+
+  var dadosAtual = sheet.getDataRange().getDisplayValues();
+  var totalCols = sheet.getLastColumn();
+  var cab = normalizarLinha_(dadosAtual[0], totalCols);
+  var saida = [cab];
+
+  for (var i = 1; i < dadosAtual.length; i++) {
+    var ano = parseInt(dadosAtual[i][3], 10);
+    var mes = parseInt(dadosAtual[i][4], 10);
+    if (ano === 2026 && mes === 3) continue;
+    saida.push(normalizarLinha_(dadosAtual[i], totalCols));
+  }
+
+  var dadosBkp = backup.getDataRange().getDisplayValues();
+  var inseridas = 0;
+  for (var j = 1; j < dadosBkp.length; j++) {
+    var anoB = parseInt(dadosBkp[j][3], 10);
+    var mesB = parseInt(dadosBkp[j][4], 10);
+    if (anoB === 2026 && mesB === 3) {
+      saida.push(normalizarLinha_(dadosBkp[j], totalCols));
+      inseridas++;
+    }
+  }
+
+  sheet.clearContents();
+  sheet.getRange(1, 1, saida.length, totalCols).setValues(saida);
+  if (sheet.getMaxRows() > saida.length) {
+    sheet.deleteRows(saida.length + 1, sheet.getMaxRows() - saida.length);
+  }
+
+  Logger.log("MAR/2026 restaurado do backup. Linhas inseridas: " + inseridas);
+}
+
+// Renumera MAR/2026 em sequência por data de publicação (ascendente).
+// Ex.: RENUMERAR_MARCO_2026(8605)
+function RENUMERAR_MARCO_2026(primeiroNumero) {
+  var sheet = ss.getSheetByName("acervo_doe");
+  if (!sheet) { Logger.log("ERRO: aba acervo_doe não encontrada"); return; }
+  if (!primeiroNumero || isNaN(parseInt(primeiroNumero, 10))) {
+    Logger.log("ERRO: informe primeiroNumero válido. Ex.: 8605");
+    return;
+  }
+
+  var stamp = Utilities.formatDate(new Date(), "GMT-3", "yyyyMMdd_HHmm");
+  var nomeSeg = "acervo_doe_backup_pre_renum_mar_2026_" + stamp;
+  sheet.copyTo(ss).setName(nomeSeg);
+  Logger.log("Backup de segurança criado: " + nomeSeg);
+
+  var dados = sheet.getDataRange().getDisplayValues();
+  var totalCols = sheet.getLastColumn();
+  var cab = normalizarLinha_(dados[0], totalCols);
+  var marco = [];
+  var outros = [cab];
+
+  for (var i = 1; i < dados.length; i++) {
+    var ano = parseInt(dados[i][3], 10);
+    var mes = parseInt(dados[i][4], 10);
+    if (ano === 2026 && mes === 3) {
+      marco.push({
+        pub: (dados[i][1] || '').toString().trim(),
+        circ: (dados[i][2] || '').toString().trim(),
+        ano: dados[i][3],
+        mes: dados[i][4],
+        url: (dados[i][5] || '').toString().trim()
+      });
+    } else {
+      outros.push(normalizarLinha_(dados[i], totalCols));
+    }
+  }
+
+  // Dedup por dia (pub|circ), preservando a primeira ocorrência.
+  var seen = {};
+  var unicas = [];
+  for (var k = 0; k < marco.length; k++) {
+    var key = marco[k].pub + '|' + marco[k].circ;
+    if (seen[key]) continue;
+    seen[key] = true;
+    unicas.push(marco[k]);
+  }
+
+  unicas.sort(function(a, b) { return parseDDMMYYYY_(a.pub) - parseDDMMYYYY_(b.pub); });
+
+  var n = parseInt(primeiroNumero, 10) - 1;
+  for (var u = 0; u < unicas.length; u++) {
+    n++;
+    outros.push(normalizarLinha_([String(n), unicas[u].pub, unicas[u].circ, '2026', '3', unicas[u].url], totalCols));
+  }
+
+  sheet.clearContents();
+  sheet.getRange(1, 1, outros.length, totalCols).setValues(outros);
+  if (sheet.getMaxRows() > outros.length) {
+    sheet.deleteRows(outros.length + 1, sheet.getMaxRows() - outros.length);
+  }
+
+  Logger.log("MAR/2026 renumerado. Total edições: " + unicas.length + ". Faixa DOE: " + primeiroNumero + " até " + n);
+}
+
+function RESTAURAR_MAR_2026_AGORA() {
+  RESTAURAR_MARCO_DO_BACKUP('acervo_doe_backup_20260401_1121');
+}
+
+function RENUMERAR_MAR_2026_AGORA() {
+  RENUMERAR_MARCO_2026(8605);
 }
