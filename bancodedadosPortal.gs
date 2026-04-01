@@ -212,6 +212,140 @@ function ehUmPDFReal(url) {
 }
 
 // =============================================================
+// SANEAMENTO acervo_doe — executa manualmente, gera log e aba backup
+// Chave canônica: pub|circ  (uma edição por par de datas de pub/circ)
+// Critério de "vencedor": registro com maior numero_doe (oriundo do SEAD histórico)
+// Rollback: aba acervo_doe_backup_YYYYMMDD criada antes de qualquer remoção
+// =============================================================
+function SANEAR_ACERVO_DOE() {
+  var sheet = ss.getSheetByName("acervo_doe");
+  if (!sheet) { Logger.log("ERRO: aba acervo_doe não encontrada"); return; }
+
+  // 1. Backup antes de qualquer alteração
+  var dataBackup = Utilities.formatDate(new Date(), "GMT-3", "yyyyMMdd_HHmm");
+  var nomeBackup = "acervo_doe_backup_" + dataBackup;
+  var backup = sheet.copyTo(ss);
+  backup.setName(nomeBackup);
+  Logger.log("Backup criado: " + nomeBackup);
+
+  // 2. Lê todos os dados (display para evitar Date objects)
+  var dados = sheet.getDataRange().getDisplayValues();
+  var cabecalho = dados[0];
+  Logger.log("Total linhas (com cabeçalho): " + dados.length);
+
+  // 3. Agrupa por chave pub|circ — mantém o registro com maior numero_doe
+  var grupos = {};  // chave → { indice, numero_doe, linha }
+  var duplicatas = [];
+
+  for (var i = 1; i < dados.length; i++) {
+    var pub  = (dados[i][1] || '').toString().trim();
+    var circ = (dados[i][2] || '').toString().trim();
+    var n    = parseInt(dados[i][0]);
+    var chave = pub + '|' + circ;
+
+    if (!pub && !circ) {
+      Logger.log("  [SKIP] linha " + (i+1) + ": pub e circ vazios, ignorado");
+      continue;
+    }
+
+    if (!grupos[chave]) {
+      grupos[chave] = { indice: i, n: isNaN(n) ? 0 : n };
+    } else {
+      // Regra de vencedor:
+      // 1) número > 0 (real) vence número 0 (pendente)
+      // 2) entre dois números > 0, mantém o menor (evita preservar inflado sintético)
+      // 3) entre dois 0, mantém o primeiro
+      var atual = grupos[chave];
+      var nAtual = atual.n;
+      var nNovo = isNaN(n) ? 0 : n;
+      var deveAtualizar =
+        (nAtual === 0 && nNovo > 0) ||
+        (nAtual > 0 && nNovo > 0 && nNovo < nAtual);
+
+      if (deveAtualizar) {
+        duplicatas.push({ linha: atual.indice + 1, chave: chave, n: nAtual, motivo: "substituído por n=" + nNovo });
+        grupos[chave] = { indice: i, n: nNovo };
+      } else {
+        duplicatas.push({ linha: i + 1, chave: chave, n: nNovo, motivo: "duplicata de " + chave + " (vencedor n=" + grupos[chave].n + ")" });
+      }
+    }
+  }
+
+  Logger.log("Registros únicos: " + Object.keys(grupos).length);
+  Logger.log("Duplicatas identificadas: " + duplicatas.length);
+
+  // 4. Monta o conjunto de índices a MANTER (vencedores)
+  var manter = {};
+  for (var chave in grupos) { manter[grupos[chave].indice] = true; }
+
+  // 5. Reconstrói em lote (muito mais rápido que deleteRow em loop)
+  var saida = [cabecalho];
+  for (var i = 1; i < dados.length; i++) {
+    if (manter[i]) saida.push(dados[i]);
+  }
+
+  var removidos = (dados.length - 1) - (saida.length - 1);
+
+  sheet.clearContents();
+  sheet.getRange(1, 1, saida.length, cabecalho.length).setValues(saida);
+  if (sheet.getMaxRows() > saida.length) {
+    sheet.deleteRows(saida.length + 1, sheet.getMaxRows() - saida.length);
+  }
+
+  Logger.log("Linhas removidas: " + removidos);
+  Logger.log("Linhas restantes: " + (saida.length - 1));
+
+  // 6. Log detalhado das duplicatas
+  if (duplicatas.length > 0) {
+    Logger.log("--- DUPLICATAS REMOVIDAS ---");
+    for (var d = 0; d < Math.min(duplicatas.length, 100); d++) {
+      Logger.log("  Linha " + duplicatas[d].linha + " | n=" + duplicatas[d].n + " | " + duplicatas[d].chave + " | " + duplicatas[d].motivo);
+    }
+    if (duplicatas.length > 100) Logger.log("  ... e mais " + (duplicatas.length - 100) + " omitidas.");
+  }
+
+  Logger.log("SANEAMENTO CONCLUÍDO. Rollback disponível na aba: " + nomeBackup);
+}
+
+// =============================================================
+// OBSERVABILIDADE — detecta crescimento anômalo por mês
+// Execute manualmente ou agende mensalmente
+// =============================================================
+function ALERTAR_CRESCIMENTO_ANOMALO() {
+  var sheet = ss.getSheetByName("acervo_doe");
+  if (!sheet) return;
+  var dados = sheet.getDataRange().getDisplayValues();
+
+  var contadores = {};  // "YYYY-MM" → count
+  for (var i = 1; i < dados.length; i++) {
+    var ano = (dados[i][3] || '').toString().trim();
+    var mes = (dados[i][4] || '').toString().trim();
+    if (!ano || !mes) continue;
+    var chave = ano + '-' + (mes.length === 1 ? '0' + mes : mes);
+    contadores[chave] = (contadores[chave] || 0) + 1;
+  }
+
+  var LIMITE_NORMAL = 35; // DOEs por mês — acima disso é suspeito
+  var alertas = [];
+  for (var k in contadores) {
+    if (contadores[k] > LIMITE_NORMAL) {
+      alertas.push("ANOMALIA: " + k + " tem " + contadores[k] + " registros (limite=" + LIMITE_NORMAL + ")");
+    }
+  }
+
+  if (alertas.length > 0) {
+    Logger.log("=== ALERTAS DE CRESCIMENTO ANÔMALO ===");
+    alertas.forEach(function(a) { Logger.log(a); });
+  } else {
+    Logger.log("OK — nenhum mês acima de " + LIMITE_NORMAL + " registros.");
+  }
+
+  // Log geral dos últimos 6 meses
+  var chaves = Object.keys(contadores).sort().slice(-6);
+  Logger.log("Últimos 6 meses: " + chaves.map(function(k){ return k + "=" + contadores[k]; }).join(", "));
+}
+
+// =============================================================
 // DIAGNÓSTICO PLANILHA — execute para investigar o acervo_doe
 // =============================================================
 function DIAGNOSTICO_PLANILHA() {
@@ -554,16 +688,24 @@ function roboDiarioOficial() {
     return true;
   });
 
-  var n = ultimoN;
   for (var i = 0; i < novasEdicoes.length; i++) {
-    n++;
     var e = novasEdicoes[i];
-    sheet.appendRow([n, e.dataStr, e.dataStr, e.ano, e.mes, e.url]);
-    Logger.log("  [+] DOE nº " + n + " (" + e.dataStr + ") — diofe ID " + e.id);
+    sheet.appendRow([0, e.dataStr, e.dataStr, e.ano, e.mes, e.url]);
+    Logger.log("  [+] DOE pendente (" + e.dataStr + ") — diofe ID " + e.id);
   }
 
   Logger.log("Robô DOE — " + Utilities.formatDate(agora, "GMT-3", "dd/MM/yyyy HH:mm") +
              " — " + novasEdicoes.length + " nova(s) edição(ões) adicionada(s).");
+
+  // Observabilidade: conta registros do mês atual para detectar explosão
+  var mesAtual = agora.getMonth() + 1;
+  var anoAtual2 = agora.getFullYear();
+  var dadosObs = sheet.getDataRange().getDisplayValues();
+  var contMes = 0;
+  for (var oi = 1; oi < dadosObs.length; oi++) {
+    if (parseInt(dadosObs[oi][3]) === anoAtual2 && parseInt(dadosObs[oi][4]) === mesAtual) contMes++;
+  }
+  Logger.log("  [OBS] Registros em " + mesAtual + "/" + anoAtual2 + ": " + contMes + (contMes > 35 ? " ← ANOMALIA" : ""));
 }
 
 // Retorna informações do PDF (filename do Content-Disposition)
@@ -583,7 +725,7 @@ function getPDFInfo(url) {
 // Retorna o valor numérico da data mais recente no acervo (YYYYMMDD)
 function getUltimaDataDOE(sheet) {
   var anoAtual = new Date().getFullYear();
-  var dados = sheet.getDataRange().getValues();
+  var dados = sheet.getDataRange().getDisplayValues(); // getDisplayValues evita Date objects do Sheets
   var maxData = 0;
   for (var i = 1; i < dados.length; i++) {
     var ano = parseInt(dados[i][3]);
@@ -602,7 +744,7 @@ function getUltimaDataDOE(sheet) {
 // Retorna o maior número de DOE no acervo (apenas anos 2025-2026+)
 function getUltimoNumeroDOE(sheet) {
   var anoAtual = new Date().getFullYear();
-  var dados = sheet.getDataRange().getValues();
+  var dados = sheet.getDataRange().getDisplayValues();
   var maxN = 0;
   for (var i = 1; i < dados.length; i++) {
     var ano = parseInt(dados[i][3]);
@@ -611,4 +753,48 @@ function getUltimoNumeroDOE(sheet) {
     if (!isNaN(n) && n > maxN) maxN = n;
   }
   return maxN > 0 ? maxN : null;
+}
+
+// =============================================================
+// REPROCESSAMENTO DE MÊS (SEAD) — corrige mês contaminado
+// Exemplo: REPROCESSAR_MES_SEAD(2026, 3)
+// =============================================================
+function REPROCESSAR_MES_SEAD(ano, mes) {
+  var sheet = ss.getSheetByName("acervo_doe");
+  if (!sheet) { Logger.log("ERRO: aba acervo_doe não encontrada"); return; }
+  if (!ano || !mes) { Logger.log("ERRO: informe ano e mes"); return; }
+
+  // Backup antes de alterar
+  var dataBackup = Utilities.formatDate(new Date(), "GMT-3", "yyyyMMdd_HHmm");
+  var nomeBackup = "acervo_doe_backup_reproc_" + ano + "_" + mes + "_" + dataBackup;
+  var backup = sheet.copyTo(ss);
+  backup.setName(nomeBackup);
+  Logger.log("Backup criado: " + nomeBackup);
+
+  // Remove somente o mês/ano alvo
+  var dados = sheet.getDataRange().getValues();
+  var manter = [dados[0]];
+  var removidas = 0;
+  for (var i = 1; i < dados.length; i++) {
+    if (parseInt(dados[i][3]) === ano && parseInt(dados[i][4]) === mes) {
+      removidas++;
+      continue;
+    }
+    manter.push(dados[i]);
+  }
+
+  sheet.clearContents();
+  sheet.getRange(1, 1, manter.length, manter[0].length).setValues(manter);
+  if (sheet.getMaxRows() > manter.length) {
+    sheet.deleteRows(manter.length + 1, sheet.getMaxRows() - manter.length);
+  }
+  Logger.log("Linhas removidas do mês alvo: " + removidas);
+
+  // Recoleta oficial do mês pelo parser SEAD
+  rasparMes(sheet, ano, mes);
+  Logger.log("REPROCESSAMENTO CONCLUÍDO: " + ano + "/" + mes);
+}
+
+function REPROCESSAR_MAR_2026() {
+  REPROCESSAR_MES_SEAD(2026, 3);
 }
