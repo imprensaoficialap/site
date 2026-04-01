@@ -1,4 +1,4 @@
-// =============================================================
+﻿// =============================================================
 // SISTEMA NIO PESQUISA - BACKEND INSTITUCIONAL
 // =============================================================
 
@@ -211,6 +211,57 @@ function ehUmPDFReal(url) {
   } catch (e) { return false; }
 }
 
+// =============================================================
+// DIAGNÓSTICO PLANILHA — execute para investigar o acervo_doe
+// =============================================================
+function DIAGNOSTICO_PLANILHA() {
+  var sheet = ss.getSheetByName("acervo_doe");
+  if (!sheet) { Logger.log("ERRO: aba acervo_doe não encontrada"); return; }
+
+  var dados = sheet.getDataRange().getValues();
+  Logger.log("Total de linhas (com cabeçalho): " + dados.length);
+  Logger.log("Primeiras 3 linhas:");
+  for (var i = 0; i < Math.min(3, dados.length); i++) {
+    Logger.log("  [" + i + "] col0=" + JSON.stringify(dados[i][0]) + " tipo=" + typeof dados[i][0]);
+  }
+
+  var maxN = 0; var maxRow = -1;
+  for (var i = 1; i < dados.length; i++) {
+    var n = parseInt(dados[i][0]);
+    if (!isNaN(n) && n > maxN) { maxN = n; maxRow = i; }
+  }
+  Logger.log("Maior número encontrado: " + maxN + " (linha índice " + maxRow + ")");
+  if (maxRow > 0) {
+    Logger.log("Conteúdo da linha com maior número: " + JSON.stringify(dados[maxRow]));
+  }
+}
+
+// =============================================================
+// DIAGNÓSTICO DIOFE — execute para ver o que o servidor retorna
+// =============================================================
+function DIAGNOSTICO_DIOFE() {
+  // Pega o ID atual salvo na config
+  var linkAtual = sheetConfig ? sheetConfig.getRange("A2").getValue() : "";
+  var match = linkAtual.match(/\/(\d+)$/);
+  var idAtual = match ? parseInt(match[1], 10) : 9824;
+
+  Logger.log("Link atual na config: " + linkAtual);
+  Logger.log("ID atual: " + idAtual);
+
+  var url = "https://diofe.portal.ap.gov.br/portal/edicoes/download/" + idAtual;
+  try {
+    var options = { muteHttpExceptions: true, followRedirects: true };
+    var resp = UrlFetchApp.fetch(url, options);
+    var headers = resp.getHeaders();
+    Logger.log("HTTP: " + resp.getResponseCode());
+    Logger.log("Content-Type: " + (headers['Content-Type'] || headers['content-type'] || 'n/a'));
+    Logger.log("Content-Disposition: " + (headers['Content-Disposition'] || headers['content-disposition'] || 'n/a'));
+    Logger.log("Todos os headers: " + JSON.stringify(headers));
+  } catch(e) {
+    Logger.log("ERRO: " + e.message);
+  }
+}
+
 
 // =============================================================
 // ACERVO DOE — leitura via doGet
@@ -222,14 +273,25 @@ function getAcervoPorMes(ano, mes) {
 
   var dados = sheet.getDataRange().getDisplayValues();
   var edicoes = [];
+  var vistos = {};
 
   for (var i = 1; i < dados.length; i++) {
     if (parseInt(dados[i][3]) === ano && parseInt(dados[i][4]) === mes) {
+      var numero = parseInt(dados[i][0]);
+      var url = (dados[i][5] || '').toString().trim();
+      // Contenção de base poluída: mantém 1 registro por data de publicação/circulação.
+      // Isso evita "multiplicação" de março quando o robô gravou vários números para os mesmos dias.
+      var pub = (dados[i][1] || '').toString().trim();
+      var circ = (dados[i][2] || '').toString().trim();
+      var chave = pub + '|' + circ;
+      if (vistos[chave]) continue;
+      vistos[chave] = true;
+
       edicoes.push({
-        n:    parseInt(dados[i][0]),
-        pub:  dados[i][1],
-        circ: dados[i][2],
-        url:  dados[i][5]
+        n: numero,
+        pub: pub,
+        circ: circ,
+        url: url
       });
     }
   }
@@ -345,10 +407,20 @@ function rasparMes(sheet, ano, mes) {
     var html    = resp.getContentText("UTF-8");
     var edicoes = parsearTabelaSEAD(html);
 
+    // Coleta números já existentes para este mês/ano (evita duplicatas)
+    var existentes = sheet.getDataRange().getValues();
+    var numerosExistentes = {};
+    for (var k = 1; k < existentes.length; k++) {
+      if (parseInt(existentes[k][3]) === ano && parseInt(existentes[k][4]) === mes) {
+        numerosExistentes[parseInt(existentes[k][0])] = true;
+      }
+    }
+
     for (var i = 0; i < edicoes.length; i++) {
       var e = edicoes[i];
-      if (e.numero && e.url) {
+      if (e.numero && e.url && !numerosExistentes[e.numero]) {
         sheet.appendRow([e.numero, e.pub, e.circ, ano, mes, e.url]);
+        numerosExistentes[e.numero] = true;
       }
     }
 
@@ -418,35 +490,125 @@ function salvarProgressoRaspagem(proximoAno) {
 
 
 // =============================================================
-// ROBÔ DIÁRIO — atualiza automaticamente via trigger
-// Configure: Triggers → roboDiarioOficial → Por hora → 23h–00h
+// ROBÔ DIÁRIO — atualiza acervo_doe via diofe.portal.ap.gov.br
+// Estratégia: sonda IDs do diofe, extrai data do filename, atribui DOE sequencial
+// Configure: Triggers → roboDiarioOficialAgendado → a cada 30 min
 // =============================================================
 
-// Trigger: a cada 30 minutos — só executa entre 08h e 12h (Brasília)
+var DIOFE_BASE = 'https://diofe.portal.ap.gov.br/portal/edicoes/download/';
+
+// Trigger: a cada 30 minutos — executa entre 07h e 13h (Brasília)
 function roboDiarioOficialAgendado() {
   var hora = parseInt(Utilities.formatDate(new Date(), "GMT-3", "HH"));
-  if (hora >= 8 && hora < 12) { roboDiarioOficial(); }
+  if (hora >= 7 && hora < 13) { roboDiarioOficial(); }
 }
+
+function FORCAR_ROBO_AGORA() { roboDiarioOficial(); }
 
 function roboDiarioOficial() {
   var agora = new Date();
-  var ano   = agora.getFullYear();
-  var mes   = agora.getMonth() + 1;
 
   var sheet = ss.getSheetByName("acervo_doe");
   if (!sheet) return;
 
-  // Registra quantas linhas havia antes
-  var linhasAntes = sheet.getLastRow();
+  var ultimoN = getUltimoNumeroDOE(sheet);
+  if (!ultimoN) { Logger.log("Robô DOE — sem registros recentes na planilha."); return; }
 
-  rasparMes(sheet, ano, mes);
+  var ultimaDataVal = getUltimaDataDOE(sheet);
 
-  var linhasDepois = sheet.getLastRow();
-  var novas = linhasDepois - linhasAntes;
+  // Garante que config!A2 aponte para o ID mais recente do diofe
+  nucleoDoRobo();
 
-  Logger.log(
-    "Robô DOE — " +
-    Utilities.formatDate(agora, "GMT-3", "dd/MM/yyyy HH:mm") +
-    " — " + novas + " nova(s) edição(ões) adicionada(s)."
-  );
+  var linkAtual = sheetConfig ? sheetConfig.getRange("A2").getValue() : "";
+  var matchId = linkAtual.match(/\/(\d+)$/);
+  if (!matchId) { Logger.log("Robô DOE — config!A2 sem ID diofe válido."); return; }
+  var idAtual = parseInt(matchId[1], 10);
+
+  Logger.log("Último DOE no acervo: " + ultimoN + " | data val: " + ultimaDataVal + " | diofe ID: " + idAtual);
+
+  // Sonda os 25 IDs anteriores ao atual para encontrar edições mais recentes
+  var novasEdicoes = [];
+  for (var id = idAtual - 25; id <= idAtual; id++) {
+    if (id <= 0) continue;
+    var info = getPDFInfo(DIOFE_BASE + id);
+    if (!info) continue;
+    var dm = info.filename.match(/(\d{4})-(\d{2})-(\d{2})/);
+    if (!dm) continue;
+    var dv = parseInt(dm[1]) * 10000 + parseInt(dm[2]) * 100 + parseInt(dm[3]);
+    if (dv > ultimaDataVal) {
+      novasEdicoes.push({
+        id: id, url: DIOFE_BASE + id,
+        ano: parseInt(dm[1]), mes: parseInt(dm[2]),
+        dataStr: dm[3] + '/' + dm[2] + '/' + dm[1],
+        dataVal: dv
+      });
+    }
+  }
+
+  // Ordena por data (mais antigas primeiro) e remove duplicatas de data
+  novasEdicoes.sort(function(a, b) { return a.dataVal - b.dataVal; });
+  var visto = {};
+  novasEdicoes = novasEdicoes.filter(function(e) {
+    if (visto[e.dataVal]) return false;
+    visto[e.dataVal] = true;
+    return true;
+  });
+
+  var n = ultimoN;
+  for (var i = 0; i < novasEdicoes.length; i++) {
+    n++;
+    var e = novasEdicoes[i];
+    sheet.appendRow([n, e.dataStr, e.dataStr, e.ano, e.mes, e.url]);
+    Logger.log("  [+] DOE nº " + n + " (" + e.dataStr + ") — diofe ID " + e.id);
+  }
+
+  Logger.log("Robô DOE — " + Utilities.formatDate(agora, "GMT-3", "dd/MM/yyyy HH:mm") +
+             " — " + novasEdicoes.length + " nova(s) edição(ões) adicionada(s).");
+}
+
+// Retorna informações do PDF (filename do Content-Disposition)
+function getPDFInfo(url) {
+  try {
+    var options = { muteHttpExceptions: true, followRedirects: true };
+    var resp = UrlFetchApp.fetch(url, options);
+    if (resp.getResponseCode() !== 200) return null;
+    var ct = resp.getHeaders()['Content-Type'] || resp.getHeaders()['content-type'] || '';
+    if (ct.indexOf('pdf') === -1) return null;
+    var cd = resp.getHeaders()['Content-Disposition'] || resp.getHeaders()['content-disposition'] || '';
+    var fn = cd.match(/filename="([^"]+)"/);
+    return { filename: fn ? fn[1] : '' };
+  } catch(e) { return null; }
+}
+
+// Retorna o valor numérico da data mais recente no acervo (YYYYMMDD)
+function getUltimaDataDOE(sheet) {
+  var anoAtual = new Date().getFullYear();
+  var dados = sheet.getDataRange().getValues();
+  var maxData = 0;
+  for (var i = 1; i < dados.length; i++) {
+    var ano = parseInt(dados[i][3]);
+    if (ano < anoAtual - 1) continue;
+    var pub = (dados[i][1] || '').toString().trim();
+    var p = pub.split('/');
+    if (p.length !== 3) continue;
+    var dia = parseInt(p[0]), mes = parseInt(p[1]), anoD = parseInt(p[2]);
+    if (isNaN(dia) || isNaN(mes) || isNaN(anoD)) continue;
+    var val = anoD * 10000 + mes * 100 + dia;
+    if (val > maxData) maxData = val;
+  }
+  return maxData;
+}
+
+// Retorna o maior número de DOE no acervo (apenas anos 2025-2026+)
+function getUltimoNumeroDOE(sheet) {
+  var anoAtual = new Date().getFullYear();
+  var dados = sheet.getDataRange().getValues();
+  var maxN = 0;
+  for (var i = 1; i < dados.length; i++) {
+    var ano = parseInt(dados[i][3]);
+    if (ano < anoAtual - 1) continue;
+    var n = parseInt(dados[i][0]);
+    if (!isNaN(n) && n > maxN) maxN = n;
+  }
+  return maxN > 0 ? maxN : null;
 }
