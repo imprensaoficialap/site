@@ -535,7 +535,8 @@ function carregarEdicoes(ano, mes) {
   fetch(`${URL_API}?acao=acervo_doe&ano=${ano}&mes=${mes}&t=${Date.now()}`)
     .then(r => r.json())
     .then(data => {
-      edicoesMes = (data.result === 'success') ? data.edicoes : [];
+      const lista = (data.result === 'success') ? data.edicoes : [];
+      edicoesMes = deduplicarEdicoesPorData(lista);
       renderizarTabela(edicoesMes, ano, mes);
       mostrarLoading(false);
     })
@@ -544,6 +545,22 @@ function carregarEdicoes(ano, mes) {
       renderizarTabela([], ano, mes);
       mostrarLoading(false);
     });
+}
+
+function deduplicarEdicoesPorData(edicoes) {
+  const vistos = new Set();
+  const unicas = [];
+
+  for (const e of edicoes || []) {
+    const pub = (e.pub || '').trim();
+    const circ = (e.circ || '').trim();
+    const chave = `${pub}|${circ}`;
+    if (vistos.has(chave)) continue;
+    vistos.add(chave);
+    unicas.push(e);
+  }
+
+  return unicas;
 }
 
 /* ============================================================
