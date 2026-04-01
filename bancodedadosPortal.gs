@@ -405,7 +405,10 @@ function getAcervoPorMes(ano, mes) {
   var sheet = ss.getSheetByName("acervo_doe");
   if (!sheet) return outputJSON({ result: "error", message: "Aba acervo_doe não encontrada." });
 
-  var dados = sheet.getDataRange().getDisplayValues();
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2) return outputJSON({ result: "success", edicoes: [] });
+  // Lê somente A:F (colunas usadas pelo acervo) para reduzir latência.
+  var dados = sheet.getRange(1, 1, lastRow, 6).getDisplayValues();
   var porData = {};
 
   for (var i = 1; i < dados.length; i++) {

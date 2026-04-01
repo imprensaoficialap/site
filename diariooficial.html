@@ -623,6 +623,16 @@ function configurarUltimaEdicao() {
   const anoAtual = agora.getFullYear();
   const mesAtual = agora.getMonth() + 1;
 
+  // Reaproveita dados já carregados para evitar nova chamada da API no load.
+  if (anoSel === anoAtual && mesSel === mesAtual && edicoesMes && edicoesMes.length > 0) {
+    const ultimaLocal = edicoesMes[0];
+    document.getElementById('ueNumero').textContent = `DOE nº ${ultimaLocal.n}`;
+    document.getElementById('ueDatas').textContent  =
+      `Publicação: ${ultimaLocal.pub}  ·  Circulação: ${ultimaLocal.circ}`;
+    document.getElementById('ueBtn').href = ultimaLocal.url;
+    return;
+  }
+
   function buscarMes(ano, mes) {
     return fetch(`${URL_API}?acao=acervo_doe&ano=${ano}&mes=${mes}&t=${Date.now()}`)
       .then(r => r.json())
