@@ -596,8 +596,28 @@ function renderizarTabela(edicoes, ano, mes) {
   tabela.style.display = 'table';
   tbody.innerHTML = '';
 
+  // Conta quantas vezes cada número aparece para rotular extras
+  const contagemN = {};
+  edicoes.forEach(e => {
+    const k = String(e.n);
+    contagemN[k] = (contagemN[k] || 0) + 1;
+  });
+  const ordemN = {};
+
   edicoes.forEach((e, idx) => {
-    const numeroDoe = (parseInt(e.n, 10) > 0) ? `DOE nº ${e.n}` : 'DOE nº S/N';
+    const nInt = parseInt(e.n, 10);
+    const k = String(e.n);
+    ordemN[k] = (ordemN[k] || 0) + 1;
+    let numeroDoe;
+    if (nInt <= 0) {
+      numeroDoe = 'DOE nº S/N';
+    } else if (contagemN[k] === 1) {
+      numeroDoe = `DOE nº ${e.n}`;
+    } else if (ordemN[k] === 1) {
+      numeroDoe = `DOE nº ${e.n}`;
+    } else {
+      numeroDoe = `DOE nº ${e.n} – Extra ${ordemN[k] - 1}`;
+    }
     const tr = document.createElement('tr');
     tr.style.animationDelay = (idx * 0.04) + 's';
     tr.innerHTML = `
