@@ -371,6 +371,142 @@ function DIAGNOSTICO_PLANILHA() {
 }
 
 // =============================================================
+// SCAN DIOFE POR FAIXA DE IDs — localiza edições de ABR/2026
+// Ex.: DIAGNOSTICO_DIOFE_RANGE(9870, 9910)
+// =============================================================
+function DIAGNOSTICO_DIOFE_RANGE(inicio, fim) {
+  Logger.log("=== SCAN diofe IDs " + inicio + " → " + fim + " ===");
+  for (var id = inicio; id <= fim; id++) {
+    var info = getPDFInfo(DIOFE_BASE + id);
+    Logger.log("diofe/" + id + " → " + (info ? '"' + info.filename + '"' : 'null'));
+    Utilities.sleep(200);
+  }
+  Logger.log("=== FIM ===");
+}
+
+// =============================================================
+// TESTA API JSON DO DIOFE — verifica se existe endpoint de listagem
+// com metadados (inclusive número do DOE)
+// =============================================================
+function TENTAR_API_DIOFE_LISTA() {
+  var candidatos = [
+    'https://diofe.portal.ap.gov.br/api/edicoes?ano=2026&mes=4',
+    'https://diofe.portal.ap.gov.br/portal/edicoes?ano=2026&mes=4',
+    'https://diofe.portal.ap.gov.br/portal/edicoes/list?ano=2026&mes=4',
+    'https://diofe.portal.ap.gov.br/api/edicoes/2026/4',
+    'https://diofe.portal.ap.gov.br/portal/edicoes/2026/abr',
+    'https://diofe.portal.ap.gov.br/'
+  ];
+  var opts = { muteHttpExceptions: true, followRedirects: true };
+  for (var i = 0; i < candidatos.length; i++) {
+    try {
+      var r = UrlFetchApp.fetch(candidatos[i], opts);
+      var body = r.getContentText("UTF-8");
+      var ct = r.getHeaders()['Content-Type'] || r.getHeaders()['content-type'] || '';
+      Logger.log(candidatos[i] + " → HTTP " + r.getResponseCode() + " | " + ct + " | " + body.substring(0, 200));
+    } catch(e) {
+      Logger.log(candidatos[i] + " → ERRO: " + e.message);
+    }
+  }
+}
+
+// =============================================================
+// INVESTIGA ENDPOINT /api/edicoes DO DIOFE — testa variações de parâmetros
+// para encontrar o formato correto que retorna JSON com número do DOE
+// =============================================================
+function INVESTIGAR_API_DIOFE_500() {
+  var base = 'https://diofe.portal.ap.gov.br/api/edicoes';
+  var candidatos = [
+    base + '?ano=2026&mes=4',
+    base + '?ano=2026&mes=04',
+    base + '?year=2026&month=4',
+    base + '?ano=2026&mes=4&pagina=1',
+    base + '?ano=2026&mes=4&page=1&size=50',
+    base + '?ano=2026&mes=4&per_page=50',
+    base + '/2026/4',
+    base + '/2026/04',
+    base + '?dataInicio=01/04/2026&dataFim=30/04/2026',
+    base  // sem parâmetros
+  ];
+
+  var optsGet = { muteHttpExceptions: true, followRedirects: true,
+    headers: { 'Accept': 'application/json, text/plain, */*', 'X-Requested-With': 'XMLHttpRequest' } };
+
+  Logger.log("=== GET /api/edicoes variações ===");
+  for (var i = 0; i < candidatos.length; i++) {
+    try {
+      var r = UrlFetchApp.fetch(candidatos[i], optsGet);
+      var body = r.getContentText("UTF-8").substring(0, 300).replace(/\n/g, ' ');
+      var ct = r.getHeaders()['Content-Type'] || r.getHeaders()['content-type'] || '';
+      Logger.log("[" + r.getResponseCode() + "] " + candidatos[i].replace(base, '/api/edicoes') + " | " + ct.split(';')[0] + " | " + body);
+    } catch(e) {
+      Logger.log("ERRO: " + candidatos[i] + " — " + e.message);
+    }
+  }
+
+  // Tenta POST no endpoint que deu 500
+  Logger.log("=== POST /api/edicoes ===");
+  var payloads = [
+    '{"ano":2026,"mes":4}',
+    '{"ano":"2026","mes":"4"}',
+    'ano=2026&mes=4'
+  ];
+  var contentTypes = ['application/json', 'application/json', 'application/x-www-form-urlencoded'];
+  for (var j = 0; j < payloads.length; j++) {
+    try {
+      var rp = UrlFetchApp.fetch(base, { method: 'post', payload: payloads[j],
+        contentType: contentTypes[j], muteHttpExceptions: true,
+        headers: { 'Accept': 'application/json' } });
+      var bp = rp.getContentText("UTF-8").substring(0, 300).replace(/\n/g, ' ');
+      Logger.log("[" + rp.getResponseCode() + "] POST payload=" + payloads[j].substring(0, 30) + " | " + bp);
+    } catch(e) {
+      Logger.log("ERRO POST: " + e.message);
+    }
+  }
+}
+
+// =============================================================
+// DIAGNÓSTICO SEAD + DIOFE FILENAMES
+// Execute para investigar: (1) quais URLs do SEAD funcionam do GAS
+// e (2) qual padrão de filename o diofe retorna nos PDFs recentes.
+// O resultado nos diz se é possível extrair o nº DOE do diofe.
+// =============================================================
+function DIAGNOSTICO_SEAD_E_DIOFE() {
+  // 1. Testa variantes de URL do SEAD
+  var urlsSead = [
+    'https://sead.portal.ap.gov.br/diario_oficial/2026/abr',
+    'https://sead.portal.ap.gov.br/diario_oficial/2026/mar',
+    'https://seadantigo.portal.ap.gov.br/diario_oficial/2026/abr'
+  ];
+  Logger.log("=== TESTE SEAD ===");
+  for (var s = 0; s < urlsSead.length; s++) {
+    try {
+      var r = UrlFetchApp.fetch(urlsSead[s], {
+        muteHttpExceptions: true, followRedirects: true,
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
+      });
+      Logger.log(urlsSead[s] + " → HTTP " + r.getResponseCode() + " (" + r.getContentText("UTF-8").length + " bytes)");
+    } catch(e) {
+      Logger.log(urlsSead[s] + " → ERRO: " + e.message);
+    }
+  }
+
+  // 2. Verifica filenames dos últimos 8 IDs do diofe
+  Logger.log("=== FILENAMES DIOFE (últimos 8 IDs) ===");
+  var linkAtual2 = sheetConfig ? sheetConfig.getRange("A2").getValue() : "";
+  var mDiofe = linkAtual2.match(/\/(\d+)$/);
+  var idAtual2 = mDiofe ? parseInt(mDiofe[1], 10) : 0;
+  if (idAtual2 > 0) {
+    for (var id = idAtual2 - 7; id <= idAtual2; id++) {
+      var info = getPDFInfo(DIOFE_BASE + id);
+      Logger.log("diofe/" + id + " → " + (info ? '"' + info.filename + '"' : 'null (não é PDF ou inacessível)'));
+    }
+  } else {
+    Logger.log("config!A2 sem ID diofe válido.");
+  }
+}
+
+// =============================================================
 // DIAGNÓSTICO DIOFE — execute para ver o que o servidor retorna
 // =============================================================
 function DIAGNOSTICO_DIOFE() {
@@ -416,7 +552,7 @@ function getAcervoPorMes(ano, mes) {
   if (lastRow < 2) return outputJSON({ result: "success", edicoes: [] });
   // Lê somente A:F (colunas usadas pelo acervo) para reduzir latência.
   var dados = sheet.getRange(1, 1, lastRow, 6).getDisplayValues();
-  var porData = {};
+  var porUrl = {};  // chave = url (ou pub|circ se url vazia) — preserva extras de mesma data
 
   for (var i = 1; i < dados.length; i++) {
     if (parseInt(dados[i][3]) === ano && parseInt(dados[i][4]) === mes) {
@@ -424,41 +560,28 @@ function getAcervoPorMes(ano, mes) {
       var url = (dados[i][5] || '').toString().trim();
       var pub = (dados[i][1] || '').toString().trim();
       var circ = (dados[i][2] || '').toString().trim();
-      var chave = pub + '|' + circ;
-      var atual = porData[chave];
-      var cand = {
-        n: numero,
-        pub: pub,
-        circ: circ,
-        url: url
-      };
-
-      if (!atual) {
-        porData[chave] = cand;
+      // Usa URL como chave: entradas com URLs diferentes (extras/suplementos) são preservadas
+      var chave = url || (pub + '|' + circ);
+      if (!porUrl[chave]) {
+        porUrl[chave] = { n: numero, pub: pub, circ: circ, url: url };
       } else {
-        var atualSead = urlEhSead(atual.url);
-        var candSead = urlEhSead(cand.url);
-        if (candSead && !atualSead) {
-          porData[chave] = cand;
-        } else if (candSead === atualSead) {
-          // Empate de fonte: mantém menor número > 0 (evita preservar inflado sintético)
-          var nAtual = parseInt(atual.n);
-          var nCand = parseInt(cand.n);
-          if (nAtual <= 0 && nCand > 0) {
-            porData[chave] = cand;
-          } else if (nAtual > 0 && nCand > 0 && nCand < nAtual) {
-            porData[chave] = cand;
-          }
+        // Mesma URL já existe — prefere SEAD se ainda não é SEAD
+        var atual = porUrl[chave];
+        if (urlEhSead(url) && !urlEhSead(atual.url)) {
+          porUrl[chave] = { n: numero, pub: pub, circ: circ, url: url };
         }
       }
     }
   }
 
   var edicoes = [];
-  for (var k in porData) edicoes.push(porData[k]);
+  for (var k in porUrl) edicoes.push(porUrl[k]);
 
-  // Mais recentes primeiro
-  edicoes.sort(function(a, b) { return b.n - a.n; });
+  // Mais recentes primeiro; dentro do mesmo nº, ordena por URL (extras ficam agrupados)
+  edicoes.sort(function(a, b) {
+    if (b.n !== a.n) return b.n - a.n;
+    return (a.url > b.url) ? 1 : -1;
+  });
   var payload = { result: "success", edicoes: edicoes };
   cache.put(cacheKey, JSON.stringify(payload), 300); // 5 minutos
   return outputJSON(payload);
@@ -675,16 +798,12 @@ function FORCAR_ROBO_AGORA() { roboDiarioOficial(); }
 
 function roboDiarioOficial() {
   var agora = new Date();
-
   var sheet = ss.getSheetByName("acervo_doe");
   if (!sheet) return;
 
   var ultimoN = getUltimoNumeroDOE(sheet);
-  if (!ultimoN) { Logger.log("Robô DOE — sem registros recentes na planilha."); return; }
+  if (!ultimoN) { Logger.log("Robô DOE — sem números no acervo. Execute RENUMERAR_MES primeiro."); return; }
 
-  var ultimaDataVal = getUltimaDataDOE(sheet);
-
-  // Garante que config!A2 aponte para o ID mais recente do diofe
   nucleoDoRobo();
 
   var linkAtual = sheetConfig ? sheetConfig.getRange("A2").getValue() : "";
@@ -692,55 +811,285 @@ function roboDiarioOficial() {
   if (!matchId) { Logger.log("Robô DOE — config!A2 sem ID diofe válido."); return; }
   var idAtual = parseInt(matchId[1], 10);
 
-  Logger.log("Último DOE no acervo: " + ultimoN + " | data val: " + ultimaDataVal + " | diofe ID: " + idAtual);
+  Logger.log("Último DOE: nº " + ultimoN + " | diofe ID atual: " + idAtual);
 
-  // Sonda os 25 IDs anteriores ao atual para encontrar edições mais recentes
+  // Lê acervo: URLs já presentes (evita duplicatas) e número por data (para extras)
+  var dados = sheet.getDataRange().getDisplayValues();
+  var urlsExistentes = {};
+  var numeroPorData = {};  // dataVal → número DOE já atribuído
+  for (var k = 1; k < dados.length; k++) {
+    var urlK = (dados[k][5] || '').toString().trim();
+    if (urlK) urlsExistentes[urlK] = true;
+    var nK = parseInt(dados[k][0], 10);
+    if (nK > 0) {
+      var pubK = (dados[k][1] || '').toString().trim().split('/');
+      if (pubK.length === 3) {
+        var dvK = parseInt(pubK[2]) * 10000 + parseInt(pubK[1]) * 100 + parseInt(pubK[0]);
+        if (!isNaN(dvK) && !numeroPorData[dvK]) numeroPorData[dvK] = nK;
+      }
+    }
+  }
+
+  // Sonda os 30 IDs anteriores ao atual, filtrando por URL nova (não por data)
   var novasEdicoes = [];
-  for (var id = idAtual - 25; id <= idAtual; id++) {
+  for (var id = idAtual - 30; id <= idAtual; id++) {
     if (id <= 0) continue;
-    var info = getPDFInfo(DIOFE_BASE + id);
+    var urlTeste = DIOFE_BASE + id;
+    if (urlsExistentes[urlTeste]) continue;  // já está no acervo
+    var info = getPDFInfo(urlTeste);
     if (!info) continue;
     var dm = info.filename.match(/(\d{4})-(\d{2})-(\d{2})/);
     if (!dm) continue;
     var dv = parseInt(dm[1]) * 10000 + parseInt(dm[2]) * 100 + parseInt(dm[3]);
-    if (dv > ultimaDataVal) {
-      novasEdicoes.push({
-        id: id, url: DIOFE_BASE + id,
-        ano: parseInt(dm[1]), mes: parseInt(dm[2]),
-        dataStr: dm[3] + '/' + dm[2] + '/' + dm[1],
-        dataVal: dv
-      });
-    }
+    novasEdicoes.push({
+      id: id, url: urlTeste,
+      ano: parseInt(dm[1]), mes: parseInt(dm[2]),
+      dataStr: dm[3] + '/' + dm[2] + '/' + dm[1],
+      dataVal: dv
+    });
   }
 
-  // Ordena por data (mais antigas primeiro) e remove duplicatas de data
+  if (novasEdicoes.length === 0) {
+    Logger.log("Robô DOE — " + Utilities.formatDate(agora, "GMT-3", "dd/MM/yyyy HH:mm") + " — nenhuma edição nova.");
+    CacheService.getScriptCache().remove("acervo_" + agora.getFullYear() + "_" + (agora.getMonth() + 1));
+    return;
+  }
+
   novasEdicoes.sort(function(a, b) { return a.dataVal - b.dataVal; });
-  var visto = {};
-  novasEdicoes = novasEdicoes.filter(function(e) {
-    if (visto[e.dataVal]) return false;
-    visto[e.dataVal] = true;
-    return true;
-  });
+
+  var n = ultimoN;
+  var mesesInvalidar = {};
 
   for (var i = 0; i < novasEdicoes.length; i++) {
     var e = novasEdicoes[i];
-    sheet.appendRow([0, e.dataStr, e.dataStr, e.ano, e.mes, e.url]);
-    Logger.log("  [+] DOE pendente (" + e.dataStr + ") — diofe ID " + e.id);
+    var numParaUsar;
+    if (numeroPorData[e.dataVal]) {
+      // Extra/suplemento de data já registrada — mesmo número
+      numParaUsar = numeroPorData[e.dataVal];
+    } else {
+      // Data nova — próximo número
+      n++;
+      numParaUsar = n;
+      numeroPorData[e.dataVal] = numParaUsar;
+    }
+    sheet.appendRow([numParaUsar, e.dataStr, e.dataStr, e.ano, e.mes, e.url]);
+    mesesInvalidar[e.ano + "_" + e.mes] = true;
+    Logger.log("  [+] DOE nº " + numParaUsar + " (" + e.dataStr + ") — diofe ID " + e.id);
+  }
+
+  for (var key in mesesInvalidar) {
+    CacheService.getScriptCache().remove("acervo_" + key);
   }
 
   Logger.log("Robô DOE — " + Utilities.formatDate(agora, "GMT-3", "dd/MM/yyyy HH:mm") +
-             " — " + novasEdicoes.length + " nova(s) edição(ões) adicionada(s).");
-
-  // Observabilidade: conta registros do mês atual para detectar explosão
-  var mesAtual = agora.getMonth() + 1;
-  var anoAtual2 = agora.getFullYear();
-  var dadosObs = sheet.getDataRange().getDisplayValues();
-  var contMes = 0;
-  for (var oi = 1; oi < dadosObs.length; oi++) {
-    if (parseInt(dadosObs[oi][3]) === anoAtual2 && parseInt(dadosObs[oi][4]) === mesAtual) contMes++;
-  }
-  Logger.log("  [OBS] Registros em " + mesAtual + "/" + anoAtual2 + ": " + contMes + (contMes > 35 ? " ← ANOMALIA" : ""));
+             " — " + novasEdicoes.length + " entrada(s) adicionada(s). Último DOE: nº " + n);
 }
+
+// =============================================================
+// COMPLETAR MÊS COM EXTRAS — varre faixa de IDs diofe e insere
+// entradas ausentes do acervo. Extras da mesma data recebem o
+// mesmo número DOE já existente para aquela data.
+// Ex.: COMPLETAR_MES_DIOFE(2026, 4, 9890, 9910)
+// =============================================================
+function COMPLETAR_MES_DIOFE(ano, mes, inicioId, fimId) {
+  var sheet = ss.getSheetByName("acervo_doe");
+  if (!sheet) { Logger.log("ERRO: acervo_doe não encontrada"); return; }
+  if (!inicioId || !fimId) { Logger.log("ERRO: informe inicioId e fimId. Ex.: COMPLETAR_MES_DIOFE(2026,4,9890,9910)"); return; }
+
+  // Lê estado atual: URLs existentes e número por data
+  var dados = sheet.getDataRange().getDisplayValues();
+  var urlsExistentes = {};
+  var numeroPorData = {};
+  for (var k = 1; k < dados.length; k++) {
+    var urlK = (dados[k][5] || '').toString().trim();
+    if (urlK) urlsExistentes[urlK] = true;
+    var nK = parseInt(dados[k][0], 10);
+    if (nK > 0 && parseInt(dados[k][3]) === ano && parseInt(dados[k][4]) === mes) {
+      var pubK = (dados[k][1] || '').toString().trim().split('/');
+      if (pubK.length === 3) {
+        var dvK = parseInt(pubK[2]) * 10000 + parseInt(pubK[1]) * 100 + parseInt(pubK[0]);
+        if (!isNaN(dvK) && !numeroPorData[dvK]) numeroPorData[dvK] = nK;
+      }
+    }
+  }
+
+  Logger.log("=== COMPLETAR_MES_DIOFE " + ano + "/" + mes + " IDs " + inicioId + "→" + fimId + " ===");
+  var inseridas = 0;
+
+  for (var id = inicioId; id <= fimId; id++) {
+    var urlTeste = DIOFE_BASE + id;
+    if (urlsExistentes[urlTeste]) { Logger.log("  [JÁ EXISTE] diofe/" + id); continue; }
+    var info = getPDFInfo(urlTeste);
+    if (!info) { Logger.log("  [NULL] diofe/" + id); continue; }
+    var dm = info.filename.match(/(\d{4})-(\d{2})-(\d{2})/);
+    if (!dm) { Logger.log("  [SEM DATA] diofe/" + id + " → " + info.filename); continue; }
+    if (parseInt(dm[1]) !== ano || parseInt(dm[2]) !== mes) {
+      Logger.log("  [OUTRO MÊS] diofe/" + id + " → " + info.filename);
+      continue;
+    }
+    var dv = parseInt(dm[1]) * 10000 + parseInt(dm[2]) * 100 + parseInt(dm[3]);
+    var dataStr = dm[3] + '/' + dm[2] + '/' + dm[1];
+    var numParaUsar = numeroPorData[dv];
+    if (!numParaUsar) {
+      Logger.log("  [SEM NÚMERO BASE] diofe/" + id + " → " + dataStr + " — data não tem número no acervo, pulando");
+      continue;
+    }
+    sheet.appendRow([numParaUsar, dataStr, dataStr, ano, mes, urlTeste]);
+    CacheService.getScriptCache().remove("acervo_" + ano + "_" + mes);
+    inseridas++;
+    Logger.log("  [+] DOE nº " + numParaUsar + " (" + dataStr + ") — diofe/" + id + " → " + info.filename);
+    Utilities.sleep(200);
+  }
+
+  Logger.log("=== CONCLUÍDO. Inseridas: " + inseridas + " ===");
+}
+
+// Atalho para completar abril 2026 com as edições extras
+function COMPLETAR_ABRIL_2026() { COMPLETAR_MES_DIOFE(2026, 4, 9890, 9910); }
+
+// =============================================================
+// CORREÇÃO DE ENTRADAS S/N — remove linhas sem número (numero=0)
+// de um mês específico e recoleta do SEAD para obter numeração correta.
+// Execute manualmente: CORRIGIR_ABRIL_2026() ou CORRIGIR_SN_COM_SEAD(2026, 4)
+// =============================================================
+function CORRIGIR_SN_COM_SEAD(ano, mes) {
+  var sheet = ss.getSheetByName("acervo_doe");
+  if (!sheet) { Logger.log("ERRO: acervo_doe não encontrada"); return; }
+
+  // 1. Tenta buscar do SEAD ANTES de apagar qualquer coisa
+  var mesStr = MESES_URL[mes - 1];
+  var urlSead = SEAD_BASE + ano + '/' + mesStr;
+  var edicoesSEAD = [];
+  try {
+    var opcoes = {
+      muteHttpExceptions: true,
+      validateHttpsCertificates: false,
+      followRedirects: true,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'pt-BR,pt;q=0.9',
+        'Referer': 'https://sead.portal.ap.gov.br/diario_oficial'
+      }
+    };
+    var resp = UrlFetchApp.fetch(urlSead, opcoes);
+    if (resp.getResponseCode() === 200) {
+      edicoesSEAD = parsearTabelaSEAD(resp.getContentText("UTF-8"));
+    } else {
+      Logger.log("SEAD retornou HTTP " + resp.getResponseCode() + " para " + ano + "/" + mesStr);
+    }
+  } catch (err) {
+    Logger.log("SEAD indisponível: " + err.message);
+  }
+
+  if (edicoesSEAD.length === 0) {
+    Logger.log("ABORTADO — SEAD não retornou edições para " + ano + "/" + mes + ". Nenhuma alteração feita.");
+    return;
+  }
+  Logger.log("SEAD retornou " + edicoesSEAD.length + " edição(ões). Prosseguindo.");
+
+  // 2. Backup antes de qualquer alteração
+  var stamp = Utilities.formatDate(new Date(), "GMT-3", "yyyyMMdd_HHmm");
+  var nomeBackup = "acervo_doe_backup_corr_" + ano + "_" + mes + "_" + stamp;
+  sheet.copyTo(ss).setName(nomeBackup);
+  Logger.log("Backup criado: " + nomeBackup);
+
+  // 3. Remove apenas as linhas com numero_doe = 0 do mês/ano alvo
+  var dados = sheet.getDataRange().getValues();
+  var saida = [dados[0]];
+  var removidas = 0;
+  for (var i = 1; i < dados.length; i++) {
+    if (parseInt(dados[i][3]) === ano && parseInt(dados[i][4]) === mes && parseInt(dados[i][0]) === 0) {
+      removidas++;
+      continue;
+    }
+    saida.push(dados[i]);
+  }
+  sheet.clearContents();
+  sheet.getRange(1, 1, saida.length, saida[0].length).setValues(saida);
+  if (sheet.getMaxRows() > saida.length) {
+    sheet.deleteRows(saida.length + 1, sheet.getMaxRows() - saida.length);
+  }
+  Logger.log("Entradas S/N removidas: " + removidas);
+
+  // 4. Insere as edições já obtidas do SEAD (evita segunda chamada)
+  var existentes = sheet.getDataRange().getValues();
+  var numerosExistentes = {};
+  for (var k = 1; k < existentes.length; k++) {
+    if (parseInt(existentes[k][3]) === ano && parseInt(existentes[k][4]) === mes) {
+      numerosExistentes[parseInt(existentes[k][0])] = true;
+    }
+  }
+  var inseridas = 0;
+  for (var j = 0; j < edicoesSEAD.length; j++) {
+    var e = edicoesSEAD[j];
+    if (e.numero && e.url && !numerosExistentes[e.numero]) {
+      sheet.appendRow([e.numero, e.pub, e.circ, ano, mes, e.url]);
+      numerosExistentes[e.numero] = true;
+      inseridas++;
+    }
+  }
+  Logger.log("Edições inseridas do SEAD: " + inseridas);
+
+  // 5. Invalida cache para o mês corrigido
+  CacheService.getScriptCache().remove("acervo_" + ano + "_" + mes);
+  Logger.log("CORRIGIR_SN_COM_SEAD concluído: " + ano + "/" + mes);
+}
+
+function CORRIGIR_ABRIL_2026() { CORRIGIR_SN_COM_SEAD(2026, 4); }
+
+// =============================================================
+// RESTAURAR MÊS DO BACKUP — recupera um mês a partir de uma aba de backup
+// Ex.: RESTAURAR_MES_DO_BACKUP('acervo_doe_backup_corr_2026_4_20260409_0839', 2026, 4)
+// =============================================================
+function RESTAURAR_MES_DO_BACKUP(nomeAbaBackup, ano, mes) {
+  var sheet  = ss.getSheetByName("acervo_doe");
+  var backup = ss.getSheetByName(nomeAbaBackup);
+  if (!sheet)  { Logger.log("ERRO: acervo_doe não encontrada"); return; }
+  if (!backup) { Logger.log("ERRO: backup não encontrado: " + nomeAbaBackup); return; }
+
+  var stamp   = Utilities.formatDate(new Date(), "GMT-3", "yyyyMMdd_HHmm");
+  var nomeSeg = "acervo_doe_backup_pre_restore_" + ano + "_" + mes + "_" + stamp;
+  sheet.copyTo(ss).setName(nomeSeg);
+  Logger.log("Backup de segurança criado: " + nomeSeg);
+
+  var totalCols = sheet.getLastColumn();
+  var dadosAtual = sheet.getDataRange().getDisplayValues();
+  var cab  = normalizarLinha_(dadosAtual[0], totalCols);
+  var saida = [cab];
+
+  // Mantém tudo exceto o mês alvo
+  for (var i = 1; i < dadosAtual.length; i++) {
+    if (parseInt(dadosAtual[i][3]) === ano && parseInt(dadosAtual[i][4]) === mes) continue;
+    saida.push(normalizarLinha_(dadosAtual[i], totalCols));
+  }
+
+  // Restaura o mês alvo do backup
+  var dadosBkp = backup.getDataRange().getDisplayValues();
+  var inseridas = 0;
+  for (var j = 1; j < dadosBkp.length; j++) {
+    if (parseInt(dadosBkp[j][3]) === ano && parseInt(dadosBkp[j][4]) === mes) {
+      saida.push(normalizarLinha_(dadosBkp[j], totalCols));
+      inseridas++;
+    }
+  }
+
+  sheet.clearContents();
+  sheet.getRange(1, 1, saida.length, totalCols).setValues(saida);
+  if (sheet.getMaxRows() > saida.length) {
+    sheet.deleteRows(saida.length + 1, sheet.getMaxRows() - saida.length);
+  }
+
+  CacheService.getScriptCache().remove("acervo_" + ano + "_" + mes);
+  Logger.log("Restaurado " + ano + "/" + mes + " do backup. Linhas inseridas: " + inseridas);
+}
+
+// Atalho para restaurar abril 2026 do backup gerado hoje
+function RESTAURAR_ABRIL_2026() {
+  RESTAURAR_MES_DO_BACKUP('acervo_doe_backup_corr_2026_4_20260409_0839', 2026, 4);
+}
+
+// =============================================================
 
 // Retorna informações do PDF (filename do Content-Disposition)
 function getPDFInfo(url) {
@@ -757,13 +1106,16 @@ function getPDFInfo(url) {
 }
 
 // Retorna o valor numérico da data mais recente no acervo (YYYYMMDD)
+// Considera apenas entradas com numero_doe > 0 para não bloquear o robô
+// em meses que têm entradas S/N pendentes de renumeração.
 function getUltimaDataDOE(sheet) {
   var anoAtual = new Date().getFullYear();
-  var dados = sheet.getDataRange().getDisplayValues(); // getDisplayValues evita Date objects do Sheets
+  var dados = sheet.getDataRange().getDisplayValues();
   var maxData = 0;
   for (var i = 1; i < dados.length; i++) {
     var ano = parseInt(dados[i][3]);
     if (ano < anoAtual - 1) continue;
+    if (parseInt(dados[i][0], 10) <= 0) continue; // ignora entradas sem número
     var pub = (dados[i][1] || '').toString().trim();
     var p = pub.split('/');
     if (p.length !== 3) continue;
@@ -997,4 +1349,109 @@ function RESTAURAR_MAR_2026_AGORA() {
 
 function RENUMERAR_MAR_2026_AGORA() {
   RENUMERAR_MARCO_2026(8605);
+}
+
+// =============================================================
+// RENUMERAR MÊS GENÉRICO — atribui números sequenciais às entradas
+// com numero_doe=0 de um mês/ano, ordenadas por data_pub.
+// Suplementos (mesma pub que a edição principal) recebem o mesmo número.
+// Ex.: RENUMERAR_MES(2026, 4, 8627)
+// =============================================================
+function RENUMERAR_MES(ano, mes, primeiroNumero) {
+  var sheet = ss.getSheetByName("acervo_doe");
+  if (!sheet) { Logger.log("ERRO: aba acervo_doe não encontrada"); return; }
+  if (!primeiroNumero || isNaN(parseInt(primeiroNumero, 10))) {
+    Logger.log("ERRO: informe primeiroNumero. Ex.: RENUMERAR_MES(2026, 4, 8627)"); return;
+  }
+
+  var stamp = Utilities.formatDate(new Date(), "GMT-3", "yyyyMMdd_HHmm");
+  var nomeSeg = "acervo_doe_backup_pre_renum_" + ano + "_" + mes + "_" + stamp;
+  sheet.copyTo(ss).setName(nomeSeg);
+  Logger.log("Backup criado: " + nomeSeg);
+
+  var dados = sheet.getDataRange().getDisplayValues();
+  var totalCols = sheet.getLastColumn();
+  var cab = normalizarLinha_(dados[0], totalCols);
+  var alvo = [];      // entradas do mês com numero=0
+  var outros = [cab]; // restante (cabeçalho + outros meses)
+
+  for (var i = 1; i < dados.length; i++) {
+    var aLinha = parseInt(dados[i][3], 10);
+    var mLinha = parseInt(dados[i][4], 10);
+    if (aLinha === ano && mLinha === mes && parseInt(dados[i][0], 10) === 0) {
+      alvo.push({
+        pub:  (dados[i][1] || '').toString().trim(),
+        circ: (dados[i][2] || '').toString().trim(),
+        url:  (dados[i][5] || '').toString().trim()
+      });
+    } else {
+      outros.push(normalizarLinha_(dados[i], totalCols));
+    }
+  }
+
+  if (alvo.length === 0) {
+    Logger.log("Nenhuma entrada com numero=0 em " + ano + "/" + mes + ". Nada a fazer.");
+    return;
+  }
+
+  // Ordena por data_pub ascendente
+  alvo.sort(function(a, b) { return parseDDMMYYYY_(a.pub) - parseDDMMYYYY_(b.pub); });
+
+  // Atribui números: mesma pub → mesmo número (suplemento = mesma edição)
+  var n = parseInt(primeiroNumero, 10) - 1;
+  var prevPub = null;
+  Logger.log("=== Plano de renumeração " + ano + "/" + mes + " (primeiroNumero=" + primeiroNumero + ") ===");
+  for (var u = 0; u < alvo.length; u++) {
+    if (alvo[u].pub !== prevPub) { n++; prevPub = alvo[u].pub; }
+    Logger.log("  pub=" + alvo[u].pub + " → nº " + n + " | " + (alvo[u].url.split('/').pop() || alvo[u].url));
+    outros.push(normalizarLinha_([String(n), alvo[u].pub, alvo[u].circ, String(ano), String(mes), alvo[u].url], totalCols));
+  }
+
+  sheet.clearContents();
+  sheet.getRange(1, 1, outros.length, totalCols).setValues(outros);
+  if (sheet.getMaxRows() > outros.length) {
+    sheet.deleteRows(outros.length + 1, sheet.getMaxRows() - outros.length);
+  }
+
+  CacheService.getScriptCache().remove("acervo_" + ano + "_" + mes);
+  Logger.log("Concluído. Entradas renumeradas: " + alvo.length + ". Faixa DOE: " + primeiroNumero + " → " + n);
+}
+
+// Atalho para abril 2026: números 8627–8632 conforme SEAD
+function RENUMERAR_ABRIL_2026() { RENUMERAR_MES(2026, 4, 8627); }
+
+// =============================================================
+// DIAGNÓSTICO HTML DIOFE — verifica se a página HTML de uma edição
+// contém o número do DOE. Se contiver, o robô pode scrapar de lá
+// e resolver a numeração automaticamente sem depender do SEAD.
+// Chame com um ID conhecido de abril 2026 (ex: 9885, 9890).
+// =============================================================
+function SCRAPE_DIOFE_HTML(id) {
+  if (!id) { Logger.log("ERRO: informe o ID. Ex.: SCRAPE_DIOFE_HTML(9885)"); return; }
+  var candidatos = [
+    'https://diofe.portal.ap.gov.br/portal/edicoes/' + id,
+    'https://diofe.portal.ap.gov.br/edicao/' + id,
+    'https://diofe.portal.ap.gov.br/portal/edicao/' + id
+  ];
+  var opts = { muteHttpExceptions: true, followRedirects: true,
+    headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36',
+               'Accept': 'text/html,*/*', 'Accept-Language': 'pt-BR,pt;q=0.9' }
+  };
+  Logger.log("=== SCRAPE HTML DIOFE id=" + id + " ===");
+  for (var i = 0; i < candidatos.length; i++) {
+    try {
+      var r = UrlFetchApp.fetch(candidatos[i], opts);
+      var code = r.getResponseCode();
+      var body = r.getContentText("UTF-8");
+      Logger.log("[" + code + "] " + candidatos[i]);
+      if (code === 200) {
+        Logger.log("Primeiros 1000 chars:\n" + body.substring(0, 1000));
+        var numDOE = body.match(/[Nn][°º\.]\s*(\d{4,5})/g);
+        Logger.log("Padrões Nº ####: " + (numDOE ? numDOE.join(', ') : 'nenhum'));
+        var faixa = body.match(/\b8[5-7]\d{2}\b/g);
+        Logger.log("Números faixa 8500–8799: " + (faixa ? faixa.filter(function(v,i,a){return a.indexOf(v)===i;}).join(', ') : 'nenhum'));
+      }
+    } catch(e) { Logger.log(candidatos[i] + " → ERRO: " + e.message); }
+  }
+  Logger.log("=== FIM ===");
 }

@@ -561,9 +561,9 @@ function deduplicarEdicoesPorData(edicoes) {
   const unicas = [];
 
   for (const e of edicoes || []) {
-    const pub = (e.pub || '').trim();
-    const circ = (e.circ || '').trim();
-    const chave = `${pub}|${circ}`;
+    const url = (e.url || '').trim();
+    // Usa URL como chave: extras/suplementos com URLs diferentes são preservados
+    const chave = url || `${(e.pub || '').trim()}|${(e.circ || '').trim()}`;
     if (vistos.has(chave)) continue;
     vistos.add(chave);
     unicas.push(e);
@@ -583,7 +583,8 @@ function renderizarTabela(edicoes, ano, mes) {
   const header = document.getElementById('tabelaHeaderTxt');
 
   header.textContent = `${MESES[mes - 1]} / ${ano}`;
-  badge.textContent  = `${edicoes.length} ${edicoes.length !== 1 ? 'edições' : 'edição'}`;
+  const numerosUnicos = new Set(edicoes.filter(e => parseInt(e.n) > 0).map(e => String(e.n))).size;
+  badge.textContent  = `${numerosUnicos} ${numerosUnicos !== 1 ? 'edições' : 'edição'}`;
 
   if (edicoes.length === 0) {
     tabela.style.display = 'none';
